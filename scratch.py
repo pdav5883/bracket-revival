@@ -23,33 +23,162 @@ GAME_MAP = (((None, None), 32), ((None, None), 32), ((None, None), 33), ((None, 
             
             ((60, 61), None))
 
-ROUND64 = (0, 31)
-ROUND32 = (32, 47)
-ROUND16 = (48, 55)
-ROUND8 = (56, 59)
-ROUND4 = (60, 61)
-ROUND2 = (62, 62)
-NUMGAMES = 63
+PREV_GAME = ((None, None), (None, None), (None, None), (None, None), # round64
+             (None, None), (None, None), (None, None), (None, None),
+             (None, None), (None, None), (None, None), (None, None),
+             (None, None), (None, None), (None, None), (None, None),
+             (None, None), (None, None), (None, None), (None, None),
+             (None, None), (None, None), (None, None), (None, None),
+             (None, None), (None, None), (None, None), (None, None),
+             (None, None), (None, None), (None, None), (None, None),
+             (0, 1), (2, 3), (4, 5), (6, 7), # round32
+             (8, 9), (10, 11), (12, 13), (14, 15),
+             (16, 17), (18, 19), (20, 21), (22, 23),
+             (24, 25), (26, 27), (28, 29), (30, 31),
+             (32, 33), (34, 35), (36, 37), (38, 39), # round16
+             (40, 41), (42, 43), (44, 45), (46, 47),
+             (48, 49), (50, 51), (52, 53), (54, 55), # round8
+             (56, 57), (58, 59), # round4
+             (60, 61)) # round2
 
-def calc_score(picks, results):
+PREV_GAME = ((None, None), (None, None), (None, None), (None, None),
+             (0, 1), (2, 3),
+             (4, 5))
+
+
+NEXT_GAME = (32, 32, 33, 33, 34, 34, 35, 35, # round64
+             36, 36, 37, 37, 38, 38, 39, 39,
+             40, 40, 41, 41, 42, 42, 43, 43,
+             44, 44, 45, 45, 46, 46, 47, 47,
+             48, 48, 49, 49, 50, 50, 51, 51, # round32
+             52, 52, 53, 53, 54, 54, 55, 55,
+             56, 56, 57, 57, 58, 58, 59, 59, # round16
+             60, 60, 61, 61, # round 8
+             62, 62, # round4
+             None) # round2
+
+NEXT_GAME = (4, 4, 5, 5, 6, 6, None)
+
+#ROUND64 = (0, 31)
+#ROUND32 = (32, 47)
+#ROUND16 = (48, 55)
+#ROUND8 = (56, 59)
+#ROUND4 = (60, 61)
+#ROUND2 = (62, 62)
+
+GAMES_PER_ROUND = (32, 16, 8, 4, 2, 1)
+GAMES_PER_ROUND = (4, 2, 1)
+
+NUMGAMES = sum(GAMES_PER_ROUND)
+
+
+def calc_points_basic_flat(picks, results):
     """
-    Picks and tuples are both list of 0/1/None
+    Picks and results are both flat lists of 0/1/None
 
-    picks is always len 63
+    Results must be same length as picks with None for unplayed, because games within
+    round are not played in index order
+
+    Each game worth 1 point
     """
-    # first compare to get matching res/pick (necessary condition for point)
-    correct = [pick == result if result is not None else None for pick, result in zip(picks, results)]
+    points = NUMGAMES * [0]
 
-    # adjust correct if the previous pick was correct
+    # to get a game right, you must pick the winner right, and have picked the game the winner came from right 
     for i in range(NUMGAMES):
-        child_game = GAME_MAP[i][0][result[i]]
-        child_correct = (child_game is None) or (correct[child_game])
-        correct[i] = correct[i] and child_correct
+        child_game = PREV_GAME[i][results[i]]
+        if (picks[i] == results[i])  and ((child_game is None) or points[child_game]):
+            points[i] = 1
+
+    return points
 
 
-def make_game_map():
-    m = tuple((get_prev(i), get_next(i)) for i in range(63))
-    return m
+def calc_points_basic_nested(picks, results):
+    """
+    Picks are nested, full picks for first round and on, full picks second round and on
+    """
+    points = NUMGAMES * [0]
+
+    num_prev_games = 0
+    
+    for rnd, picks_round in enumerate(picks):
+
+        # only look at picks for current round
+        for i in range(GAMES_PER_ROUND[rnd]):
+            i_abs = i + num_prev_games # index into flat lists
+            
+            # must pick winner right, and have picked child game right
+            child_game = PREV_GAME[i_abs][results[i_abs]]
+            
+            if (picks_round[i] == results[i_abs]) and ((child_game is None) or (points[child_game])):
+                points[i_abs] = 1
+
+        num_prev_games += GAMES_PER_ROUND[rnd]
+
+    return points
+
+
+def calc_points_revival(picks, results, K=2):
+    """
+    Picks are nested, results include only games played
+    picks[0] picks the whole bracket
+    picks[1] picks
+    """
+    """
+    Picks are nested, full picks for first round and on, full picks second round and on
+    """
+    points = NUMGAMES * [0]
+
+    num_prev_games = 0
+    
+    for rnd, picks_round in enumerate(picks):
+
+        #breakpoint()
+
+        # only look at picks for current round
+        for i in range(GAMES_PER_ROUND[rnd]):
+            #breakpoint()
+            i_abs = i + num_prev_games # index into flat lists
+            
+            # must pick winner right, and have picked child game right
+            if (picks_round[i] == results[i_abs]):
+                points[i_abs] = 1
+
+                rnd_back = rnd - 1
+
+                while rnd_back >= 0:
+                    num_prev_games_back = sum(GAMES_PER_ROUND[0:rnd_back])
+                    
+                    # check that current pick is same
+                    if picks[rnd_back][i_abs - num_prev_games_back] != results[i_abs]:
+                        break
+
+                    # check that children are all correct
+                    # j is here to ensure we go back the correct number of steps based on round
+                    child_game = PREV_GAME[i_abs][results[i_abs]]
+                    j = 0
+
+                    while (child_game is not None) and (j < rnd - rnd_back):
+                        if picks[rnd_back][child_game - num_prev_games_back] != results[child_game]:
+                            break
+
+                        child_game = PREV_GAME[child_game][results[child_game]]
+                        j += 1
+
+                    if (child_game is not None) and (j < rnd - rnd_back):
+                        break
+
+                    # if we've made it to None child, then we picked i_abs game correctly in previous round
+                    points[i_abs] *= K
+
+                    rnd_back -= 1
+
+        num_prev_games += GAMES_PER_ROUND[rnd]
+
+    return points
+
+
+
+
 
 def get_next(i):
     """
@@ -119,7 +248,7 @@ def get_prev(i):
 
 
 if __name__ == "__main__":
-    i = int(sys.argv[1])
-
-    print("Previous games:", get_prev(i))
-    print("Next game:", get_next(i))
+    res = [0, 1, 1, 0, 0, 1, 1]
+    picks = [[0,1,1,0,0,1,1],[0,1,1],[1]]
+    points = calc_points_revival(picks, res)
+    print(points)
