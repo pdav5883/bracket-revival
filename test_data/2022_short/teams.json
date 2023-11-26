@@ -1,0 +1,11 @@
+[
+  {"name": "Arkansas", "short_name": "ARK", "seed": 4},
+  {"name": "Duke", "short_name": "DUK", "seed": 2},
+  {"name": "North Carolina", "short_name": "UNC", "seed": 8},
+  {"name": "Saint Peter's", "short_name": "STP", "seed": 15},
+  {"name": "Houston", "short_name": "HOU", "seed": 5},
+  {"name": "Villanova", "short_name": "VIL", "seed": 2},
+  {"name": "Kansas", "short_name": "KAN", "seed": 1},
+  {"name": "Miami", "short_name": "MIA", "seed": 10}
+]
+

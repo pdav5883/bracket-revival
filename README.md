@@ -11,8 +11,16 @@ Work in progress
 - Test page to play a smaller version to understand rules
 
 ## Data Model
+/{year}
+  teams.json - list of teams with {"name", "short_name", "seed"}
+  results.json - {"results": list of 0/1/null, "score": list of [a,b]/null}
+  /{cid}
+    competition.json - state of competition {"cid": {cid uuid}, "name", "scoreboard": {}, "completed_rounds": N, other state info}
+    {pid}.json - {"pid": {pid uuid}, "name", "picks": [[],[],..]}
+  
 
 ## Computing Points
+- Play in game?
 1. current pick is correct: point = 1, else point = 0 and break
 2. loop through prev rounds: current pick is correct and children back to that round are correct: point * K, else break
 

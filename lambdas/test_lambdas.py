@@ -1,4 +1,5 @@
 from test_lambda import lambda_function as test_lambda
+from calc_score import lambda_function as calc_score
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -11,6 +12,14 @@ def test_function():
 
     event = make_event()
     data = test_lambda.lambda_handler(event, None)
+
+    return jsonify(data)
+
+
+@app.route("/score", methods=["GET"])
+def score_function():
+    event = make_event()
+    data = calc_score.lambda_handler(event, None)
 
     return jsonify(data)
 
