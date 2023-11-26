@@ -26,6 +26,8 @@ def lambda_handler(event, context):
         for i in range(played_games, NUMGAMES):
             results[i] = None
 
+    # TODO: what to do if picks for all round not there?
+
     points = calc_points_revival(picks, results)
     
     return {"points": points}

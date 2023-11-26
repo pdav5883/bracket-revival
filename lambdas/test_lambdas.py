@@ -1,5 +1,8 @@
+import json
+
 from test_lambda import lambda_function as test_lambda
 from calc_score import lambda_function as calc_score
+from update_picks import lambda_function as update_picks
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -24,11 +27,18 @@ def score_function():
     return jsonify(data)
 
 
+@app.route("/update", methods=["POST"])
+def update_function():
+    event = make_event()
+    data = update_picks.lambda_handler(event, None)
+
+    return jsonify(data)
+
+
 def make_event():
     if request.method == "GET":
         event = {"queryStringParameters": dict(request.args)}
     elif request.method == "POST":
-        # TODO: need to test this, lambda expects to run json.loads(event["body"])
         event = {"body": json.dumps(request.json)}
     else:
         event = {}
