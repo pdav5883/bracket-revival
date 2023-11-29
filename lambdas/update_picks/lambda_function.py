@@ -35,8 +35,7 @@ def lambda_handler(event, context):
     
     write_file(player_key, player)
 
-    return {"statusCode": 200,
-            "body": "Successfully added new picks"}
+    return "Successfully added new picks"
 
 
 def read_file(key):

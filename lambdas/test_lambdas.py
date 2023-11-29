@@ -3,6 +3,7 @@ import json
 from test_lambda import lambda_function as test_lambda
 from calc_score import lambda_function as calc_score
 from update_picks import lambda_function as update_picks
+from get_bracket import lambda_function as get_bracket
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -31,6 +32,14 @@ def score_function():
 def update_function():
     event = make_event()
     data = update_picks.lambda_handler(event, None)
+
+    return jsonify(data)
+
+
+@app.route("/bracket", methods=["GET"])
+def bracket_function():
+    event = make_event()
+    data = get_bracket.lambda_handler(event, None)
 
     return jsonify(data)
 
