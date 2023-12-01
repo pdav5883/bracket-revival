@@ -10,6 +10,10 @@ Work in progress
 - Visualize leaderboard
 - Test page to play a smaller version to understand rules
 
+## Working
+- Page: Visualize current bracket
+- Page: Make picks for entire bracket
+
 ## Data Model
 /{year}
   teams.json - list of teams with {"name", "short_name", "seed"}
