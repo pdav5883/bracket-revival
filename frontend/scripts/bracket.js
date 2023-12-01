@@ -7,11 +7,18 @@ $(document).ready(function() {
 function populateBracket() {
   const year = $("#yearinput").val()
   const cid = $("#cidinput").val()
+  const completedRounds = $("#rndinput").val()
+
+  queryData = {"year": year, "cid": cid}
+
+  if (completedRounds !== "") {
+    queryData["completed_rounds"] = completedRounds
+  }
 
   $.ajax({
     method: "GET",
     url: api_url,
-    data: {"year": year, "cid": cid},
+    data: queryData,
     crossDomain: true,
     success: function(gamesNested) {
       // game: {teams: [], seeds: [], score: [], result: 0/1}
@@ -25,15 +32,33 @@ function populateBracket() {
 	let tableRow = table.insertRow()
 	bracketRow.forEach(bracketCell => {
 	  if (bracketCell !== null) {
-	    let tableCell = tableRow.insertCell()
-	    tableCell.rowSpan = bracketCell.rowSpan
-	    tableCell.innerText = bracketCell.teams[0] + " vs " + bracketCell.teams[1]
+	    buildMatchup(tableRow.insertCell(), bracketCell)
 	  }
 	})
       })
 
     }
   })
+}
+
+
+function buildMatchup(tableCell, bracketCell) {
+  tableCell.rowSpan = bracketCell.rowSpan
+  let t0 = document.createElement("span")
+  t0.textContent = bracketCell.teams[0] === null ? "---" : bracketCell.teams[0]
+  let t1 = document.createElement("span")
+  t1.textContent = bracketCell.teams[1] === null ? "---" : bracketCell.teams[1]
+
+  if (bracketCell.result == 0) {
+    t0.classList.add("winnerspan")
+  }
+  else if (bracketCell.result == 1) {
+    t1.classList.add("winnerspan")
+  }
+
+  tableCell.appendChild(t0)
+  tableCell.appendChild(document.createElement("br"))
+  tableCell.appendChild(t1)
 }
 
 
