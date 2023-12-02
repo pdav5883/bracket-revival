@@ -45,15 +45,19 @@ function populateBracket() {
 function buildMatchup(tableCell, bracketCell) {
   tableCell.rowSpan = bracketCell.rowSpan
   let t0 = document.createElement("span")
-  t0.textContent = bracketCell.teams[0] === null ? "---" : bracketCell.teams[0]
+  t0.textContent = bracketCell.teams[0] === null ? "---" : "#" + bracketCell.seeds[0] + " " + bracketCell.teams[0]
   let t1 = document.createElement("span")
-  t1.textContent = bracketCell.teams[1] === null ? "---" : bracketCell.teams[1]
+  t1.textContent = bracketCell.teams[1] === null ? "---" : "#" + bracketCell.seeds[1] + " " + bracketCell.teams[1]
 
   if (bracketCell.result == 0) {
     t0.classList.add("winnerspan")
+    t0.textContent += " (" + bracketCell.score[0] + ")"
+    t1.textContent += " (" + bracketCell.score[1] + ")"
   }
   else if (bracketCell.result == 1) {
     t1.classList.add("winnerspan")
+    t0.textContent += " (" + bracketCell.score[0] + ")"
+    t1.textContent += " (" + bracketCell.score[1] + ")"
   }
 
   tableCell.appendChild(t0)
