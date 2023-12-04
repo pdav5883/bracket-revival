@@ -10,7 +10,7 @@ def lambda_handler(event, context):
     year = body.get("year", None)
     cid = body.get("cid", None)
     pid = body.get("pid", None)
-    rnd = body.get("round", None)
+    rnd = int(body.get("round", None))
     new_picks = body.get("picks", None)
 
     # TODO: assert arguments exist
