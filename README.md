@@ -14,6 +14,11 @@ Work in progress
 - Page: Visualize current bracket
 - Page: Make picks for entire bracket
 
+## How to Test
+- In terminal 1: `cd frontend` and run `python -m http.server`
+- In terminal 2: `cd lambdas` and run `python -m test_lambdas`
+	- Note: `flask` and `flask_cors` must be installed in the environment
+- In browser go to `localhost:8000/{page}.html` 
 ## Data Model
 /{year}
   teams.json - list of teams with {"name", "short_name", "seed"}
