@@ -1,5 +1,7 @@
 import json
 
+from utils.tournament import *
+
 prefix = "../test_data/"
 
 def lambda_handler(event, context):
