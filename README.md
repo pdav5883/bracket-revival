@@ -10,6 +10,23 @@ Work in progress
 - Visualize leaderboard
 - Test page to play a smaller version to understand rules
 
+## Lambdas
+#### calc_score
+- GET: Reads data files and returns flat list of points for each game
+- Input: year, cid, pid
+- Output: {"points": [flat list of points per game, 0 if game not played]}
+#### get_bracket
+- GET: Reads data files and returns nested list of game results (no picks)
+- Input: year, cid, completed_rounds (opt)
+- Output: [[{"teams": [a,b], "seeds": [a,b], "score": [a,b], "result": 0/1}, (round 0 game 1), ...], [(round 1 game 0), (round 1 game 1), ...], ...]
+#### get_round_start
+- GET: Returns list of games starting in given round to populate bracket
+- Input: year, cid, round_start
+- Output: [{"teams": [a,b], "seeds": [a,b]}, (round 0 game 1), (round 0 game 2), ...]
+#### update_picks
+- POST: Adds picks to a player's data file
+- Input: year, cid, pid, round, picks: [0/1 flat list of picks]
+
 ## Working
 - Page: Visualize current bracket
 - Page: Make picks for entire bracket
