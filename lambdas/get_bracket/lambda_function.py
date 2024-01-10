@@ -80,6 +80,12 @@ def lambda_handler(event, context):
                 "picks": [[], []]}
         games.append(game)
 
+    # games does not include bracket champion
+    champion_abs_ind = abs_inds[-1][results[-1]] if results[-1] is not None else None
+    champion = {"team": names[champion_abs_ind] if champion_abs_ind is not None else None,
+                "seed": seeds[champion_abs_ind] if champion_abs_ind is not None else None,
+                "picks": []}
+
     # write each round of picks into games flat list
     for rnd, picks_rnd in enumerate(player_picks):
         # results leading up to this round of picks
@@ -94,7 +100,9 @@ def lambda_handler(event, context):
             games[i]["picks"][0].append(names[i_upper])
             games[i]["picks"][1].append(names[i_lower])
 
-
+        # bracket winner is not in games
+        champion_abs_ind = abs_inds[-1][picks_rnd[-1]]
+        champion["picks"].append(names[champion_abs_ind])
 
     # nest flat list into rounds
     games_nested = []
@@ -105,7 +113,8 @@ def lambda_handler(event, context):
             games_round.append(games.pop(0))
         games_nested.append(games_round)
 
-    return games_nested
+    return {"games": games_nested,
+            "champion": champion}
 
 
 def make_absolute_bracket(results, picks=None):

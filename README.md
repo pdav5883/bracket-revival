@@ -16,14 +16,10 @@ Work in progress
 - Input: year, cid, pid
 - Output: {"points": [flat list of points per game, 0 if game not played]}
 #### get_bracket
-- GET: Reads data files and returns nested list of game results (no picks)
-- **WAS**
-- Input: year, cid, completed_rounds (opt)
-- Output: [[{"teams": [a,b], "seeds": [a,b], "score": [a,b], "result": 0/1}, (round 0 game 1), ...], [(round 1 game 0), (round 1 game 1), ...], ...]
-- **IS**: add pick/points info if pid is present
 - GET: Reads data files and returns nested list of results, plus nested picks and points if pid is present.
 - Input: year, cid, pid (opt), completed_rounds (opt)
-- Output: [[{"teams": [a,b], "seeds": [a,b], "score": [a,b], "result": 0/1, "picks": [[],[]], "points": [a,b]}, (r0g1), ...], [(r1g0), (r1g1), ...], ...].
+- Output: {"games": [[{"teams": [a,b], "seeds": [a,b], "score": [a,b], "result": 0/1, "picks": [[],[]], "points": [a,b]}, (r0g1), ...], [(r1g0), (r1g1), ...], ...],
+           "champion": {"team": a, "seed": a, "picks": []}
 - picks and points fields are structured for frontend rendering. i.e. the picks values will not be one of the "teams" values. Picks is who was picked to be **playing** in this game, and points is how many points were awarded for correctly picking who is in the game.
 #### get_round_start
 - GET: Returns list of games starting in given round to populate bracket
@@ -36,7 +32,6 @@ Work in progress
 ## Working
 - Page: Visualize current bracket
 - Page: Make picks for entire bracket
-- Known error: current return of get_bracket doesn't account for winner of final game in picks
 
 ## How to Test
 - In terminal 1: `cd frontend` and run `python -m http.server`
