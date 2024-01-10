@@ -60,6 +60,10 @@ function buildChampion(tableCell, bracketCell) {
   t.textContent = bracketCell.team === null ? "---" : "#" + bracketCell.seed + " " + bracketCell.team
   t.classList.add("winnerspan")
 
+  if (bracketCell.points > 0) {
+    t.textContent += " [" + bracketCell.points + "]"
+  }
+
   // add blank elements for spacing - TODO:  there's got to be a better way
   for (let i = 0; i < bracketCell.picks.length; i++) {
     let pick = document.createElement("span")
@@ -69,13 +73,6 @@ function buildChampion(tableCell, bracketCell) {
   }
   
   tableCell.appendChild(t)
-
-  if (bracketCell.points > 0) {
-    let p = document.createElement("span")
-    p.textContent = "[" + bracketCell.points + "]"
-    p.classList.add("pointspan")
-    tableCell.appendChild(p)
-  }
 
   for (let i = 0; i < bracketCell.picks.length; i++) {
     let pick = document.createElement("span")
@@ -98,19 +95,19 @@ function buildMatchup(tableCell, bracketCell) {
     t0.classList.add("winnerspan")
     t0.textContent += " (" + bracketCell.score[0] + ")"
     t1.textContent += " (" + bracketCell.score[1] + ")"
-
-    if (bracketCell.points > 0) {
-      t0.textContent += "[" + bracketCell.points + "]"
-    }
   }
   else if (bracketCell.result == 1) {
     t1.classList.add("winnerspan")
     t0.textContent += " (" + bracketCell.score[0] + ")"
     t1.textContent += " (" + bracketCell.score[1] + ")"
-    
-    if (bracketCell.points > 0) {
-      t1.textContent += "[" + bracketCell.points + "]"
-    }
+  }
+
+  if (bracketCell.points[0] > 0) {
+    t0.textContent += " [" + bracketCell.points[0] + "]"
+  }
+  
+  if (bracketCell.points[1] > 0) {
+    t1.textContent += " [" + bracketCell.points[1] + "]"
   }
 
   for (let i = 0; i < bracketCell.picks[0].length; i++) {

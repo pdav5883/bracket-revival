@@ -81,22 +81,16 @@ def lambda_handler(event, context):
                 "seeds": [seeds[i_upper] if i_lower is not None else None, seeds[i_lower] if i_lower is not None else None],
                 "score": scores[i],
                 "result": results[i],
-                "picks": [[], []],
-                "points": player_points[i]}
-        """
-        don't actually need to do this, but saving in case wrong
+                "picks": [[], []]}
+
         # player_points contains how many points you get for game i, but games list contains the points won
         #  for picking the participants of game i.
         prev_upper, prev_lower = PREV_GAME[i]
         points_upper = player_points[prev_upper] if prev_upper is not None else 0
         points_lower = player_points[prev_lower] if prev_lower is not None else 0
         game["points"] = [points_upper, points_lower]
-        """
 
         games.append(game)
-
-    # remove points from last game and show them instead at champion
-    games[-1]["points"] = 0
 
     # games does not include bracket champion
     champion_abs_ind = abs_inds[-1][results[-1]] if results[-1] is not None else None
