@@ -41,9 +41,11 @@ def lambda_handler(event, context):
 
     if pid is None:
         player = None
+        player_picks = []
     else:
         player_key = prefix + year + "/" + cid + "/" + pid + ".json"
         player = read_file(player_key)
+        player_picks = player["picks"]
 
 
     # don't show a player results past completed_rounds or beyond the picks they've made
@@ -53,7 +55,7 @@ def lambda_handler(event, context):
         completed_rounds = min(completed_rounds, int(completed_rounds_query))
 
     if player is not None:
-        completed_rounds = min(completed_rounds, len(player["picks"]))
+        completed_rounds = min(completed_rounds, len(player_picks))
 
     # set all results beyond played rounds to None and hide picks beyond round
     if completed_rounds < NUMROUNDS:
@@ -63,18 +65,36 @@ def lambda_handler(event, context):
             scores[i] = [None, None]
 
         if player is not None:
-            player["picks"] = player["picks"][0:completed_rounds]
+            player_picks = player_picks[0:completed_rounds]
 
     games = []
     
+    # write results into games flat list first
     abs_inds = make_absolute_bracket(results)
 
     for i, (i_upper, i_lower) in enumerate(abs_inds):
         game = {"teams": [names[i_upper] if i_upper is not None else None, names[i_lower] if i_lower is not None else None],
                 "seeds": [seeds[i_upper] if i_lower is not None else None, seeds[i_lower] if i_lower is not None else None],
                 "score": scores[i],
-                "result": results[i]}
+                "result": results[i],
+                "picks": [[], []]}
         games.append(game)
+
+    # write each round of picks into games flat list
+    for rnd, picks_rnd in enumerate(player_picks):
+        # results leading up to this round of picks
+        results_pre = results[0:sum(GAMES_PER_ROUND[0:rnd])]
+
+        abs_inds = make_absolute_bracket(results_pre, picks_rnd)
+
+        first_pick = sum(GAMES_PER_ROUND[0:rnd+1])
+
+        for i in range(first_pick, NUMGAMES):
+            i_upper, i_lower = abs_inds[i]
+            games[i]["picks"][0].append(names[i_upper])
+            games[i]["picks"][1].append(names[i_lower])
+
+
 
     # nest flat list into rounds
     games_nested = []
@@ -95,7 +115,7 @@ def make_absolute_bracket(results, picks=None):
     - results must start from round0 and continue through round i (or be empty)
     - if present picks must start at round i+1 (or zero if results empty) and continue through final round.
 
-    Returns list of absolute upper/lower indices for each game, with None for unplayed
+    Returns list of absolute upper/lower indices for each game, None if there is no result/pick for game
 
     Returns None if something goes wrong (TODO: do something else here)
     """

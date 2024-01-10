@@ -36,6 +36,7 @@ Work in progress
 ## Working
 - Page: Visualize current bracket
 - Page: Make picks for entire bracket
+- Known error: current return of get_bracket doesn't account for winner of final game in picks
 
 ## How to Test
 - In terminal 1: `cd frontend` and run `python -m http.server`

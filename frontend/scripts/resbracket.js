@@ -7,16 +7,12 @@ $(document).ready(function() {
 function populateBracket() {
   const year = $("#yearinput").val()
   const cid = $("#cidinput").val()
-  const pid = $("#pidinput").val()
   const completedRounds = $("#rndinput").val()
 
   queryData = {"year": year, "cid": cid}
 
   if (completedRounds !== "") {
     queryData["completed_rounds"] = completedRounds
-  }
-  if (pid !== "") {
-    queryData["pid"] = pid 
   }
 
   $.ajax({
@@ -64,25 +60,9 @@ function buildMatchup(tableCell, bracketCell) {
     t1.textContent += " (" + bracketCell.score[1] + ")"
   }
 
-  for (let i = 0; i < bracketCell.picks[0].length; i++) {
-    let pick = document.createElement("span")
-    pick.textContent = bracketCell.picks[0][i]
-    pick.classList.add("pickspan")
-    tableCell.appendChild(pick)
-    tableCell.appendChild(document.createElement("br"))
-  }
-
   tableCell.appendChild(t0)
   tableCell.appendChild(document.createElement("br"))
   tableCell.appendChild(t1)
-  
-  for (let i = 0; i < bracketCell.picks[1].length; i++) {
-    let pick = document.createElement("span")
-    pick.textContent = bracketCell.picks[1][i]
-    pick.classList.add("pickspan")
-    tableCell.appendChild(document.createElement("br"))
-    tableCell.appendChild(pick)
-  }
 }
 
 
