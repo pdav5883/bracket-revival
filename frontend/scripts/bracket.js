@@ -58,6 +58,7 @@ function buildChampion(tableCell, bracketCell) {
   tableCell.rowSpan = bracketCell.rowSpan
   let t = document.createElement("span")
   t.textContent = bracketCell.team === null ? "---" : "#" + bracketCell.seed + " " + bracketCell.team
+  //t.textContent = bracketCell.team === null ? "---" : bracketCell.team  // simplified
   t.classList.add("winnerspan")
 
   if (bracketCell.points > 0) {
@@ -88,8 +89,10 @@ function buildMatchup(tableCell, bracketCell) {
   tableCell.rowSpan = bracketCell.rowSpan
   let t0 = document.createElement("span")
   t0.textContent = bracketCell.teams[0] === null ? "---" : "#" + bracketCell.seeds[0] + " " + bracketCell.teams[0]
+  //t0.textContent = bracketCell.teams[0] === null ? "---" : bracketCell.teams[0]   // simplified
   let t1 = document.createElement("span")
   t1.textContent = bracketCell.teams[1] === null ? "---" : "#" + bracketCell.seeds[1] + " " + bracketCell.teams[1]
+  //t1.textContent = bracketCell.teams[1] === null ? "---" : bracketCell.teams[1]    // simplified
 
   if (bracketCell.result == 0) {
     t0.classList.add("winnerspan")
