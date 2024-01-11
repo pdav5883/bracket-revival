@@ -1,6 +1,8 @@
 {
   "cid": "0000",
-  "name": "2022",
+  "name": "0 0 0 0",
   "scoreboard": {},
-  "completed_rounds": 6 
+  "completed_rounds": 6 ,
+  "open_picks": true,
+  "scoreboard": {"Peter": [], "Kelly": []}
 }

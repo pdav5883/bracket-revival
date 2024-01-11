@@ -28,6 +28,18 @@ Work in progress
 #### update_picks
 - POST: Adds picks to a player's data file
 - Input: year, cid, pid, round, picks: [0/1 flat list of picks]
+#### get_competitions
+- GET: Returns struct with years and cids for each year
+- Input: none
+- Output: {"y0": "cid",...}
+#### get_scoreboard
+- GET: Returns list of players with points, details on game
+- Input: year, cid, rounds_completed (opt)
+- Output: {"names": [Full Names], "total_points": [total,...], "round_points": [[r0, r1, ...],...]}
+#### update_scoreboard
+- POST: Updates the scoreboard field in competition file by looking at results and picks
+- Input: year, cid
+- Output: None
 
 ## Working
 - Page: Visualize current bracket
@@ -39,12 +51,14 @@ Work in progress
 	- Note: `flask` and `flask_cors` must be installed in the environment
 - In browser go to `localhost:8000/{page}.html` 
 ## Data Model
+index.json - {"yr": ["Comp Name 1", "Comp Name 2",...]}
 /{year}
   teams.json - list of teams with {"name", "short_name", "seed"}
   results.json - {"results": list of 0/1/null, "score": list of [a,b]/null}
   /{cid}
-    competition.json - state of competition {"cid": {cid uuid}, "name", "scoreboard": {}, "completed_rounds": N, other state info}
-    {pid}.json - {"pid": {pid uuid}, "name", "picks": [[],[],..]}
+    competition.json - state of competition {"cid": "lowernospaces", "name": "Actual Name" , "completed_rounds": N, "open_picks": true/false (can make any picks any time)
+                                             "scoreboard": {"Actual pName": [r0, r1, ...],...}}
+    {pid}.json - {"pid": "lowernospaces", "name": "Actual Name", "picks": [[],[],..]}
   
 
 ## Computing Points
