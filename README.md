@@ -37,7 +37,8 @@ Work in progress
 - Input: year, cid, rounds_completed (opt)
 - Output: {"names": [Full Names], "total_points": [total,...], "round_points": [[r0, r1, ...],...]}
 #### update_scoreboard
-- POST: Updates the scoreboard field in competition file by looking at results and picks
+- POST: Updates the scoreboard field in competition file by looking at results and picks.
+	- Does not pay attention to completed_rounds in competition.json, since that is considered during get_scoreboard
 - Input: year, cid
 - Output: None
 

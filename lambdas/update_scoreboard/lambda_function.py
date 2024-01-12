@@ -1,6 +1,7 @@
 import json
 
 from utils.tournament import *
+from utils import points
 
 prefix = "../test_data/"
 
@@ -8,36 +9,37 @@ def lambda_handler(event, context):
     """
     POST request
     """
-    body = json.loads(event["body"])
-    year = body.get("year", None)
-    cid = body.get("cid", None)
-    pid = body.get("pid", None)
-    rnd = int(body.get("round", None))
-    new_picks = body.get("picks", None)
+    year = body.get("year")
+    cid = body.get("cid").replace(" ", "").lower()
 
     # TODO: assert arguments exist
-    # TODO: check that pid exists
 
-    # check that there are right number of picks for round
-    games_remaining = NUMGAMES - sum(GAMES_PER_ROUND[0:rnd])
+    results_key = prefix + year + "/results.json"
+    results_dict = read_file(results_key)
+    results = results_dict["results"]
+
+    competition_key = prefix + year + "/" + cid + "/competition.json"
     
-    if games_remaining != len(new_picks):
-        return {"statusCode": 400,
-                "body": "Submitted picks are incorrect length"}
+    competition = read_file(competition_key)
+    scoreboard = competition["scoreboard"]
 
-    player_key = prefix + year + "/" + cid + "/" + pid + ".json"
-    player = read_file(player_key)
+    player_names = list(scoreboard.keys())
 
-    # check that pid picks are ready for these new ones
-    if len(player["picks"]) != rnd:
-        return {"statusCode": 400,
-                "body": "Player cannot accept picks for this round"}
+    # repopulate scoreboard
+    scoreboard = {}
 
-    player["picks"].append(new_picks)
-    
-    write_file(player_key, player)
+    for pname in player_names:
+        pid = pname.replace(" ", "").lower()
+        player_key = prefix + year + "/" + cid + "/"
+        player = read_file(competition_key)
 
-    return "Successfully added new picks"
+        scoreboard[pname] = points.calc_points_revival(player["picks"], results)
+
+    competition["scoreboard"] = scoreboard
+
+    write_file(competition_key, competition)
+
+    return f"Successfully updated scoreboard for year {year}, cid {cid}"
 
 
 def read_file(key):
