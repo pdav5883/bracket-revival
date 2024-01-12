@@ -9,8 +9,13 @@ def lambda_handler(event, context):
     """
     POST request
     """
-    year = body.get("year")
-    cid = body.get("cid").replace(" ", "").lower()
+    #body = json.loads(event["body"])
+    #year = body.get("year")
+    #cid = body.get("cid").replace(" ", "").lower()
+
+    # for testing only
+    year = event["queryStringParameters"].get("year")
+    cid = event["queryStringParameters"].get("cid")
 
     # TODO: assert arguments exist
 
@@ -30,10 +35,18 @@ def lambda_handler(event, context):
 
     for pname in player_names:
         pid = pname.replace(" ", "").lower()
-        player_key = prefix + year + "/" + cid + "/"
-        player = read_file(competition_key)
+        player_key = prefix + year + "/" + cid + "/" + pid + ".json"
+        player = read_file(player_key)
 
-        scoreboard[pname] = points.calc_points_revival(player["picks"], results)
+        points_game = points.calc_points_revival(player["picks"], results)
+        points_round = []
+        first_game = 0
+
+        for gpr in GAMES_PER_ROUND:
+            points_round.append(sum(points_game[first_game:first_game + gpr]))
+            first_game += gpr
+
+        scoreboard[pname] = points_round
 
     competition["scoreboard"] = scoreboard
 

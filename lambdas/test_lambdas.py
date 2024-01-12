@@ -5,6 +5,8 @@ from calc_score import lambda_function as calc_score
 from update_picks import lambda_function as update_picks
 from get_bracket import lambda_function as get_bracket
 from get_round_start import lambda_function as get_round_start
+from update_scoreboard import lambda_function as update_scoreboard
+from get_scoreboard import lambda_function as get_scoreboard
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -49,6 +51,22 @@ def bracket_function():
 def start_function():
     event = make_event()
     data = get_round_start.lambda_handler(event, None)
+
+    return jsonify(data)
+
+
+@app.route("/sync", methods=["POST","GET"])
+def sync_function():
+    event = make_event()
+    data = update_scoreboard.lambda_handler(event, None)
+
+    return jsonify(data)
+
+
+@app.route("/scoreboard", methods=["GET"])
+def scoreboard_function():
+    event = make_event()
+    data = get_scoreboard.lambda_handler(event, None)
 
     return jsonify(data)
 
