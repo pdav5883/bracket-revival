@@ -10,6 +10,14 @@ Work in progress
 - Visualize leaderboard
 - Test page to play a smaller version to understand rules
 
+## WIP
+- Finish update_index function to add player names to index.json
+- Add dropdowns to scoreboard.html, pick.html, bracket.html containing yr/cid/pid options
+- Add query string look on scoreboard/pick/bracket to prepopulate
+- Add links from scoreboard.html to bracket.html
+- Hide fields/buttons if there are query params, add "change" button to show fields.
+- Deploy and test
+
 ## Lambdas
 #### calc_score
 - GET: Reads data files and returns flat list of points for each game
@@ -29,9 +37,9 @@ Work in progress
 - POST: Adds picks to a player's data file
 - Input: year, cid, pid, round, picks: [0/1 flat list of picks]
 #### get_competitions
-- GET: Returns struct with years and cids for each year
+- GET: Returns struct with years and cids for each year, and player names for each cid
 - Input: none
-- Output: {"y0": "cid",...}
+- Output: {"y0": {"cid": [name0, ...],...}
 #### get_scoreboard
 - GET: Returns list of players with points, details on game
 - Input: year, cid, rounds_completed (opt)
@@ -40,6 +48,10 @@ Work in progress
 - POST: Updates the scoreboard field in competition file by looking at results and picks.
 	- Does not pay attention to completed_rounds in competition.json, since that is considered during get_scoreboard
 - Input: year, cid
+- Output: None
+#### update_index
+- POST: Updates the index.json file with years, competitions, and names
+- Input: None
 - Output: None
 
 ## Working
@@ -52,7 +64,7 @@ Work in progress
 	- Note: `flask` and `flask_cors` must be installed in the environment
 - In browser go to `localhost:8000/{page}.html` 
 ## Data Model
-index.json - {"yr": ["Comp Name 1", "Comp Name 2",...]}
+index.json - {"yr": {"Comp Name 1": ["Name 1",...],  "Comp Name 2",...},...}
 /{year}
   teams.json - list of teams with {"name", "short_name", "seed"}
   results.json - {"results": list of 0/1/null, "score": list of [a,b]/null}
@@ -80,6 +92,7 @@ index.json - {"yr": ["Comp Name 1", "Comp Name 2",...]}
 	- Prev-prev: pick = result
 	- points MULT
 ## Questions/Misc Thoughts
+- index.json will contain all years, cids, and player names. This may not scale well, but get to that problem if it becomes one. For now it's simpler to pass all this data at once rather than create a new endpoit just to grab names whenever a new cid is selected in bracket dropdown.
 - How much data does the backend send back for get_bracket?
 	- Backend will look at three sources to determine how much data to send.
 	- 1. completed_rounds in competition.json. If completed_rounds = 1, then it will show all available results and picks for round 0.
