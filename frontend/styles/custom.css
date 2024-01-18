@@ -3,3 +3,10 @@
 }
 .pickspan {
   font-size: smaller;
+}
+#scoreboardtable {
+  border-collapse: collapse;
+}
+#scoreboardtable td, th {
+  border: 1px solid;
+}

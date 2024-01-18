@@ -31,7 +31,7 @@ def lambda_handler(event, context):
     round_points = list(scoreboard.values())
 
     # zero out points for rounds beyond completed
-    round_points = [[p if rnd <= completed_rounds else 0 for rnd, p in enumerate(rp)] for rp in round_points]
+    round_points = [[p if rnd < completed_rounds else 0 for rnd, p in enumerate(rp)] for rp in round_points]
 
     total_points = [sum(rp) for rp in round_points]
 
