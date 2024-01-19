@@ -11,11 +11,12 @@ Work in progress
 - Test page to play a smaller version to understand rules
 
 ## WIP
-- Finish update_index function to add player names to index.json
 - Add dropdowns to scoreboard.html, pick.html, bracket.html containing yr/cid/pid options
 - Add query string look on scoreboard/pick/bracket to prepopulate
 - Add links from scoreboard.html to bracket.html
 - Hide fields/buttons if there are query params, add "change" button to show fields.
+- add_year/competition/player lambdas
+- Move all read/write functions into separate utils file, build for S3
 - Deploy and test
 
 ## Lambdas
@@ -37,9 +38,9 @@ Work in progress
 - POST: Adds picks to a player's data file
 - Input: year, cid, pid, round, picks: [0/1 flat list of picks]
 #### get_competitions
-- GET: Returns struct with years and cids for each year, and player names for each cid
+- GET: Returns struct with years and competition names for each year, and player names for each cid
 - Input: none
-- Output: {"y0": {"cid": [name0, ...],...}
+- Output: {"y0": {"comp name": ["player name", ...],...}
 #### get_scoreboard
 - GET: Returns list of players with points, details on game
 - Input: year, cid, rounds_completed (opt)
@@ -47,12 +48,25 @@ Work in progress
 #### update_scoreboard
 - POST: Updates the scoreboard field in competition file by looking at results and picks.
 	- Does not pay attention to completed_rounds in competition.json, since that is considered during get_scoreboard
+	- Assumes that all player names have been added to competition.json
 - Input: year, cid
 - Output: None
-#### update_index
-- POST: Updates the index.json file with years, competitions, and names
-- Input: None
-- Output: None
+#### add_player
+- POST: Adds a new player to competition
+	- Adds player name to competition.json scoreboard
+	- Adds player name to index.json
+	- Adds pid.json file in competition dir
+- WIP
+#### add_competition
+- POST: Adds a new competition to year
+	- Adds a new competition dir with competition.json
+	- Adds competition name to index.json
+- WIP
+#### add_year
+- POST: Adds a new year
+	- Adds year dir, results.json, teams.json empty
+	- Adds year to index.json
+- WIP
 
 ## Working
 - Page: Visualize current bracket
