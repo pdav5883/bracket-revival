@@ -7,6 +7,7 @@ from get_bracket import lambda_function as get_bracket
 from get_round_start import lambda_function as get_round_start
 from update_scoreboard import lambda_function as update_scoreboard
 from get_scoreboard import lambda_function as get_scoreboard
+from get_competitions import lambda_function as get_competitions
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -67,6 +68,14 @@ def sync_function():
 def scoreboard_function():
     event = make_event()
     data = get_scoreboard.lambda_handler(event, None)
+
+    return jsonify(data)
+
+
+@app.route("/competitions", methods=["GET"])
+def competitions_function():
+    event = make_event()
+    data = get_competitions.lambda_handler(event, None)
 
     return jsonify(data)
 

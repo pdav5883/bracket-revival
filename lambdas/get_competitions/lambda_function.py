@@ -1,7 +1,7 @@
 ##############
 ### Return structure with valid years and cids 
 
-import os
+import json 
 
 prefix = "../test_data/"
 

@@ -15,10 +15,14 @@
   <script src="/scripts/scoreboard.js"></script>
 </head>
 <body>
-  <input id="yearinput" type="text" placeholder="year">
-  <input id="cidinput" type="text" placeholder="cid">
-  <input id="rndinput" type="text" placeholder="rounds complete">
+  <label id="yearlabel" for="yearsel">Year</label>
+  <select id="yearsel"></select>
+  <label id="complabel" for="compsel">Game</label>
+  <select id="compsel"></select>
+  <label id="rndlabel" for="rndinput">Completed Rounds</label>
+  <input id="rndinput" type="text">
   <button id="gobutton">Go</button>
+  <button id="editbutton">Change Game</button>
   <p id="textstatus"></p>
   
   <table id="scoreboardtable">
