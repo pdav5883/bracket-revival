@@ -37,7 +37,7 @@ Work in progress
 - Output: [{"teams": [a,b], "seeds": [a,b]}, (round 0 game 1), (round 0 game 2), ...]
 #### update_picks
 - POST: Adds picks to a player's data file
-- Input: year, cid, pid, round, picks: [0/1 flat list of picks]
+- Input: year, cid, pid, picks: [0/1 flat list of picks]
 #### get_competitions
 - GET: Returns struct with years and competition names for each year, and player names for each cid
 - Input: none
@@ -107,6 +107,7 @@ index.json - {"yr": {"Comp Name 1": ["Name 1",...],  "Comp Name 2",...},...}
 	- Prev-prev: pick = result
 	- points MULT
 ## Questions/Misc Thoughts
+- How should I take care of controlling when pick submissions are allowed? Plan use a combo of open_picks and completed_rounds in competition.json. open_picks must be true, and completed_rounds must be >= to the round submission being attempted. 
 - index.json will contain all years, cids, and player names. This may not scale well, but get to that problem if it becomes one. For now it's simpler to pass all this data at once rather than create a new endpoit just to grab names whenever a new cid is selected in bracket dropdown.
 - How much data does the backend send back for get_bracket?
 	- Backend will look at three sources to determine how much data to send.

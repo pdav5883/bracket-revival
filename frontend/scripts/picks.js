@@ -6,7 +6,6 @@ let index
 let yearSubmit // these submit variables store the values
 let cidSubmit  // used to populate round start
 let pidSubmit
-let roundSubmit
 
 $(document).ready(function() {
   $("#gobutton").on("click", changeRoundStart)
@@ -27,13 +26,11 @@ function initPickPage() {
   // check query params first, then local storage for year/comp
   if (params.has("year") &&
       params.has("cid") &&
-      params.has("pid") &&
-      params.has("round")) {
+      params.has("pid")) {
     displayMode()
     populateRoundStart({"year": params.get("year"),
                         "cid": params.get("cid"),
-                        "pid": params.get("pid"),
-                        "round": params.get("round")})
+                        "pid": params.get("pid")})
   }
   // else if localStorage
   else {
@@ -46,11 +43,9 @@ function editMode() {
   $("#yearsel").show()
   $("#compsel").show()
   $("#playersel").show()
-  $("#rndinput").show()
   $("#yearlabel").show()
   $("#complabel").show()
   $("#playerlabel").show()
-  $("#rndlabel").show()
   $("#gobutton").show()
   $("#submitbutton").show()
 
@@ -85,11 +80,9 @@ function displayMode() {
   $("#yearsel").hide()
   $("#compsel").hide()
   $("#playersel").hide()
-  $("#rndinput").hide()
   $("#yearlabel").hide()
   $("#complabel").hide()
   $("#playerlabel").hide()
-  $("#rndlabel").hide()
   $("#gobutton").hide()
   $("#submitbutton").show()
 
@@ -148,17 +141,15 @@ function populateRoundStart(args) {
     yearSubmit = $("#yearsel").val()
     cidSubmit = $("#compsel").val()
     pidSubmit = $("#playersel").val()
-    roundSubmit = $("#rndinput").val()
   }
 
   else {
     yearSubmit = args.year
     cidSubmit = args.cid
     pidSubmit = args.pid
-    roundSubmit = args.round
   }
 
-  queryData = {"year": yearSubmit, "cid": cidSubmit, "round_start": roundSubmit}
+  queryData = {"year": yearSubmit, "cid": cidSubmit, "pid": pidSubmit}
 
   $.ajax({
     method: "GET",
@@ -207,7 +198,7 @@ function submitPicks() {
     return
   }
 
-  data = {"year": yearSubmit, "cid": cidSubmit, "pid": pidSubmit, "round": roundSubmit, "picks": picks}
+  data = {"year": yearSubmit, "cid": cidSubmit, "pid": pidSubmit, "picks": picks}
 
   $.ajax({
     method: "POST",

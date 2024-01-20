@@ -11,13 +11,24 @@ def lambda_handler(event, context):
     """
     GET request
 
-    Input: year, cid, round_start
+    Input: year, cid, pid OR round_start
     All games before round_start must have completed
     Output: [round 0 games [{teams: [], seeds: [], score: [], result:}]]
     """
     year = event["queryStringParameters"].get("year")
     cid = event["queryStringParameters"].get("cid").replace(" ", "").lower()
-    round_start = int(event["queryStringParameters"].get("round_start"))
+    pid = event["queryStringParameters"].get("pid", None)
+    round_start = event["queryStringParameters"].get("round_start", None)
+
+    if pid is not None:
+        pid = pid.replace(" ", "").lower()
+        round_start = get_player_next_round(year, cid, pid)
+    elif round_start is not None:
+        round_start = int(round_start)
+    else:
+        # TODO: return an error here
+        return {"statusCode": 400,
+                "body": "Either pid or round_start must be present in query"}
 
     # TODO: assert arguments exist
 
@@ -70,7 +81,13 @@ def lambda_handler(event, context):
     
     return games
 
-   
+
+def get_player_next_round(year, cid, pid):
+    player_key = prefix + year + "/" + cid + "/" + pid + ".json"
+    player = read_file(player_key)
+    return len(player["picks"])
+  
+
 def read_file(key):
     with open(key, "r") as fptr:
         data = json.load(fptr)
