@@ -11,14 +11,9 @@ Work in progress
 - Test page to play a smaller version to understand rules
 
 ## WIP
-- Add dropdowns to scoreboard.html, pick.html, bracket.html containing yr/cid/pid options
-- Add query string look on scoreboard/pick/bracket to prepopulate
-- Add links from scoreboard.html to bracket.html
-- Hide fields/buttons if there are query params, add "change" button to show fields.
 - add_year/competition/player lambdas
 - Move all read/write functions into separate utils file, build for S3
 - Deploy and test
-- Pick page remove round input, just populate with next round of picks for player
 
 ## Lambdas
 #### calc_score
