@@ -91,7 +91,7 @@ function populateCompetitions() {
     compOpt = document.createElement("option")
     compOpt.value = compName
     compOpt.textContent = compName
-    $("#compsel").append(comp)
+    $("#compsel").append(compOpt)
   }
 }
 
@@ -170,6 +170,7 @@ function populateScoreboard(args) {
 
       let tableRow = table.insertRow()
       let tableCell = document.createElement("th")
+
       tableRow.appendChild(tableCell)
 
       roundNames.forEach(rName => {
@@ -182,10 +183,14 @@ function populateScoreboard(args) {
       tableCell.textContent = "TOTAL"
       tableRow.appendChild(tableCell)
 
+      let tablePlayer
       leaders.forEach(leader => {
 	tableRow = table.insertRow()
 	tableCell = tableRow.insertCell()
-	tableCell.textContent = leader.name
+	tablePlayer = document.createElement("a")
+	tablePlayer.textContent = leader.name
+	tablePlayer.href = "/bracket.html?year=" + year + "&cid=" + cid + "&pid=" + leader.name
+	tableCell.append(tablePlayer)
 
 	leader.round.forEach(points => {
 	  tableCell = tableRow.insertCell()
