@@ -86,11 +86,11 @@ function displayMode() {
 function populateCompetitions() {
   $("#compsel").empty()
 
-  let comp
+  let compOpt
   for (const compName in index[$("#yearsel").val()]) {
-    comp = document.createElement("option")
-    comp.value = compName
-    comp.textContent = compName
+    compOpt = document.createElement("option")
+    compOpt.value = compName
+    compOpt.textContent = compName
     $("#compsel").append(comp)
   }
 }

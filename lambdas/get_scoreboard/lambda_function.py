@@ -18,6 +18,8 @@ def lambda_handler(event, context):
     cid = event["queryStringParameters"].get("cid").replace(" ", "").lower()
     completed_rounds_query = event["queryStringParameters"].get("completed_rounds", None)
 
+    # TODO handle bad/no inputs
+
     competition_key = prefix + year + "/" + cid + "/competition.json"
     
     competition = read_file(competition_key)

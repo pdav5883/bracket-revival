@@ -19,8 +19,8 @@ def lambda_handler(event, context):
 
     "picks" respresents who we picked to be *playing* in the game, not who we picked to win the game.
     """
-    year = event["queryStringParameters"].get("year", None)
-    cid = event["queryStringParameters"].get("cid", None)
+    year = event["queryStringParameters"].get("year")
+    cid = event["queryStringParameters"].get("cid").replace(" ", "").lower()
     pid = event["queryStringParameters"].get("pid", None)
     completed_rounds_query = event["queryStringParameters"].get("completed_rounds", None)
 
@@ -40,10 +40,11 @@ def lambda_handler(event, context):
 
     competition = read_file(competition_key)
 
-    if pid is None:
+    if pid is None or pid == "":
         player = None
         player_picks = []
     else:
+        pid = pid.replace(" ", "").lower()
         player_key = prefix + year + "/" + cid + "/" + pid + ".json"
         player = read_file(player_key)
         player_picks = player["picks"]

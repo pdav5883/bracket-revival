@@ -15,11 +15,16 @@
   <script src="/scripts/bracket.js"></script>
 </head>
 <body>
-  <input id="yearinput" type="text" placeholder="year">
-  <input id="cidinput" type="text" placeholder="cid">
-  <input id="pidinput" type="text" placeholder="pid">
-  <input id="rndinput" type="text" placeholder="rounds complete">
+  <label id="yearlabel" for="yearsel">Year</label>
+  <select id="yearsel"></select>
+  <label id="complabel" for="compsel">Game</label>
+  <select id="compsel"></select>
+  <label id="playerlabel" for="playersel">Player</label>
+  <select id="playersel"></select>
+  <label id="rndlabel" for="rndinput">Completed Rounds</label>
+  <input id="rndinput" type="text" size=3>
   <button id="gobutton">Go</button>
+  <button id="editbutton">Change Game</button>
   <p id="textstatus"></p>
   
   <table id="brackettable">

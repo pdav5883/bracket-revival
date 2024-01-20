@@ -1,14 +1,158 @@
-const api_url = "http://0.0.0.0:5000/bracket"
+const bracket_api_url = "http://0.0.0.0:5000/bracket"
+const competitions_api_url = "http://0.0.0.0:5000/competitions"
+
+let index
 
 $(document).ready(function() {
-  $("#gobutton").on("click", populateBracket)
+  $("#gobutton").on("click", changeBracket)
+  $("#yearsel").on("change", populateCompetitions)
+  $("#compsel").on("change", populatePlayerNames)
+
+  initBracketPage()
+
+  $("#editbutton").on("click", function() {
+    editMode()
+  })
 })
 
-function populateBracket() {
-  const year = $("#yearinput").val()
-  const cid = $("#cidinput").val()
-  const pid = $("#pidinput").val()
-  const completedRounds = $("#rndinput").val()
+
+function initBracketPage() {
+  const params = new URLSearchParams(window.location.search)
+
+  // check query params first, then local storage for year/comp
+  if (params.has("year") && params.has("cid")) {
+    displayMode()
+    populateBracket({"year": params.get("year"),
+                     "cid": params.get("cid"),
+                     "pid": params.has("pid") ? params.get("pid") : "",
+                     "completedRounds": params.has("rounds") ? params.get("rounds") : ""
+    })
+  }
+  // else if localStorage
+  else {
+    editMode()
+  }
+}
+
+
+function editMode() {
+  $("#editbutton").hide()
+  $("#yearsel").show()
+  $("#compsel").show()
+  $("#playersel").show()
+  $("#rndinput").show()
+  $("#yearlabel").show()
+  $("#complabel").show()
+  $("#playerlabel").show()
+  $("#rndlabel").show()
+  $("#gobutton").show()
+
+  // first time we populate selects, call backend
+  if (index === undefined) {
+    $.ajax({
+      method: "GET",
+      url: competitions_api_url,
+      data: {},
+      crossDomain: true,
+      success: function(result) {
+	index = result
+
+	//populate years
+	let yearOpt
+	for (const year in index) {
+	  yearOpt = document.createElement("option")
+	  yearOpt.value = year
+	  yearOpt.textContent = year
+	  $("#yearsel").append(yearOpt)
+	}
+
+	// set to latest year with change to populate competitions
+	$("#yearsel").val(yearOpt.value).change()
+      }
+    })
+  }
+}
+
+
+function displayMode() {
+  $("#editbutton").show()
+  $("#yearsel").hide()
+  $("#compsel").hide()
+  $("#playersel").hide()
+  $("#rndinput").hide()
+  $("#yearlabel").hide()
+  $("#complabel").hide()
+  $("#playerlabel").hide()
+  $("#rndlabel").hide()
+  $("#gobutton").hide()
+
+}
+
+
+function populateCompetitions() {
+  $("#compsel").empty()
+
+  let compOpt
+  for (const compName in index[$("#yearsel").val()]) {
+    compOpt = document.createElement("option")
+    compOpt.value = compName
+    compOpt.textContent = compName
+    $("#compsel").append(compOpt)
+  }
+
+  // set to last competition
+  // TODO is this right?
+  $("#compsel").val(compOpt.value).change()
+}
+
+
+function populatePlayerNames() {
+  $("#playersel").empty()
+
+  let playerOpt
+  for (const playerName of index[$("#yearsel").val()][$("#compsel").val()]) {
+    playerOpt = document.createElement("option")
+    playerOpt.value = playerName
+    playerOpt.textContent = playerName
+    $("#playersel").append(playerOpt)
+  }
+
+  // Empty shows bracket
+  playerOpt = document.createElement("option")
+  playerOpt.value = ""
+  playerOpt.textContent = "--NONE--"
+  $("#playersel").append(playerOpt)
+
+  // set to bracket only 
+  $("#playersel").val(playerOpt.value).change()
+}
+
+
+function changeBracket() {
+  // nests within function to avoid passing click arg to populateBracket
+  populateBracket()
+}
+
+
+function populateBracket(args) {
+  let year
+  let cid
+  let pid
+  let completedRounds
+
+  if (args === undefined) {
+    year = $("#yearsel").val()
+    cid = $("#compsel").val()
+    pid = $("#playersel").val()
+    completedRounds = $("#rndinput").val()
+  }
+
+  else {
+    year = args.year
+    cid = args.cid
+    pid = args.pid
+    completedRounds = args.completedRounds
+  }
 
   queryData = {"year": year, "cid": cid}
 
@@ -21,7 +165,7 @@ function populateBracket() {
 
   $.ajax({
     method: "GET",
-    url: api_url,
+    url: bracket_api_url,
     data: queryData,
     crossDomain: true,
     success: function(result) {
