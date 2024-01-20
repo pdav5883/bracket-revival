@@ -30,10 +30,10 @@ function initPickPage() {
       params.has("pid") &&
       params.has("round")) {
     displayMode()
-    populateBracket({"year": params.get("year"),
-                     "cid": params.get("cid"),
-                     "pid": params.get("pid"),
-                     "round": params.get("round")})
+    populateRoundStart({"year": params.get("year"),
+                        "cid": params.get("cid"),
+                        "pid": params.get("pid"),
+                        "round": params.get("round")})
   }
   // else if localStorage
   else {
