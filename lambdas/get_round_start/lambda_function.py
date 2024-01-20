@@ -16,7 +16,7 @@ def lambda_handler(event, context):
     Output: [round 0 games [{teams: [], seeds: [], score: [], result:}]]
     """
     year = event["queryStringParameters"].get("year")
-    cid = event["queryStringParameters"].get("cid")
+    cid = event["queryStringParameters"].get("cid").replace(" ", "").lower()
     round_start = int(event["queryStringParameters"].get("round_start"))
 
     # TODO: assert arguments exist

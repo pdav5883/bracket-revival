@@ -9,10 +9,10 @@ def lambda_handler(event, context):
     POST request
     """
     body = json.loads(event["body"])
-    year = body.get("year", None)
-    cid = body.get("cid", None)
-    pid = body.get("pid", None)
-    rnd = int(body.get("round", None))
+    year = body.get("year")
+    cid = body.get("cid").replace(" ", "").lower()
+    pid = body.get("pid").replace(" ", "").lower()
+    rnd = int(body.get("round"))
     new_picks = body.get("picks", None)
 
     # TODO: assert arguments exist

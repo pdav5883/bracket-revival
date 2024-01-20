@@ -1,64 +1,168 @@
-const api_url_start = "http://0.0.0.0:5000/start"
-const api_url_update = "http://0.0.0.0:5000/update"
+const start_api_url = "http://0.0.0.0:5000/start"
+const update_api_url = "http://0.0.0.0:5000/update"
+const competitions_api_url = "http://0.0.0.0:5000/competitions"
+
+let index
+let yearSubmit // these submit variables store the values
+let cidSubmit  // used to populate round start
+let pidSubmit
+let roundSubmit
 
 $(document).ready(function() {
-  $("#gobutton").on("click", populateRoundStart)
+  $("#gobutton").on("click", changeRoundStart)
   $("#submitbutton").on("click", submitPicks)
+  $("#yearsel").on("change", populateCompetitions)
+  $("#compsel").on("change", populatePlayerNames)
+
+  initPickPage()
+
+  // no switch to edit mode for picks page, since this
+  // isn't part of game flow
 })
 
 
-function submitPicks() {
-  $("#statustext").text("")
+function initPickPage() {
+  const params = new URLSearchParams(window.location.search)
 
-  const year = $("#yearinput").val()
-  const cid = $("#cidinput").val()
-  const pid = $("#pidinput").val()
-  const rnd = $("#rndinput").val()
-
-  // gather picks by putting all winnerspan entries into array
-  const numPicks = $("[id^=cell_").length
-  let picks = Array(numPicks).fill(null)
-
-  $("span.winnerspan").each(function(i, e) {
-    picks[e.flatIndex] = e.topBottom
-  })
-
-  // make sure that all picks have been made
-  if (picks.some((e) => e === null)) {
-    $("#statustext").text("Error: all picks must be made before submission")
-    return
+  // check query params first, then local storage for year/comp
+  if (params.has("year") &&
+      params.has("cid") &&
+      params.has("pid") &&
+      params.has("round")) {
+    displayMode()
+    populateBracket({"year": params.get("year"),
+                     "cid": params.get("cid"),
+                     "pid": params.get("pid"),
+                     "round": params.get("round")})
   }
-
-  data = {"year": year, "cid": cid, "pid": pid, "round": rnd, "picks": picks}
-
-  $.ajax({
-    method: "POST",
-    url: api_url_update,
-    contentType: "application/json; charset=utf-8",
-    data: JSON.stringify(data),
-    crossDomain: true,
-    success: function() {
-      $("#statustext").text("Submission successful!")
-    },
-    failure: function(e) {
-      $("#statustext").text("Server Error: TODO")
-    }
-  })
+  // else if localStorage
+  else {
+    editMode()
+  }
 }
 
 
-function populateRoundStart() {
+function editMode() {
+  $("#yearsel").show()
+  $("#compsel").show()
+  $("#playersel").show()
+  $("#rndinput").show()
+  $("#yearlabel").show()
+  $("#complabel").show()
+  $("#playerlabel").show()
+  $("#rndlabel").show()
+  $("#gobutton").show()
+  $("#submitbutton").show()
+
+  // first time we populate selects, call backend
+  if (index === undefined) {
+    $.ajax({
+      method: "GET",
+      url: competitions_api_url,
+      data: {},
+      crossDomain: true,
+      success: function(result) {
+	index = result
+
+	//populate years
+	let yearOpt
+	for (const year in index) {
+	  yearOpt = document.createElement("option")
+	  yearOpt.value = year
+	  yearOpt.textContent = year
+	  $("#yearsel").append(yearOpt)
+	}
+
+	// set to latest year with change to populate competitions
+	$("#yearsel").val(yearOpt.value).change()
+      }
+    })
+  }
+}
+
+
+function displayMode() {
+  $("#yearsel").hide()
+  $("#compsel").hide()
+  $("#playersel").hide()
+  $("#rndinput").hide()
+  $("#yearlabel").hide()
+  $("#complabel").hide()
+  $("#playerlabel").hide()
+  $("#rndlabel").hide()
+  $("#gobutton").hide()
+  $("#submitbutton").show()
+
+}
+
+
+function populateCompetitions() {
+  $("#compsel").empty()
+
+  let compOpt
+  for (const compName in index[$("#yearsel").val()]) {
+    compOpt = document.createElement("option")
+    compOpt.value = compName
+    compOpt.textContent = compName
+    $("#compsel").append(compOpt)
+  }
+
+  // set to last competition
+  // TODO is this right?
+  $("#compsel").val(compOpt.value).change()
+}
+
+
+function populatePlayerNames() {
+  $("#playersel").empty()
+
+  let playerOpt
+  for (const playerName of index[$("#yearsel").val()][$("#compsel").val()]) {
+    playerOpt = document.createElement("option")
+    playerOpt.value = playerName
+    playerOpt.textContent = playerName
+    $("#playersel").append(playerOpt)
+  }
+
+  // Empty option
+  playerOpt = document.createElement("option")
+  playerOpt.value = ""
+  playerOpt.textContent = ""
+  $("#playersel").append(playerOpt)
+
+  // set to empty 
+  $("#playersel").val(playerOpt.value).change()
+}
+
+
+function changeRoundStart() {
+  // nests within function to avoid passing click arg to populate
+  populateRoundStart()
+}
+
+
+function populateRoundStart(args) {
   $("#statustext").text("")
   
-  const year = $("#yearinput").val()
-  const cid = $("#cidinput").val()
-  const startRound = $("#rndinput").val()
+  if (args === undefined) {
+    yearSubmit = $("#yearsel").val()
+    cidSubmit = $("#compsel").val()
+    pidSubmit = $("#playersel").val()
+    roundSubmit = $("#rndinput").val()
+  }
 
-  queryData = {"year": year, "cid": cid, "round_start": startRound}
+  else {
+    yearSubmit = args.year
+    cidSubmit = args.cid
+    pidSubmit = args.pid
+    roundSubmit = args.round
+  }
+
+  queryData = {"year": yearSubmit, "cid": cidSubmit, "round_start": roundSubmit}
 
   $.ajax({
     method: "GET",
-    url: api_url_start,
+    url: start_api_url,
     data: queryData,
     crossDomain: true,
     success: function(startGames) {
@@ -80,6 +184,42 @@ function populateRoundStart() {
 
       // adds the on-click listeners to populate picks in bracket
       addBracketListeners()
+    }
+  })
+}
+
+
+
+function submitPicks() {
+  $("#statustext").text("")
+
+  // gather picks by putting all winnerspan entries into array
+  const numPicks = $("[id^=cell_").length
+  let picks = Array(numPicks).fill(null)
+
+  $("span.winnerspan").each(function(i, e) {
+    picks[e.flatIndex] = e.topBottom
+  })
+
+  // make sure that all picks have been made
+  if (picks.some((e) => e === null)) {
+    $("#statustext").text("Error: all picks must be made before submission")
+    return
+  }
+
+  data = {"year": yearSubmit, "cid": cidSubmit, "pid": pidSubmit, "round": roundSubmit, "picks": picks}
+
+  $.ajax({
+    method: "POST",
+    url: update_api_url,
+    contentType: "application/json; charset=utf-8",
+    data: JSON.stringify(data),
+    crossDomain: true,
+    success: function() {
+      $("#statustext").text("Submission successful!")
+    },
+    failure: function(e) {
+      $("#statustext").text("Server Error: TODO")
     }
   })
 }
