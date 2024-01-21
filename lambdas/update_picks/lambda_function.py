@@ -1,8 +1,8 @@
 import json
 
 from utils.tournament import *
+from utils import basic
 
-prefix = "../test_data/"
 
 def lambda_handler(event, context):
     """
@@ -17,8 +17,8 @@ def lambda_handler(event, context):
     # TODO: assert arguments exist
     # TODO: check that pid exists
 
-    player_key = prefix + year + "/" + cid + "/" + pid + ".json"
-    player = read_file(player_key)
+    player_key = basic.prefix + year + "/" + cid + "/" + pid + ".json"
+    player = basic.read_file(player_key)
     
     # check that there are right number of picks for round, infer round
     #  from number of times that player has picked
@@ -30,8 +30,8 @@ def lambda_handler(event, context):
                 "body": f"Submitted picks are incorrect length. Expected length: {games_remaining}. Submitted length: {len(new_picks)}"}
 
     # check that this submission is allowed
-    competition_key = prefix + year + "/" + cid + "/competition.json"
-    competition = read_file(competition_key)
+    competition_key = basic.prefix + year + "/" + cid + "/competition.json"
+    competition = basic.read_file(competition_key)
 
     if not competition["open_picks"]:
         return {"statusCode": 400,
@@ -43,19 +43,8 @@ def lambda_handler(event, context):
 
     player["picks"].append(new_picks)
     
-    write_file(player_key, player)
+    basic.write_file(player_key, player)
 
     return f"Successfully added new picks for round {rnd} to player {pid} in game {cid}"
 
-
-def read_file(key):
-    with open(key, "r") as fptr:
-        data = json.load(fptr)
-
-    return data
-
-
-def write_file(key, data):
-    with open(key, "w") as fptr:
-        json.dump(data, fptr)
 

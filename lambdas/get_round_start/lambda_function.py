@@ -4,8 +4,8 @@
 import json
 
 from utils.tournament import *
+from utils import basic
 
-prefix = "../test_data/"
 
 def lambda_handler(event, context):
     """
@@ -32,16 +32,16 @@ def lambda_handler(event, context):
 
     # TODO: assert arguments exist
 
-    results_key = prefix + year + "/results.json"
-    teams_key = prefix + year + "/teams.json"
-    competition_key = prefix + year + "/" + cid + "/competition.json"
+    results_key = basic.prefix + year + "/results.json"
+    teams_key = basic.prefix + year + "/teams.json"
+    competition_key = basic.prefix + year + "/" + cid + "/competition.json"
  
-    results_dict = read_file(results_key)
+    results_dict = basic.read_file(results_key)
     results = results_dict.get("results")
 
-    teams = read_file(teams_key)
+    teams = basic.read_file(teams_key)
     
-    competition = read_file(competition_key)
+    competition = basic.read_file(competition_key)
     completed_rounds = competition.get("completed_rounds")
 
     if round_start > completed_rounds:
@@ -83,19 +83,8 @@ def lambda_handler(event, context):
 
 
 def get_player_next_round(year, cid, pid):
-    player_key = prefix + year + "/" + cid + "/" + pid + ".json"
-    player = read_file(player_key)
+    player_key = basic.prefix + year + "/" + cid + "/" + pid + ".json"
+    player = basic.read_file(player_key)
     return len(player["picks"])
   
-
-def read_file(key):
-    with open(key, "r") as fptr:
-        data = json.load(fptr)
-
-    return data
-
-
-def write_file(key, data):
-    with open(key, "w") as fptr:
-        json.dump(data, fptr)
 

@@ -2,8 +2,8 @@ import json
 
 from utils.tournament import *
 from utils import points
+from utils import basic
 
-prefix = "../test_data/"
 
 def lambda_handler(event, context):
     """
@@ -19,13 +19,13 @@ def lambda_handler(event, context):
 
     # TODO: assert arguments exist
 
-    results_key = prefix + year + "/results.json"
-    results_dict = read_file(results_key)
+    results_key = basic.prefix + year + "/results.json"
+    results_dict = basic.read_file(results_key)
     results = results_dict["results"]
 
-    competition_key = prefix + year + "/" + cid + "/competition.json"
+    competition_key = basic.prefix + year + "/" + cid + "/competition.json"
     
-    competition = read_file(competition_key)
+    competition = basic.read_file(competition_key)
     scoreboard = competition["scoreboard"]
 
     player_names = list(scoreboard.keys())
@@ -35,8 +35,8 @@ def lambda_handler(event, context):
 
     for pname in player_names:
         pid = pname.replace(" ", "").lower()
-        player_key = prefix + year + "/" + cid + "/" + pid + ".json"
-        player = read_file(player_key)
+        player_key = basic.prefix + year + "/" + cid + "/" + pid + ".json"
+        player = basic.read_file(player_key)
 
         points_game = points.calc_points_revival(player["picks"], results)
         points_round = []
@@ -50,19 +50,8 @@ def lambda_handler(event, context):
 
     competition["scoreboard"] = scoreboard
 
-    write_file(competition_key, competition)
+    basic.write_file(competition_key, competition)
 
     return f"Successfully updated scoreboard for year {year}, cid {cid}"
 
-
-def read_file(key):
-    with open(key, "r") as fptr:
-        data = json.load(fptr)
-
-    return data
-
-
-def write_file(key, data):
-    with open(key, "w") as fptr:
-        json.dump(data, fptr)
 

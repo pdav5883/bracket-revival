@@ -2,8 +2,8 @@ import json
 
 from utils.tournament import *
 from utils import points
+from utils import basic
 
-prefix = "../test_data/"
 
 def lambda_handler(event, context):
     """
@@ -26,27 +26,27 @@ def lambda_handler(event, context):
 
     # TODO: assert arguments exist
 
-    results_key = prefix + year + "/results.json"
-    teams_key = prefix + year + "/teams.json"
-    competition_key = prefix + year + "/" + cid + "/competition.json"
+    results_key = basic.prefix + year + "/results.json"
+    teams_key = basic.prefix + year + "/teams.json"
+    competition_key = basic.prefix + year + "/" + cid + "/competition.json"
 
-    results_dict = read_file(results_key)
+    results_dict = basic.read_file(results_key)
     results = results_dict["results"]
     scores = results_dict["scores"]
 
-    teams = read_file(teams_key)
+    teams = basic.read_file(teams_key)
     names = [t["name"] for t in teams]
     seeds = [t["seed"] for t in teams]
 
-    competition = read_file(competition_key)
+    competition = basic.read_file(competition_key)
 
     if pid is None or pid == "":
         player = None
         player_picks = []
     else:
         pid = pid.replace(" ", "").lower()
-        player_key = prefix + year + "/" + cid + "/" + pid + ".json"
-        player = read_file(player_key)
+        player_key = basic.prefix + year + "/" + cid + "/" + pid + ".json"
+        player = basic.read_file(player_key)
         player_picks = player["picks"]
 
 
@@ -182,15 +182,4 @@ def make_absolute_bracket(results, picks=None):
 
     return abs_inds
 
-
-def read_file(key):
-    with open(key, "r") as fptr:
-        data = json.load(fptr)
-
-    return data
-
-
-def write_file(key, data):
-    with open(key, "w") as fptr:
-        json.dump(data, fptr)
 

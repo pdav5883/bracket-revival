@@ -1,11 +1,11 @@
 ##############
-### Return list of games at start of round to fill in picks
+### Return scoreboard
 
 import json
 
 from utils.tournament import *
+from utils import basic
 
-prefix = "../test_data/"
 
 def lambda_handler(event, context):
     """
@@ -20,9 +20,9 @@ def lambda_handler(event, context):
 
     # TODO handle bad/no inputs
 
-    competition_key = prefix + year + "/" + cid + "/competition.json"
+    competition_key = basic.prefix + year + "/" + cid + "/competition.json"
     
-    competition = read_file(competition_key)
+    competition = basic.read_file(competition_key)
     completed_rounds = competition["completed_rounds"]
     scoreboard = competition["scoreboard"]
 
@@ -39,10 +39,4 @@ def lambda_handler(event, context):
 
     return {"names": names, "total_points": total_points, "round_points": round_points}
 
-      
-def read_file(key):
-    with open(key, "r") as fptr:
-        data = json.load(fptr)
-
-    return data
 

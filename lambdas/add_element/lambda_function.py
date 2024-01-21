@@ -4,7 +4,8 @@
 import json 
 import os
 
-prefix = "../test_data/"
+from utils import basic
+
 
 def lambda_handler(event, context):
     """
@@ -47,10 +48,10 @@ def add_year(year):
         return {"statusCode": 400,
                 "body": "Request requires year parameter"}
         
-    results_key = prefix + year + "/results.json"
-    teams_key = prefix + year + "/teams.json"
+    results_key = basic.prefix + year + "/results.json"
+    teams_key = basic.prefix + year + "/teams.json"
 
-    if key_exists(results_key):
+    if basic.key_exists(results_key):
         return {"statusCode": 400,
                 "body": f"Year {year} already exists"}
 
@@ -69,13 +70,13 @@ def add_year(year):
         team["seed"] = seed
         teams.append(team)
 
-    write_file(results_key, results)
-    write_file(teams_key, teams)
+    basic.write_file(results_key, results)
+    basic.write_file(teams_key, teams)
 
     # update index file
-    index = read_file(prefix + "index.json")
+    index = basic.read_file(basic.prefix + "index.json")
     index[str(year)] = {}
-    write_file(prefix + "index.json", index)
+    basic.write_file(basic.prefix + "index.json", index)
 
     return f"Successfully created new year {year}"
 
@@ -93,14 +94,14 @@ def add_competition(year, compname):
         
     cid = compname.replace(" ", "").lower()
 
-    results_key = prefix + year + "/results.json"
-    competition_key = prefix + year + "/" + cid + "/competition.json"
+    results_key = basic.prefix + year + "/results.json"
+    competition_key = basic.prefix + year + "/" + cid + "/competition.json"
 
-    if not key_exists(results_key):
+    if not basic.key_exists(results_key):
         return {"statusCode": 400,
                 "body": f"Year {year} does not yet exist"}
 
-    if key_exists(competition_key):
+    if basic.key_exists(competition_key):
         return {"statusCode": 400,
                 "body": f"Competition cid {cid} already exists"}
 
@@ -110,12 +111,12 @@ def add_competition(year, compname):
                    "completed_rounds": 0,
                    "open_picks": True}
 
-    write_file(competition_key, competition)
+    basic.write_file(competition_key, competition)
 
     # update index file
-    index = read_file(prefix + "index.json")
+    index = basic.read_file(basic.prefix + "index.json")
     index[year][compname] = []
-    write_file(prefix + "index.json", index)
+    basic.write_file(basic.prefix + "index.json", index)
 
     return f"Successfully created new competition {compname} in year {year}"
 
@@ -137,14 +138,14 @@ def add_player(year, compname, playername):
     cid = compname.replace(" ", "").lower()
     pid = playername.replace(" ", "").lower()
 
-    competition_key = prefix + year + "/" + cid + "/competition.json"
-    player_key = prefix + year + "/" + cid + "/" + pid + ".json"
+    competition_key = basic.prefix + year + "/" + cid + "/competition.json"
+    player_key = basic.prefix + year + "/" + cid + "/" + pid + ".json"
 
-    if not key_exists(competition_key):
+    if not basic.key_exists(competition_key):
         return {"statusCode": 400,
                 "body": f"Competition {cid} does not yet exist"}
 
-    if key_exists(player_key):
+    if basic.key_exists(player_key):
         return {"statusCode": 400,
                 "body": f"Player pid {pid} already exists"}
 
@@ -152,33 +153,14 @@ def add_player(year, compname, playername):
               "name": playername,
               "picks": []}
 
-    write_file(player_key, player)
+    basic.write_file(player_key, player)
 
     # update index file
-    index = read_file(prefix + "index.json")
+    index = basic.read_file(basic.prefix + "index.json")
     index[year][compname].append(playername)
-    write_file(prefix + "index.json", index)
+    basic.write_file(basic.prefix + "index.json", index)
 
     return f"Successfully created new player {playername} in competition {compname} in year {year}"
 
 
-def key_exists(key):
-    """
-    Boolean whether a file exists at key
-    """
-    return os.path.isfile(key)
-
-
-def read_file(key):
-    with open(key, "r") as fptr:
-        data = json.load(fptr)
-
-    return data
-
-
-def write_file(key, data):
-    os.makedirs(os.path.dirname(key), exist_ok=True)
-
-    with open(key, "w") as fptr:
-        json.dump(data, fptr)
 

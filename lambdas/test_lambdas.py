@@ -1,6 +1,5 @@
 import json
 
-from test_lambda import lambda_function as test_lambda
 from calc_score import lambda_function as calc_score
 from update_picks import lambda_function as update_picks
 from get_bracket import lambda_function as get_bracket

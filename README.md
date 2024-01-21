@@ -11,7 +11,7 @@ Work in progress
 - Test page to play a smaller version to understand rules
 
 ## WIP
-- Move all read/write functions into separate utils file, build for S3
+- Update basic.py for S3
 - Deploy and test
 
 ## Lambdas

@@ -2,8 +2,8 @@
 ### Return structure with valid years and cids 
 
 import json 
+from utils import basic
 
-prefix = "../test_data/"
 
 def lambda_handler(event, context):
     """
@@ -12,12 +12,6 @@ def lambda_handler(event, context):
     Input: None
     Output: {"year": [cid0, cid1,...],...} 
     """
-    return read_file(prefix + "/index.json") 
+    return basic.read_file(basic.prefix + "/index.json") 
   
-
-def read_file(key):
-    with open(key, "r") as fptr:
-        data = json.load(fptr)
-
-    return data
 
