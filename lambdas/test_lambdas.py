@@ -15,14 +15,6 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-@app.route("/test", methods=["GET"])
-def test_function():
-
-    event = make_event()
-    data = test_lambda.lambda_handler(event, None)
-
-    return jsonify(data)
-
 
 @app.route("/score", methods=["GET"])
 def score_function():
