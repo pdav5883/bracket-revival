@@ -155,9 +155,16 @@ def add_player(year, compname, playername):
 
     basic.write_file(player_key, player)
 
-    # update index file
+    # update competition file
+    competition = basic.read_file(competition_key)
+    competition["scoreboard"][playername] = []
+    basic.write_file(competition_key, competition)
+
+    # update index.json. Grab the actual full competition name from competition.json since we
+    #  want to be robust to the compname input being the cid
     index = basic.read_file(basic.prefix + "index.json")
-    index[year][compname].append(playername)
+    index[year][competition["name"]].append(playername)
+    
     basic.write_file(basic.prefix + "index.json", index)
 
     return f"Successfully created new player {playername} in competition {compname} in year {year}"
