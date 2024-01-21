@@ -8,6 +8,7 @@ from get_round_start import lambda_function as get_round_start
 from update_scoreboard import lambda_function as update_scoreboard
 from get_scoreboard import lambda_function as get_scoreboard
 from get_competitions import lambda_function as get_competitions
+from add_element import lambda_function as add_element
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -80,10 +81,20 @@ def competitions_function():
     return jsonify(data)
 
 
+@app.route("/add", methods=["PUT", "GET"])
+def add_element_function():
+    event = make_event()
+    data = add_element.lambda_handler(event, None)
+
+    return jsonify(data)
+
+
 def make_event():
     if request.method == "GET":
         event = {"queryStringParameters": dict(request.args)}
     elif request.method == "POST":
+        event = {"body": json.dumps(request.json)}
+    elif request.method == "PUT":
         event = {"body": json.dumps(request.json)}
     else:
         event = {}

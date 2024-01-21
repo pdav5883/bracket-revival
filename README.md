@@ -11,7 +11,6 @@ Work in progress
 - Test page to play a smaller version to understand rules
 
 ## WIP
-- add_year/competition/player lambdas
 - Move all read/write functions into separate utils file, build for S3
 - Deploy and test
 
@@ -64,15 +63,12 @@ Work in progress
 	- Adds year to index.json
 - WIP
 
-## Working
-- Page: Visualize current bracket
-- Page: Make picks for entire bracket
-
 ## How to Test
 - In terminal 1: `cd frontend` and run `python -m http.server`
 - In terminal 2: `cd lambdas` and run `python -m test_lambdas`
 	- Note: `flask` and `flask_cors` must be installed in the environment
 - In browser go to `localhost:8000/{page}.html` 
+
 ## Data Model
 index.json - {"yr": {"Comp Name 1": ["Name 1",...],  "Comp Name 2",...},...}
 /{year}
@@ -85,7 +81,7 @@ index.json - {"yr": {"Comp Name 1": ["Name 1",...],  "Comp Name 2",...},...}
   
 
 ## Computing Points
-- Play in game?
+- Play in game? NO
 1. current pick is correct: point = 1, else point = 0 and break
 2. loop through prev rounds: current pick is correct and children back to that round are correct: point * K, else break
 

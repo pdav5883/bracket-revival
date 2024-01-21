@@ -7,7 +7,7 @@ prefix = "../test_data/"
 
 def lambda_handler(event, context):
     """
-    POST request
+    POST request (GET for testing)
     """
     #body = json.loads(event["body"])
     #year = body.get("year")
