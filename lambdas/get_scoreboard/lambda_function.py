@@ -20,7 +20,7 @@ def lambda_handler(event, context):
 
     # TODO handle bad/no inputs
 
-    competition_key = basic.prefix + year + "/" + cid + "/competition.json"
+    competition_key = year + "/" + cid + "/competition.json"
     
     competition = basic.read_file(competition_key)
     completed_rounds = competition["completed_rounds"]

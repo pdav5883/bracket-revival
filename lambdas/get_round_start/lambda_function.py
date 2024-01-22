@@ -32,9 +32,9 @@ def lambda_handler(event, context):
 
     # TODO: assert arguments exist
 
-    results_key = basic.prefix + year + "/results.json"
-    teams_key = basic.prefix + year + "/teams.json"
-    competition_key = basic.prefix + year + "/" + cid + "/competition.json"
+    results_key = year + "/results.json"
+    teams_key = year + "/teams.json"
+    competition_key = year + "/" + cid + "/competition.json"
  
     results_dict = basic.read_file(results_key)
     results = results_dict.get("results")
@@ -83,7 +83,7 @@ def lambda_handler(event, context):
 
 
 def get_player_next_round(year, cid, pid):
-    player_key = basic.prefix + year + "/" + cid + "/" + pid + ".json"
+    player_key = year + "/" + cid + "/" + pid + ".json"
     player = basic.read_file(player_key)
     return len(player["picks"])
   

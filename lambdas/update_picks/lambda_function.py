@@ -17,7 +17,7 @@ def lambda_handler(event, context):
     # TODO: assert arguments exist
     # TODO: check that pid exists
 
-    player_key = basic.prefix + year + "/" + cid + "/" + pid + ".json"
+    player_key = year + "/" + cid + "/" + pid + ".json"
     player = basic.read_file(player_key)
     
     # check that there are right number of picks for round, infer round
@@ -30,7 +30,7 @@ def lambda_handler(event, context):
                 "body": f"Submitted picks are incorrect length. Expected length: {games_remaining}. Submitted length: {len(new_picks)}"}
 
     # check that this submission is allowed
-    competition_key = basic.prefix + year + "/" + cid + "/competition.json"
+    competition_key = year + "/" + cid + "/competition.json"
     competition = basic.read_file(competition_key)
 
     if not competition["open_picks"]:

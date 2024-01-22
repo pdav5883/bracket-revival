@@ -48,8 +48,8 @@ def add_year(year):
         return {"statusCode": 400,
                 "body": "Request requires year parameter"}
         
-    results_key = basic.prefix + year + "/results.json"
-    teams_key = basic.prefix + year + "/teams.json"
+    results_key = year + "/results.json"
+    teams_key = year + "/teams.json"
 
     if basic.key_exists(results_key):
         return {"statusCode": 400,
@@ -74,9 +74,9 @@ def add_year(year):
     basic.write_file(teams_key, teams)
 
     # update index file
-    index = basic.read_file(basic.prefix + "index.json")
+    index = basic.read_file("index.json")
     index[str(year)] = {}
-    basic.write_file(basic.prefix + "index.json", index)
+    basic.write_file("index.json", index)
 
     return f"Successfully created new year {year}"
 
@@ -94,8 +94,8 @@ def add_competition(year, compname):
         
     cid = compname.replace(" ", "").lower()
 
-    results_key = basic.prefix + year + "/results.json"
-    competition_key = basic.prefix + year + "/" + cid + "/competition.json"
+    results_key = year + "/results.json"
+    competition_key = year + "/" + cid + "/competition.json"
 
     if not basic.key_exists(results_key):
         return {"statusCode": 400,
@@ -114,9 +114,9 @@ def add_competition(year, compname):
     basic.write_file(competition_key, competition)
 
     # update index file
-    index = basic.read_file(basic.prefix + "index.json")
+    index = basic.read_file("index.json")
     index[year][compname] = []
-    basic.write_file(basic.prefix + "index.json", index)
+    basic.write_file("index.json", index)
 
     return f"Successfully created new competition {compname} in year {year}"
 
@@ -138,8 +138,8 @@ def add_player(year, compname, playername):
     cid = compname.replace(" ", "").lower()
     pid = playername.replace(" ", "").lower()
 
-    competition_key = basic.prefix + year + "/" + cid + "/competition.json"
-    player_key = basic.prefix + year + "/" + cid + "/" + pid + ".json"
+    competition_key = year + "/" + cid + "/competition.json"
+    player_key = year + "/" + cid + "/" + pid + ".json"
 
     if not basic.key_exists(competition_key):
         return {"statusCode": 400,
@@ -162,10 +162,10 @@ def add_player(year, compname, playername):
 
     # update index.json. Grab the actual full competition name from competition.json since we
     #  want to be robust to the compname input being the cid
-    index = basic.read_file(basic.prefix + "index.json")
+    index = basic.read_file("index.json")
     index[year][competition["name"]].append(playername)
     
-    basic.write_file(basic.prefix + "index.json", index)
+    basic.write_file("index.json", index)
 
     return f"Successfully created new player {playername} in competition {compname} in year {year}"
 

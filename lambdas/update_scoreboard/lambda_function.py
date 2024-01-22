@@ -19,11 +19,11 @@ def lambda_handler(event, context):
 
     # TODO: assert arguments exist
 
-    results_key = basic.prefix + year + "/results.json"
+    results_key = year + "/results.json"
     results_dict = basic.read_file(results_key)
     results = results_dict["results"]
 
-    competition_key = basic.prefix + year + "/" + cid + "/competition.json"
+    competition_key = year + "/" + cid + "/competition.json"
     
     competition = basic.read_file(competition_key)
     scoreboard = competition["scoreboard"]
@@ -35,7 +35,7 @@ def lambda_handler(event, context):
 
     for pname in player_names:
         pid = pname.replace(" ", "").lower()
-        player_key = basic.prefix + year + "/" + cid + "/" + pid + ".json"
+        player_key = year + "/" + cid + "/" + pid + ".json"
         player = basic.read_file(player_key)
 
         points_game = points.calc_points_revival(player["picks"], results)
