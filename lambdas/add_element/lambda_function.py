@@ -4,7 +4,7 @@
 import json 
 import os
 
-from utils import basic
+from common import utils
 
 
 def lambda_handler(event, context):
@@ -51,7 +51,7 @@ def add_year(year):
     results_key = year + "/results.json"
     teams_key = year + "/teams.json"
 
-    if basic.key_exists(results_key):
+    if utils.key_exists(results_key):
         return {"statusCode": 400,
                 "body": f"Year {year} already exists"}
 
@@ -70,13 +70,13 @@ def add_year(year):
         team["seed"] = seed
         teams.append(team)
 
-    basic.write_file(results_key, results)
-    basic.write_file(teams_key, teams)
+    utils.write_file(results_key, results)
+    utils.write_file(teams_key, teams)
 
     # update index file
-    index = basic.read_file("index.json")
+    index = utils.read_file("index.json")
     index[str(year)] = {}
-    basic.write_file("index.json", index)
+    utils.write_file("index.json", index)
 
     return f"Successfully created new year {year}"
 
@@ -97,11 +97,11 @@ def add_competition(year, compname):
     results_key = year + "/results.json"
     competition_key = year + "/" + cid + "/competition.json"
 
-    if not basic.key_exists(results_key):
+    if not utils.key_exists(results_key):
         return {"statusCode": 400,
                 "body": f"Year {year} does not yet exist"}
 
-    if basic.key_exists(competition_key):
+    if utils.key_exists(competition_key):
         return {"statusCode": 400,
                 "body": f"Competition cid {cid} already exists"}
 
@@ -111,12 +111,12 @@ def add_competition(year, compname):
                    "completed_rounds": 0,
                    "open_picks": True}
 
-    basic.write_file(competition_key, competition)
+    utils.write_file(competition_key, competition)
 
     # update index file
-    index = basic.read_file("index.json")
+    index = utils.read_file("index.json")
     index[year][compname] = []
-    basic.write_file("index.json", index)
+    utils.write_file("index.json", index)
 
     return f"Successfully created new competition {compname} in year {year}"
 
@@ -141,11 +141,11 @@ def add_player(year, compname, playername):
     competition_key = year + "/" + cid + "/competition.json"
     player_key = year + "/" + cid + "/" + pid + ".json"
 
-    if not basic.key_exists(competition_key):
+    if not utils.key_exists(competition_key):
         return {"statusCode": 400,
                 "body": f"Competition {cid} does not yet exist"}
 
-    if basic.key_exists(player_key):
+    if utils.key_exists(player_key):
         return {"statusCode": 400,
                 "body": f"Player pid {pid} already exists"}
 
@@ -153,19 +153,19 @@ def add_player(year, compname, playername):
               "name": playername,
               "picks": []}
 
-    basic.write_file(player_key, player)
+    utils.write_file(player_key, player)
 
     # update competition file
-    competition = basic.read_file(competition_key)
+    competition = utils.read_file(competition_key)
     competition["scoreboard"][playername] = []
-    basic.write_file(competition_key, competition)
+    utils.write_file(competition_key, competition)
 
     # update index.json. Grab the actual full competition name from competition.json since we
     #  want to be robust to the compname input being the cid
-    index = basic.read_file("index.json")
+    index = utils.read_file("index.json")
     index[year][competition["name"]].append(playername)
     
-    basic.write_file("index.json", index)
+    utils.write_file("index.json", index)
 
     return f"Successfully created new player {playername} in competition {compname} in year {year}"
 

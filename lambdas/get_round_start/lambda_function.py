@@ -3,8 +3,8 @@
 
 import json
 
-from utils.tournament import *
-from utils import basic
+from common import tournament as trn
+from common import utils
 
 
 def lambda_handler(event, context):
@@ -36,38 +36,38 @@ def lambda_handler(event, context):
     teams_key = year + "/teams.json"
     competition_key = year + "/" + cid + "/competition.json"
  
-    results_dict = basic.read_file(results_key)
+    results_dict = utils.read_file(results_key)
     results = results_dict.get("results")
 
-    teams = basic.read_file(teams_key)
+    teams = utils.read_file(teams_key)
     
-    competition = basic.read_file(competition_key)
+    competition = utils.read_file(competition_key)
     completed_rounds = competition.get("completed_rounds")
 
     if round_start > completed_rounds:
         return {"statusCode": 400,
                 "body": f"Start round {round_start} is greater than completed rounds {completed_rounds}"}
 
-    if round_start >= NUMROUNDS:
+    if round_start >= trn.NUMROUNDS:
         return {"statusCode": 400,
                 "body": f"Start round {round_start} is great than number of rounds"}
 
     games = []
 
     # for each game in round_start search back through tournament tree to first round to find teams
-    first_game = sum(GAMES_PER_ROUND[0:round_start])
+    first_game = sum(trn.GAMES_PER_ROUND[0:round_start])
 
-    for i in range(first_game, first_game + GAMES_PER_ROUND[round_start]):
+    for i in range(first_game, first_game + trn.GAMES_PER_ROUND[round_start]):
         i_upper, i_lower = i, i
-        i_prev_upper, i_prev_lower = PREV_GAME[i]
+        i_prev_upper, i_prev_lower = trn.PREV_GAME[i]
 
         while i_prev_upper is not None:
             i_upper = i_prev_upper
-            i_prev_upper = PREV_GAME[i_upper][results[i_upper]]
+            i_prev_upper = trn.PREV_GAME[i_upper][results[i_upper]]
 
         while i_prev_lower is not None:
             i_lower = i_prev_lower
-            i_prev_lower = PREV_GAME[i_lower][results[i_lower]]
+            i_prev_lower = trn.PREV_GAME[i_lower][results[i_lower]]
 
         # happens if round_start = 0
         if i_upper == i_lower:
@@ -84,7 +84,7 @@ def lambda_handler(event, context):
 
 def get_player_next_round(year, cid, pid):
     player_key = year + "/" + cid + "/" + pid + ".json"
-    player = basic.read_file(player_key)
+    player = utils.read_file(player_key)
     return len(player["picks"])
   
 

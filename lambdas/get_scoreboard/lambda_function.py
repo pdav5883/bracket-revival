@@ -3,8 +3,8 @@
 
 import json
 
-from utils.tournament import *
-from utils import basic
+from common import tournament as trn
+from common import utils
 
 
 def lambda_handler(event, context):
@@ -22,7 +22,7 @@ def lambda_handler(event, context):
 
     competition_key = year + "/" + cid + "/competition.json"
     
-    competition = basic.read_file(competition_key)
+    competition = utils.read_file(competition_key)
     completed_rounds = competition["completed_rounds"]
     scoreboard = competition["scoreboard"]
 

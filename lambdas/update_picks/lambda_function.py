@@ -1,7 +1,7 @@
 import json
 
-from utils.tournament import *
-from utils import basic
+from common import tournament as trn
+from common import utils
 
 
 def lambda_handler(event, context):
@@ -18,12 +18,12 @@ def lambda_handler(event, context):
     # TODO: check that pid exists
 
     player_key = year + "/" + cid + "/" + pid + ".json"
-    player = basic.read_file(player_key)
+    player = utils.read_file(player_key)
     
     # check that there are right number of picks for round, infer round
     #  from number of times that player has picked
     rnd = len(player["picks"])
-    games_remaining = NUMGAMES - sum(GAMES_PER_ROUND[0:rnd])
+    games_remaining = trn.NUMGAMES - sum(trn.GAMES_PER_ROUND[0:rnd])
     
     if games_remaining != len(new_picks):
         return {"statusCode": 400,
@@ -31,7 +31,7 @@ def lambda_handler(event, context):
 
     # check that this submission is allowed
     competition_key = year + "/" + cid + "/competition.json"
-    competition = basic.read_file(competition_key)
+    competition = utils.read_file(competition_key)
 
     if not competition["open_picks"]:
         return {"statusCode": 400,
@@ -43,7 +43,7 @@ def lambda_handler(event, context):
 
     player["picks"].append(new_picks)
     
-    basic.write_file(player_key, player)
+    utils.write_file(player_key, player)
 
     return f"Successfully added new picks for round {rnd} to player {pid} in game {cid}"
 

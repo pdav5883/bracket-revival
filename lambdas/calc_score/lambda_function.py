@@ -1,8 +1,8 @@
 import json
 
-from utils.tournament import *
-from utils import points
-from utils import basic
+from common import tournament as trn
+from common import points
+from common import utils
 
 
 def lambda_handler(event, context):
@@ -19,14 +19,14 @@ def lambda_handler(event, context):
     competition_key = year + "/" + cid + "/competition.json"
     player_key = year + "/" + cid + "/" + pid + ".json"
 
-    results = basic.read_file(results_key).get("results")
-    completed_rounds = basic.read_file(competition_key).get("completed_rounds")
-    picks = basic.read_file(player_key).get("picks")
+    results = utils.read_file(results_key).get("results")
+    completed_rounds = utils.read_file(competition_key).get("completed_rounds")
+    picks = utils.read_file(player_key).get("picks")
 
     # set all results beyond played rounds to None
-    if completed_rounds < NUMROUNDS:
-        played_games = sum(GAMES_PER_ROUND[0:completed_rounds])
-        for i in range(played_games, NUMGAMES):
+    if completed_rounds < trn.NUMROUNDS:
+        played_games = sum(trn.GAMES_PER_ROUND[0:completed_rounds])
+        for i in range(played_games, trn.NUMGAMES):
             results[i] = None
 
     # TODO: what to do if picks for all round not there?

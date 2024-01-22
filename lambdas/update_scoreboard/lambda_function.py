@@ -1,8 +1,8 @@
 import json
 
-from utils.tournament import *
-from utils import points
-from utils import basic
+from common import tournament as trn
+from common import points
+from common import utils
 
 
 def lambda_handler(event, context):
@@ -20,12 +20,12 @@ def lambda_handler(event, context):
     # TODO: assert arguments exist
 
     results_key = year + "/results.json"
-    results_dict = basic.read_file(results_key)
+    results_dict = utils.read_file(results_key)
     results = results_dict["results"]
 
     competition_key = year + "/" + cid + "/competition.json"
     
-    competition = basic.read_file(competition_key)
+    competition = utils.read_file(competition_key)
     scoreboard = competition["scoreboard"]
 
     player_names = list(scoreboard.keys())
@@ -36,13 +36,13 @@ def lambda_handler(event, context):
     for pname in player_names:
         pid = pname.replace(" ", "").lower()
         player_key = year + "/" + cid + "/" + pid + ".json"
-        player = basic.read_file(player_key)
+        player = utils.read_file(player_key)
 
         points_game = points.calc_points_revival(player["picks"], results)
         points_round = []
         first_game = 0
 
-        for gpr in GAMES_PER_ROUND:
+        for gpr in trn.GAMES_PER_ROUND:
             points_round.append(sum(points_game[first_game:first_game + gpr]))
             first_game += gpr
 
@@ -50,7 +50,7 @@ def lambda_handler(event, context):
 
     competition["scoreboard"] = scoreboard
 
-    basic.write_file(competition_key, competition)
+    utils.write_file(competition_key, competition)
 
     return f"Successfully updated scoreboard for year {year}, cid {cid}"
 

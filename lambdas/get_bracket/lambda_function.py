@@ -1,8 +1,8 @@
 import json
 
-from utils.tournament import *
-from utils import points
-from utils import basic
+from common import tournament as trn
+from common import points
+from common import utils
 
 
 def lambda_handler(event, context):
@@ -30,15 +30,15 @@ def lambda_handler(event, context):
     teams_key = year + "/teams.json"
     competition_key = year + "/" + cid + "/competition.json"
 
-    results_dict = basic.read_file(results_key)
+    results_dict = utils.read_file(results_key)
     results = results_dict["results"]
     scores = results_dict["scores"]
 
-    teams = basic.read_file(teams_key)
+    teams = utils.read_file(teams_key)
     names = [t["name"] for t in teams]
     seeds = [t["seed"] for t in teams]
 
-    competition = basic.read_file(competition_key)
+    competition = utils.read_file(competition_key)
 
     if pid is None or pid == "":
         player = None
@@ -46,7 +46,7 @@ def lambda_handler(event, context):
     else:
         pid = pid.replace(" ", "").lower()
         player_key = year + "/" + cid + "/" + pid + ".json"
-        player = basic.read_file(player_key)
+        player = utils.read_file(player_key)
         player_picks = player["picks"]
 
 
@@ -60,9 +60,9 @@ def lambda_handler(event, context):
         completed_rounds = min(completed_rounds, len(player_picks))
 
     # set all results beyond played rounds to None and hide picks beyond round
-    if completed_rounds < NUMROUNDS:
-        played_games = sum(GAMES_PER_ROUND[0:completed_rounds])
-        for i in range(played_games, NUMGAMES):
+    if completed_rounds < trn.NUMROUNDS:
+        played_games = sum(trn.GAMES_PER_ROUND[0:completed_rounds])
+        for i in range(played_games, trn.NUMGAMES):
             results[i] = None
             scores[i] = [None, None]
 
@@ -86,7 +86,7 @@ def lambda_handler(event, context):
 
         # player_points contains how many points you get for game i, but games list contains the points won
         #  for picking the participants of game i.
-        prev_upper, prev_lower = PREV_GAME[i]
+        prev_upper, prev_lower = trn.PREV_GAME[i]
         points_upper = player_points[prev_upper] if prev_upper is not None else 0
         points_lower = player_points[prev_lower] if prev_lower is not None else 0
         game["points"] = [points_upper, points_lower]
@@ -103,13 +103,13 @@ def lambda_handler(event, context):
     # write each round of picks into games flat list
     for rnd, picks_rnd in enumerate(player_picks):
         # results leading up to this round of picks
-        results_pre = results[0:sum(GAMES_PER_ROUND[0:rnd])]
+        results_pre = results[0:sum(trn.GAMES_PER_ROUND[0:rnd])]
 
         abs_inds = make_absolute_bracket(results_pre, picks_rnd)
 
-        first_pick = sum(GAMES_PER_ROUND[0:rnd+1])
+        first_pick = sum(trn.GAMES_PER_ROUND[0:rnd+1])
 
-        for i in range(first_pick, NUMGAMES):
+        for i in range(first_pick, trn.NUMGAMES):
             i_upper, i_lower = abs_inds[i]
             games[i]["picks"][0].append(names[i_upper])
             games[i]["picks"][1].append(names[i_lower])
@@ -121,7 +121,7 @@ def lambda_handler(event, context):
     # nest flat list into rounds
     games_nested = []
 
-    for gpr in GAMES_PER_ROUND:
+    for gpr in trn.GAMES_PER_ROUND:
         games_round = []
         for _ in range(gpr):
             games_round.append(games.pop(0))
@@ -148,14 +148,14 @@ def make_absolute_bracket(results, picks=None):
     else:
         rel_inds = results
 
-    if len(rel_inds) != NUMGAMES:
+    if len(rel_inds) != trn.NUMGAMES:
         return None
 
     abs_inds = []
 
     # create flat list of bracket indices
-    for i in range(NUMGAMES):
-        i_prev_upper, i_prev_lower = PREV_GAME[i]
+    for i in range(trn.NUMGAMES):
+        i_prev_upper, i_prev_lower = trn.PREV_GAME[i]
 
         if i_prev_upper is None:
             i_upper = 2 * i

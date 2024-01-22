@@ -2,7 +2,7 @@
 ### Return structure with valid years and cids 
 
 import json 
-from utils import basic
+from common import utils
 
 
 def lambda_handler(event, context):
@@ -12,6 +12,6 @@ def lambda_handler(event, context):
     Input: None
     Output: {"year": [cid0, cid1,...],...} 
     """
-    return basic.read_file("/index.json") 
+    return utils.read_file("index.json") 
   
 
