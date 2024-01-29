@@ -1,5 +1,4 @@
-const scoreboard_api_url = "http://0.0.0.0:5000/scoreboard"
-const competitions_api_url = "http://0.0.0.0:5000/competitions"
+// API_URL is in global namespace from constants.js
 
 let index
 
@@ -47,7 +46,7 @@ function editMode() {
   if (index === undefined) {
     $.ajax({
       method: "GET",
-      url: competitions_api_url,
+      url: API_URL.competitions,
       data: {},
       crossDomain: true,
       success: function(result) {
@@ -127,7 +126,7 @@ function populateScoreboard(args) {
 
   $.ajax({
     method: "GET",
-    url: scoreboard_api_url,
+    url: API_URL.scoreboard,
     data: queryData,
     crossDomain: true,
     success: function(result) {

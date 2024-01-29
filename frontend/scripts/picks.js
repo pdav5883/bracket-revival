@@ -1,6 +1,4 @@
-const start_api_url = "http://0.0.0.0:5000/start"
-const update_api_url = "http://0.0.0.0:5000/update"
-const competitions_api_url = "http://0.0.0.0:5000/competitions"
+// API_URL is in global namespace from constants.js
 
 let index
 let yearSubmit // these submit variables store the values
@@ -53,7 +51,7 @@ function editMode() {
   if (index === undefined) {
     $.ajax({
       method: "GET",
-      url: competitions_api_url,
+      url: API_URL.competitions,
       data: {},
       crossDomain: true,
       success: function(result) {
@@ -153,7 +151,7 @@ function populateRoundStart(args) {
 
   $.ajax({
     method: "GET",
-    url: start_api_url,
+    url: API_URL.start,
     data: queryData,
     crossDomain: true,
     success: function(startGames) {
@@ -202,7 +200,7 @@ function submitPicks() {
 
   $.ajax({
     method: "POST",
-    url: update_api_url,
+    url: API_URL.update,
     contentType: "application/json; charset=utf-8",
     data: JSON.stringify(data),
     crossDomain: true,

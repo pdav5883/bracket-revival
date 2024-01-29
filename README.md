@@ -64,9 +64,14 @@ Work in progress
 - WIP
 
 ## How to Test
-- In terminal 1: `cd frontend` and run `python -m http.server`
-- In terminal 2: `cd lambdas` and run `python -m test_lambdas`
-	- Note: `flask` and `flask_cors` must be installed in the environment
+- In terminal 1:
+	- `cd frontend`
+	- `python -m http.server`
+- In terminal 2:
+	-`cd lambdas`
+	- Activate venv with flask, flask_cors, boto3
+	- `export BRACKET_REVIVAL_LOCAL_PREFIX="../test_data/"` 
+	- `python -m test_lambdas`
 - In browser go to `localhost:8000/{page}.html` 
 
 ## Data Model

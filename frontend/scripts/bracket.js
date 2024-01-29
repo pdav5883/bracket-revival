@@ -1,5 +1,4 @@
-const bracket_api_url = "http://0.0.0.0:5000/bracket"
-const competitions_api_url = "http://0.0.0.0:5000/competitions"
+// API_URL is in global namespace from constants.js
 
 let index
 
@@ -51,7 +50,7 @@ function editMode() {
   if (index === undefined) {
     $.ajax({
       method: "GET",
-      url: competitions_api_url,
+      url: API_URL.competitions,
       data: {},
       crossDomain: true,
       success: function(result) {
@@ -165,7 +164,7 @@ function populateBracket(args) {
 
   $.ajax({
     method: "GET",
-    url: bracket_api_url,
+    url: API_URL.bracket,
     data: queryData,
     crossDomain: true,
     success: function(result) {
