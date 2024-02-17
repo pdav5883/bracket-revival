@@ -25,6 +25,13 @@ def write_file_local(key, data):
         json.dump(data, fptr)
 
 
+def read_parameter_local(name):
+    """
+    For testing always return test
+    """
+    return "test"
+
+
 def key_exists_s3(key):
     try:
         s3.head_object(Bucket=bucket, Key=key)
@@ -47,6 +54,13 @@ def write_file_s3(key, data):
     return None
 
 
+def read_parameter_ssm(name):
+    try:
+        return ssm.get_parameter(Name=name)["Parameter"]["Value"]
+    except ClientError as e:
+        return None
+
+
 # allow switch to local testing with env variables
 if "BRACKET_REVIVAL_LOCAL_PREFIX" in os.environ:
     prefix = os.environ["BRACKET_REVIVAL_LOCAL_PREFIX"]
@@ -54,11 +68,14 @@ if "BRACKET_REVIVAL_LOCAL_PREFIX" in os.environ:
     key_exists = key_exists_local
     read_file = read_file_local
     write_file = write_file_local
+    read_parameter = read_parameter_local
 
 else:
     bucket = "bracket-revival-private"
     s3 = boto3.client("s3")
+    ssm = boto3.client("ssm")
 
     key_exists = key_exists_s3
     read_file = read_file_s3
     write_file = write_file_s3
+    read_parameter = read_parameter_ssm

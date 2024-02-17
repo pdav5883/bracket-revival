@@ -8,6 +8,8 @@ from update_scoreboard import lambda_function as update_scoreboard
 from get_scoreboard import lambda_function as get_scoreboard
 from get_competitions import lambda_function as get_competitions
 from add_element import lambda_function as add_element
+from admin_edit import lambda_function as admin_edit
+from admin_auth import lambda_function as admin_auth
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -80,6 +82,22 @@ def add_element_function():
     return jsonify(data)
 
 
+@app.route("/admin", methods=["POST"])
+def admin_edit_function():
+    event = make_event()
+    
+    # auth is automatic true
+    event["headers"] = {"authorization": "test"}
+    auth = admin_auth.lambda_handler(event, None)
+
+    if auth["isAuthorized"]:
+        data = admin_edit.lambda_handler(event, None)
+    else:
+        data = "Invalid authorization"
+
+    return jsonify(data)
+
+
 def make_event():
     if request.method == "GET":
         event = {"queryStringParameters": dict(request.args)}
@@ -89,6 +107,7 @@ def make_event():
         event = {"body": json.dumps(request.json)}
     else:
         event = {}
+
     return event
 
 if __name__ == "__main__":

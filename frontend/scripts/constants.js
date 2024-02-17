@@ -8,6 +8,7 @@ const API_URL = {
   bracket: BASE_URL + "/bracket",
   start: BASE_URL + "/start",
   update: BASE_URL + "/update",
-  competitions: BASE_URL + "/competitions"
+  competitions: BASE_URL + "/competitions",
+  admin: BASE_URL + "/admin"
 }
 

@@ -12,6 +12,7 @@ def lambda_handler(event, context):
     Input: None
     Output: {"year": [cid0, cid1,...],...} 
     """
+    print(utils.read_file("index.json"))
     return utils.read_file("index.json") 
   
 
