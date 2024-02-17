@@ -9,7 +9,7 @@ def lambda_handler(event, context):
     """
     GET request
 
-    Input: year, cid, pid (opt), completed_rounds (opt)
+    Input: year, cid (opt), pid (opt), completed_rounds (opt)
     Output: nested list of games
             [[{"teams": [a,b], "seeds": [a,b], "score": [a,b], "result": 0/1, "picks": [[a,a,a], [b,b,b]], "points": [0/1/2, 0/1/2]}, (r0g1), ...],
              [(r1g0), (r1g1), ...],
@@ -20,7 +20,7 @@ def lambda_handler(event, context):
     "picks" respresents who we picked to be *playing* in the game, not who we picked to win the game.
     """
     year = event["queryStringParameters"].get("year")
-    cid = event["queryStringParameters"].get("cid").replace(" ", "").lower()
+    cid = event["queryStringParameters"].get("cid", None)
     pid = event["queryStringParameters"].get("pid", None)
     completed_rounds_query = event["queryStringParameters"].get("completed_rounds", None)
 
@@ -28,7 +28,6 @@ def lambda_handler(event, context):
 
     results_key = year + "/results.json"
     teams_key = year + "/teams.json"
-    competition_key = year + "/" + cid + "/competition.json"
 
     results_dict = utils.read_file(results_key)
     results = results_dict["results"]
@@ -38,7 +37,13 @@ def lambda_handler(event, context):
     names = [t["name"] for t in teams]
     seeds = [t["seed"] for t in teams]
 
-    competition = utils.read_file(competition_key)
+    if cid is None or cid == "":
+        completed_rounds = trn.NUMROUNDS
+    else:
+        cid = cid.replace(" ", "").lower()
+        competition_key = year + "/" + cid + "/competition.json"
+        competition = utils.read_file(competition_key)
+        completed_rounds = competition["completed_rounds"]
 
     if pid is None or pid == "":
         player = None
@@ -51,8 +56,6 @@ def lambda_handler(event, context):
 
 
     # don't show a player results past completed_rounds or beyond the picks they've made
-    completed_rounds = competition["completed_rounds"]
-
     if completed_rounds_query is not None:
         completed_rounds = min(completed_rounds, int(completed_rounds_query))
 
