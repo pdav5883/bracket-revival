@@ -35,6 +35,7 @@ def lambda_handler(event, context):
 
     teams = utils.read_file(teams_key)
     names = [t["name"] for t in teams]
+    shorts = [t["short_name"] for t in teams]
     seeds = [t["seed"] for t in teams]
 
     if cid is None or cid == "":
@@ -82,6 +83,7 @@ def lambda_handler(event, context):
 
     for i, (i_upper, i_lower) in enumerate(abs_inds):
         game = {"teams": [names[i_upper] if i_upper is not None else None, names[i_lower] if i_lower is not None else None],
+                "shorts": [shorts[i_upper] if i_lower is not None else None, shorts[i_lower] if i_lower is not None else None],
                 "seeds": [seeds[i_upper] if i_lower is not None else None, seeds[i_lower] if i_lower is not None else None],
                 "score": scores[i],
                 "result": results[i],
@@ -99,6 +101,7 @@ def lambda_handler(event, context):
     # games does not include bracket champion
     champion_abs_ind = abs_inds[-1][results[-1]] if results[-1] is not None else None
     champion = {"team": names[champion_abs_ind] if champion_abs_ind is not None else None,
+                "short": shorts[champion_abs_ind] if champion_abs_ind is not None else None,
                 "seed": seeds[champion_abs_ind] if champion_abs_ind is not None else None,
                 "picks": [],
                 "points": player_points[-1]}

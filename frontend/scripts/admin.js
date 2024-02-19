@@ -93,6 +93,53 @@ function populateResultsTable(year) {
 }
 
 
+function populateTeamsTable(year) {
+  $.ajax({
+    method: "GET",
+    url: API_URL.bracket,
+    data: {"year": year},
+    crossDomain: true,
+    success: function(result) {
+      let gamesStart = result.games[0]
+
+      let table = document.getElementById("admintable")
+      table.innerHTML = ""
+
+      let i = 0
+      gamesStart.forEach(game => {
+	let tableRow = table.insertRow()
+	
+	let tableCell = tableRow.insertCell()
+	tableCell.textContent = game.seeds[0]
+	
+	tableCell = tableRow.insertCell()
+	let inp = makeTextInput("name_" + i, 10, game.teams[0])
+	tableCell.appendChild(inp)
+	
+	tableCell = tableRow.insertCell()
+	inp = makeTextInput("short_" + i, 4, game.shorts[0])
+	tableCell.appendChild(inp)
+	i++
+
+	tableRow = table.insertRow()
+	
+	tableCell = tableRow.insertCell()
+	tableCell.textContent = game.seeds[1]
+	
+	tableCell = tableRow.insertCell()
+	inp = makeTextInput("name_" + i, 10, game.teams[1])
+	tableCell.appendChild(inp)
+	
+	tableCell = tableRow.insertCell()
+	inp = makeTextInput("short_" + i, 4, game.shorts[1])
+	tableCell.appendChild(inp)
+	i++
+      })
+    }
+  })
+}
+
+
 function buildMatchup(tableCell, bracketCell) {
   tableCell.rowSpan = bracketCell.rowSpan
   tableCell.id = "game_" + bracketCell.flatIndex
@@ -109,8 +156,8 @@ function buildMatchup(tableCell, bracketCell) {
     t1.classList.add("winnerspan")
   }
 
-  let score0 = makeTextInput("score0_" + bracketCell.flatIndex, 2, bracketCell.score[0])
-  let score1 = makeTextInput("score1_" + bracketCell.flatIndex, 2, bracketCell.score[1])
+  let score0 = makeTextInput("score0_" + bracketCell.flatIndex, 2, bracketCell.score[0] === null ? "" : bracketCell.score[0])
+  let score1 = makeTextInput("score1_" + bracketCell.flatIndex, 2, bracketCell.score[1] === null ? "" : bracketCell.score[1])
 
   t0.appendChild(score0)
   t1.appendChild(score1)
@@ -162,6 +209,9 @@ function submitEdits() {
   if (typeArg === "results") {
     submitResultsEdits()
   }
+  else if (typeArg === "teams") {
+    submitTeamsEdits()
+  }
 }
 
 
@@ -207,7 +257,42 @@ function submitResultsEdits() {
       }
     }
   })
+}
 
+
+function submitTeamsEdits() {
+  let table = document.getElementById("admintable")
+
+  $("#statustext").text("")
+
+  const numTeams = $("[id^=name_").length
+  let names_shorts = []
+
+  for (let i = 0; i < numTeams; i++) {
+    names_shorts.push([$("#name_" + i).val(), $("#short_" + i).val()])
+  }
+
+  $.ajax({
+    type: "POST",
+    url: API_URL.admin,
+    headers: {"authorization": $("#pwdtext").val()},
+    crossDomain: true,
+    contentType: "application/json; charset=utf-8",
+    data: JSON.stringify({"etype": "teams", "year": yearArg, "data": names_shorts}),
+
+    success: function() {
+      $("#statustext").text("Success!")
+    },
+
+    error: function(err) {
+      if (err.status == 403) {
+	$("#statustext").text("Error: incorrect password")
+      }
+      else {
+	$("#statustext").text("Error: unknown submission error")
+      }
+    }
+  })
 }
 
 
@@ -219,5 +304,8 @@ function changeAdminPage() {
 
   if (typeArg === "results") {
     populateResultsTable(yearArg)
+  }
+  else if (typeArg === "teams") {
+    populateTeamsTable(yearArg)
   }
 }

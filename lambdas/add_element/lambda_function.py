@@ -5,7 +5,7 @@ import json
 import os
 
 from common import utils
-
+from common import tournament as trn
 
 def lambda_handler(event, context):
     """
@@ -55,8 +55,8 @@ def add_year(year):
         return {"statusCode": 400,
                 "body": f"Year {year} already exists"}
 
-    results = {"results": [],
-               "scores": []}
+    results = {"results": [None] * trn.NUMGAMES,
+               "scores": [[None, None]] * trn.NUMGAMES}
 
     team_blank = {"name": "Full ", "short_name": "Short ", "seed": 0}
     seed_order = [1, 16, 8, 9, 5, 12, 4, 13, 6, 11, 3, 14, 7, 10, 2, 15] * 4

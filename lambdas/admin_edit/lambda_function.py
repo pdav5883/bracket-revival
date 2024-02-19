@@ -102,7 +102,7 @@ def update_teams(year, new_teams):
         new_data[i]["name"] = name
         new_data[i]["short_name"] = sname
 
-    write_file(obj_key, new_data)
+    utils.write_file(obj_key, new_data)
 
     return {"statusCode": 200,
             "body": "Successful update"}
