@@ -83,8 +83,8 @@ def lambda_handler(event, context):
 
     for i, (i_upper, i_lower) in enumerate(abs_inds):
         game = {"teams": [names[i_upper] if i_upper is not None else None, names[i_lower] if i_lower is not None else None],
-                "shorts": [shorts[i_upper] if i_lower is not None else None, shorts[i_lower] if i_lower is not None else None],
-                "seeds": [seeds[i_upper] if i_lower is not None else None, seeds[i_lower] if i_lower is not None else None],
+                "shorts": [shorts[i_upper] if i_upper is not None else None, shorts[i_lower] if i_lower is not None else None],
+                "seeds": [seeds[i_upper] if i_upper is not None else None, seeds[i_lower] if i_lower is not None else None],
                 "score": scores[i],
                 "result": results[i],
                 "picks": [[], []]}
