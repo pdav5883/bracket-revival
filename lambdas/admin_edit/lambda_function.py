@@ -17,6 +17,9 @@ with etype argument in request body:
     - etype=results: {"results": [0/1/None,....],
                       "scores": [[#/None, #/None],...]}
     - etype=teams: [[name, shortname],...] where order is same as
+    - etype=competition: {"completed_rounds":,
+                          "open_picks",
+                          "players": {old_name: new_name,...}}
     bracket order in teams.json
     - etype=competition TODO
 """
@@ -39,8 +42,9 @@ def lambda_handler(event, context):
         return update_teams(year, new_teams)
 
     elif etype == "competition":
-        # TODO
-        return None
+        cid = body["cid"]
+        new_competition = body["data"]
+        return update_competition(year, cid, new_competition)
     
 
 def update_results(year, new_data):
@@ -106,4 +110,51 @@ def update_teams(year, new_teams):
 
     return {"statusCode": 200,
             "body": "Successful update"}
+
+
+def update_competition(year, cid, new_competition):
+    competition_key = year + "/" + cid.replace(" ", "").lower() + "/competition.json"
+    old_competition = utils.read_file(competition_key)
+
+    # validation checks TODO
+
+    # start from old competition
+    new_data = dict(old_competition)
+
+    new_data["completed_rounds"] = int(new_competition["completed_rounds"])
+    new_data["open_picks"] = new_competition["open_picks"] in (True, "true", "True", 1, "1")
+
+    # for player name edits, must update competition.json, index.json, {name}.json, and change filename
+    for old_name, new_name in new_competition["players"].items():
+        if old_name != new_name:
+            print(f"Replace player name {old_name} with {new_name}")
+            old_pid = old_name.replace(" ", "").lower()
+            new_pid = new_name.replace(" ", "").lower()
+
+            old_player_key = year + "/" + cid.replace(" ", "").lower()  + "/" + old_pid + ".json"
+            new_player_key = year + "/" + cid.replace(" ", "").lower()  + "/" + new_pid + ".json"
+
+            player = utils.read_file(old_player_key)
+            player["pid"] = new_pid
+            player["name"] = new_name
+            utils.write_file(new_player_key, player)
+            utils.delete_file(old_player_key)
+
+            # update to competition.json
+            score = new_data["scoreboard"].pop(old_name)
+            new_data["scoreboard"][new_name] = score
+
+            # update to index.json
+            index = utils.read_file("index.json")
+            player_list = index[year][new_data["name"]] # competition is under full name in index.json
+            player_list.remove(old_name)
+            player_list.append(new_name)
+            utils.write_file("index.json", index)
+
+    print(f"Rewriting {cid} competition.json FROM:")
+    print(old_competition)
+    print(f"TO:")
+    print(new_data)
+
+    utils.write_file(competition_key, new_data)
 

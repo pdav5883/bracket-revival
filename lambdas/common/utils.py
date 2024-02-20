@@ -25,6 +25,10 @@ def write_file_local(key, data):
         json.dump(data, fptr)
 
 
+def delete_file_local(key):
+    os.remove(prefix + key)
+
+
 def read_parameter_local(name):
     """
     For testing always return test
@@ -54,6 +58,10 @@ def write_file_s3(key, data):
     return None
 
 
+def delete_file_s3(key):
+    pass
+
+
 def read_parameter_ssm(name):
     try:
         return ssm.get_parameter(Name=name)["Parameter"]["Value"]
@@ -68,6 +76,7 @@ if "BRACKET_REVIVAL_LOCAL_PREFIX" in os.environ:
     key_exists = key_exists_local
     read_file = read_file_local
     write_file = write_file_local
+    delete_file = delete_file_local
     read_parameter = read_parameter_local
 
 else:
@@ -78,4 +87,5 @@ else:
     key_exists = key_exists_s3
     read_file = read_file_s3
     write_file = write_file_s3
+    delete_file = delete_file_s3
     read_parameter = read_parameter_ssm

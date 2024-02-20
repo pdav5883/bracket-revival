@@ -2,9 +2,10 @@
 let index
 let typeArg
 let yearArg
+let compArg
 
 $(document).ready(function() {
-  //$("#yearsel").on("change", populateCompetitions)
+  $("#yearsel").on("change", populateCompetitions)
   $("#subbutton").on("click", submitEdits)
   $("#gobutton").on("click", changeAdminPage)
   initAdminPage()
@@ -41,29 +42,21 @@ function initAdminPage() {
 }
 
 
-/*
 function populateCompetitions() {
-  // need to clear options, or list will always grow
-  $("#gamesel").empty()
+  $("#compsel").empty()
 
-  $.ajax({
-    method: "GET",
-    url: pickem_api_url,
-    data: {"qtype": "games", "year": $("#yearsel").val()},
-    crossDomain: true,
-    success: function(res) {
-      let game
+  let compOpt
+  for (const compName in index[$("#yearsel").val()]) {
+    compOpt = document.createElement("option")
+    compOpt.value = compName
+    compOpt.textContent = compName
+    $("#compsel").append(compOpt)
+  }
 
-      Object.keys(res).forEach(gid => {
-	game = document.createElement("option")
-	game.value = gid
-	game.textContent = gid.replace("-", " ")
-	$("#gamesel").append(game)
-      })
-    }
-  })
+  // set to last competition
+  // TODO is this right?
+  $("#compsel").val(compOpt.value).change()
 }
-*/
 
 
 function populateResultsTable(year) {
@@ -140,6 +133,56 @@ function populateTeamsTable(year) {
 }
 
 
+function populateCompetitionTable(year, cid) {
+  $.ajax({
+    method: "GET",
+    url: API_URL.competitions,
+    data: {"year": year, "cid": cid},
+    crossDomain: true,
+    success: function(result) {
+      let table = document.getElementById("admintable")
+      table.innerHTML = ""
+
+      // open picks
+      let row = table.insertRow()
+      
+      let cell = row.insertCell()
+      cell.textContent = "Open Picks"
+      
+      cell = row.insertCell()
+      let input = makeBooleanSelect("selpicks", result.open_picks)
+      cell.appendChild(input)
+
+      // completed rounds
+      row = table.insertRow()
+      cell = row.insertCell()
+      cell.textContent = "Completed Rounds"
+
+      cell = row.insertCell()
+      input = makeTextInput("inprounds", 2, result.completed_rounds)
+      cell.appendChild(input)
+
+      Object.keys(result.scoreboard).forEach((name, i) => {
+	row = table.insertRow()
+	cell = row.insertCell()
+	cell.textContent = name
+	cell.id = "old_" + i
+
+	cell = row.insertCell()
+	input = makeTextInput("new_" + i, 10, name)
+	cell.appendChild(input)
+      })
+      
+      // completed_rounds
+      //
+      // open_picks
+      //
+      // names are keys in scoreboard 
+    }
+  })
+}
+
+
 function buildMatchup(tableCell, bracketCell) {
   tableCell.rowSpan = bracketCell.rowSpan
   tableCell.id = "game_" + bracketCell.flatIndex
@@ -194,6 +237,25 @@ function buildBracketArray(gamesNested) {
 }
 
 
+function makeBooleanSelect(id, current) {
+  let select = document.createElement("select")
+  select.id = id
+  let option = document.createElement("option")
+  option.value = true
+  option.textContent = "True"
+  select.appendChild(option)
+  option = document.createElement("option")
+  option.value = false
+  option.textContent = "False"
+  select.appendChild(option)
+
+  if (current !== undefined) {
+    select.value = current
+  }
+
+  return select
+}
+
 function makeTextInput(id, numchar=2, current="") {
   let input = document.createElement("input")
   input.setAttribute("type", "text")
@@ -211,6 +273,9 @@ function submitEdits() {
   }
   else if (typeArg === "teams") {
     submitTeamsEdits()
+  }
+  else if (typeArg === "competition") {
+    submitCompetitionEdits()
   }
 }
 
@@ -296,9 +361,48 @@ function submitTeamsEdits() {
 }
 
 
+function submitCompetitionEdits() {
+  $("#statustext").text("")
+
+  const numPlayers = $("[id^=old_").length
+  let players = {}
+
+  for (let i = 0; i < numPlayers; i++) {
+    players[$("#old_" + i).text()] = $("#new_" + i).val()
+  }
+
+  data = {"completed_rounds": parseInt($("#inprounds").val()),
+          "open_picks": $("#selpicks").val(),
+          "players": players}
+
+  $.ajax({
+    type: "POST",
+    url: API_URL.admin,
+    headers: {"authorization": $("#pwdtext").val()},
+    crossDomain: true,
+    contentType: "application/json; charset=utf-8",
+    data: JSON.stringify({"etype": "competition", "year": yearArg, "cid": compArg, "data": data}),
+
+    success: function() {
+      $("#statustext").text("Success!")
+    },
+
+    error: function(err) {
+      if (err.status == 403) {
+	$("#statustext").text("Error: incorrect password")
+      }
+      else {
+	$("#statustext").text("Error: unknown submission error")
+      }
+    }
+  })
+}
+
+
 function changeAdminPage() {
   typeArg = $("#typesel").val()
   yearArg = $("#yearsel").val()
+  compArg = $("#compsel").val()
   
   $("#statustext").text("")
 
@@ -307,5 +411,8 @@ function changeAdminPage() {
   }
   else if (typeArg === "teams") {
     populateTeamsTable(yearArg)
+  }
+  else if (typeArg === "competition") {
+    populateCompetitionTable(yearArg, compArg)
   }
 }

@@ -9,10 +9,15 @@ def lambda_handler(event, context):
     """
     GET request
 
-    Input: None
-    Output: {"year": [cid0, cid1,...],...} 
+    If no input, return index.json, if year/cid input return competition.json
     """
-    print(utils.read_file("index.json"))
-    return utils.read_file("index.json") 
+    year = event["queryStringParameters"].get("year", None)
+    cid = event["queryStringParameters"].get("cid", None)
+
+    if year is None or cid is None:
+        return utils.read_file("index.json")
+    else:
+        cid = cid.replace(" ", "").lower()
+        return utils.read_file(year + "/" + cid + "/competition.json")
   
 

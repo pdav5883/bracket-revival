@@ -11,8 +11,6 @@ Work in progress
 - Test page to play a smaller version to understand rules
 
 ## WIP
-- Update basic.py for S3
-- Deploy and test
 
 ## Lambdas
 #### calc_score
