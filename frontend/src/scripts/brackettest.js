@@ -313,7 +313,11 @@ function makeBracketryData(gamesNested) {
     ]
   }
   else if (gamesNested.length == 3) {
-    data.rounds = ["Elite 8", "Final Four", "Championship"]
+    data.rounds = [
+      { name: "Elite 8" },
+      { name: "Final 4" },
+      { name: "Championship" }
+    ]
   }
 
   // first round has all contestants
@@ -341,29 +345,47 @@ function makeBracketryData(gamesNested) {
       const match = {
         roundIndex: rInd,
         order: gInd,
-        sides: [
-          {
-            contestantId: game.teams[0],
-            scores: [{
-              mainScore: game.score[0],
-              isWinner: game.result == 0
-            }],
-            isWinner: game.result == 0
-          },
-          {
-            contestantId: game.teams[1],
-            scores: [{
-              mainScore: game.score[1],
-              isWinner: game.result == 1
-            }],
-            isWinner: game.result == 1
-          }
-        ]
+        sides: makeMatchSides(game)
       }
-      
+
       data.matches.push(match)
     })
   })
 
   return data
+}
+
+
+function makeMatchSides(game) {
+  let side0, side1
+
+  if (game.teams[0] === null) {
+    side0 = { title: "" }
+  }
+  else {
+    side0 = { contestantId: game.teams[0] }
+  }
+
+  if (game.teams[1] === null) {
+    side1 = { title: "" }
+  }
+  else {
+    side1 = { contestantId: game.teams[1] }
+  }
+
+  if (game.score[0] !== null) {
+    side0.scores = [{
+      mainScore: game.score[0]
+    }]
+    side1.scores = [{
+      mainScore: game.score[1]
+    }]
+  }
+
+  if (game.result !== null) {
+    side0.isWinner = game.result == 0
+    side1.isWinner = game.result == 1
+  }
+
+  return [side0, side1]
 }
