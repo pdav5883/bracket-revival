@@ -3,10 +3,6 @@ const HtmlWebpack = require("html-webpack-plugin")
 
 module.exports = {
   entry: {
-    brackettest: {
-      import: "./src/scripts/brackettest.js",
-      dependOn: "shared"
-    },
     admin: {
       import: "./src/scripts/admin.js",
       dependOn: "shared"
@@ -31,12 +27,6 @@ module.exports = {
     filename: "scripts/[name].bundle.js"
   },
   plugins: [
-    new HtmlWebpack({
-      title: "Bracket Test",
-      filename: "brackettest.html",
-      template: "./src/brackettest.html",
-      chunks: ["shared", "brackettest"]
-    }),
     new HtmlWebpack({
       title: "Admin",
       filename: "admin.html",
