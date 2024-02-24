@@ -1,4 +1,5 @@
-// API_URL is in global namespace from constants.js
+import { API_URL } from "./constants.js" 
+import $ from "jquery"
 
 let index
 let yearSubmit // these submit variables store the values
