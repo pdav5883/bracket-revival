@@ -186,40 +186,35 @@ function populateRoundStart(args) {
 
           let [nextMatch, nextTopBottom] = getNextMatch(allData, thisMatch.roundIndex, thisMatch.order)
 
-          // thisMatch is championship
-          if (nextMatch === null) {
-            bracket.applyMatchesUpdates(updateMatches)
-            return
-          }
-          // for match following thisMatch, fill in new pick name
-          else {
-            nextMatch.sides[nextTopBottom].contestantId = thisMatch.sides[thisTopBottom].contestantId 
-            delete nextMatch.sides[nextTopBottom].title
-          }
+          let firstNext = true
           
           // keep going down bracket if pick we changed is winner
           while (nextMatch !== null) {
-            if (nextMatch.sides[nextTopBottom].isWinner) {
-              delete nextMatch.sides[nextTopBottom].isWinner
-              updateMatches.push(nextMatch)
+            // for first nextGame, fill in new pick name
+            if (firstNext) {
+              nextMatch.sides[nextTopBottom].contestantId = thisMatch.sides[thisTopBottom].contestantId 
+              delete nextMatch.sides[nextTopBottom].title
+              firstNext = false
+            }
+            else {
+              nextMatch.sides[nextTopBottom].title = ""
+              delete nextMatch.sides[nextTopBottom].contestantId
+            }
 
-              // get following match and remove name - for some reason can't use destructuring here...
+            // can't delete isWinner once nextMatch is pushed, so save for later
+            const isWinner = nextMatch.sides[nextTopBottom].isWinner
+            delete nextMatch.sides[nextTopBottom].isWinner
+            updateMatches.push(nextMatch)
+
+            if (isWinner) {
+              // can't use destructuring here.
               const nxt = getNextMatch(allData, nextMatch.roundIndex, nextMatch.order)
               nextMatch = nxt[0]
               nextTopBottom = nxt[1]
-
-              // doesn't make sense to check for null here and in while
-              if (nextMatch !== null) {
-                nextMatch.sides[nextTopBottom].title = ""
-                delete nextMatch.sides[nextTopBottom].contestantId
-              }
             }
             else {
-              break
+              nextMatch = null
             }
-          }
-          if (nextMatch !== null) {
-            updateMatches.push(nextMatch)
           }
           bracket.applyMatchesUpdates(updateMatches)
         }
