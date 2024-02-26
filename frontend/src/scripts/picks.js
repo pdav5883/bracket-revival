@@ -164,6 +164,7 @@ function populateRoundStart(args) {
       const bracketData = makeBracketryStartData(startGames)
 
       const bracketOptions = {
+        liveMatchBorderColor: "#ff4545",
         onMatchSideClick: (thisMatch, thisTopBottom) => {
           // if click is already on winner, don't do anything
           if (thisMatch.sides[thisTopBottom].isWinner) {
@@ -178,6 +179,9 @@ function populateRoundStart(args) {
           // highlight winner for clicked match
           thisMatch.sides[thisTopBottom].isWinner = true
           delete thisMatch.sides[1 - thisTopBottom].isWinner
+
+          // isLive used to show missing picks
+          delete thisMatch.isLive
 
           let updateMatches = [thisMatch]
 
@@ -232,16 +236,18 @@ function submitPicks() {
 
   let matches = bracket.getAllData().matches
 
-  let incomplete = 0
+  // use bracketry isLive feature to highlight unpicked games
+  let incomplete = []
   matches.forEach(match => {
     if (!(match.sides[0].isWinner || match.sides[1].isWinner)) { 
-      incomplete++
-      // TODO could keep track of incomplete here for highlighting
+      match.isLive = true
+      incomplete.push(match)
     }
   })
 
-  if (incomplete > 0) {
-    $("#statustext").text("Error: " + String(incomplete) + " missing picks")
+  if (incomplete.length > 0) {
+    $("#statustext").text("Error: " + String(incomplete.length) + " missing picks")
+    bracket.applyMatchesUpdates(incomplete)
     return
   }
 
