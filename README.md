@@ -32,9 +32,11 @@ Work in progress
 #### get_bracket
 - GET: Reads data files and returns nested list of results, plus nested picks and points if pid is present.
 - Input: year, cid, pid (opt), completed_rounds (opt)
-- Output: {"games": [[{"teams": [a,b], "seeds": [a,b], "score": [a,b], "result": 0/1, "picks": [[],[]], "points": [a,b]}, (r0g1), ...], [(r1g0), (r1g1), ...], ...],
+- Output: {"games": [[{"teams": [a,b], "seeds": [a,b], "score": [a,b], "result": 0/1, "picks": [[a,b,0/1]], "points": #, "correct": #}, (r0g1), ...], [(r1g0), (r1g1), ...], ...],
            "champion": {"team": a, "seed": a, "picks": []}
-- picks and points fields are structured for frontend rendering. i.e. the picks values will not be one of the "teams" values. Picks is who was picked to be **playing** in this game, and points is how many points were awarded for correctly picking who is in the game.
+- picks is list of tuples, where each tuple is [upper team in game, lower team in game, picked result] for each round of picks for this game.
+- points is number of points awarded for this game, None if not yet played
+- correct is number of sequential picks that were correct for this game, None if not yet played
 #### get_round_start
 - GET: Returns list of games starting in given round to populate bracket
 - Input: year, cid, round_start

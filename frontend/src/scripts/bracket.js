@@ -174,18 +174,34 @@ function populateBracket(args) {
     url: API_URL.bracket,
     data: queryData,
     crossDomain: true,
-    success: function(result) {
-      // game: {teams: [], seeds: [], score: [], result: 0/1}
-      // teams/seeds/score=[null, null], result=null
-      let gamesNested = result.games
-      let champion = result.champion
-
+    success: function(gamesNested) {
       const bracketData = makeBracketryData(gamesNested)
 
       const bracketOptions = {
         onMatchClick: (thisMatch) => {
           const allData = bracket.getAllData()
-          let modal = new Modal(document.getElementById("exampleModal"))
+          let pickList = document.getElementById("picklist")
+          pickList.innerHTML = ""
+
+          thisMatch.picks.forEach((pick, i) => {
+            let pickItem = document.createElement("li")
+            pickItem.textContent = "Pick " + String(i + 1) + ": "
+            if (pick[2] == 0) {
+              pickItem.textContent += pick[0] + " over " + pick[1]
+            }
+            else if (pick[2] == 1) {
+              pickItem.textContent += pick[1] + " over " + pick[0]
+            }
+            pickList.appendChild(pickItem)
+          })
+
+          if (thisMatch.points !== null) {
+            let pickItem = document.createElement("li")
+            pickItem.textContent = "Points Awarded: " + String(thisMatch.points)
+            pickList.appendChild(pickItem)
+          }
+
+          let modal = Modal.getOrCreateInstance(document.getElementById("gameModal"))
           modal.show()
         }
       }
@@ -247,7 +263,9 @@ function makeBracketryData(gamesNested) {
         roundIndex: rInd,
         order: gInd,
         sides: makeMatchSides(game),
-        otherInfo: "test"
+        picks: game.picks,
+        points: game.points,
+        correct: game.correct
       }
 
       data.matches.push(match)
