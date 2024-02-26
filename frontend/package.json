@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "bootstrap": "5.0",
     "bracketry": "^1.0.4",
     "jquery": "^3.5.0"
   },

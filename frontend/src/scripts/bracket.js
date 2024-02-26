@@ -2,8 +2,11 @@
 
 import { API_URL } from "./constants.js" 
 import { createBracket } from "bracketry"
+import { Modal } from "bootstrap"
+import "bootstrap/dist/css/bootstrap.min.css"
 import $ from "jquery"
 
+let bracket
 let index
 
 $(document).ready(function() {
@@ -178,7 +181,16 @@ function populateBracket(args) {
       let champion = result.champion
 
       const bracketData = makeBracketryData(gamesNested)
-      createBracket(bracketData, document.getElementById("bracketdiv"))
+
+      const bracketOptions = {
+        onMatchClick: (thisMatch) => {
+          const allData = bracket.getAllData()
+          let modal = new Modal(document.getElementById("exampleModal"))
+          modal.show()
+        }
+      }
+
+      bracket = createBracket(bracketData, document.getElementById("bracketdiv"), bracketOptions)
     }
   })
 }
@@ -234,7 +246,8 @@ function makeBracketryData(gamesNested) {
       const match = {
         roundIndex: rInd,
         order: gInd,
-        sides: makeMatchSides(game)
+        sides: makeMatchSides(game),
+        otherInfo: "test"
       }
 
       data.matches.push(match)
