@@ -51,5 +51,13 @@ module.exports = {
       template: "./src/scoreboard.html",
       chunks: ["shared", "scoreboard"]
     }),
-  ]
+  ],
+  module: {
+    rules: [
+      {
+        test: /\.css$/i,
+        use: ["style-loader", "css-loader"]
+      }
+    ]
+  }
 }
