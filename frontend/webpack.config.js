@@ -15,10 +15,6 @@ module.exports = {
       import: "./src/scripts/picks.js",
       dependOn: "shared"
     },
-    pickstest: {
-      import: "./src/scripts/pickstest.js",
-      dependOn: "shared"
-    },
     scoreboard: {
       import: "./src/scripts/scoreboard.js",
       dependOn: "shared"
@@ -48,12 +44,6 @@ module.exports = {
       filename: "picks.html",
       template: "./src/picks.html",
       chunks: ["shared", "picks"]
-    }),
-    new HtmlWebpack({
-      title: "Picks Test",
-      filename: "pickstest.html",
-      template: "./src/pickstest.html",
-      chunks: ["shared", "pickstest"]
     }),
     new HtmlWebpack({
       title: "Scoreboard",

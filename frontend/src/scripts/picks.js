@@ -1,6 +1,8 @@
 import { API_URL } from "./constants.js" 
+import { createBracket } from "bracketry"
 import $ from "jquery"
 
+let bracket
 let index
 let yearSubmit // these submit variables store the values
 let cidSubmit  // used to populate round start
@@ -158,22 +160,67 @@ function populateRoundStart(args) {
     success: function(startGames) {
       // game: {teams: [], seeds: [], score: [], result: 0/1}
       // teams/seeds/score=[null, null], result=null
-      let table = document.getElementById("brackettable")
-      table.innerHTML = ""
 
-      const bracketArray = buildStartBracketArray(startGames)
+      const bracketData = makeBracketryStartData(startGames)
 
-      bracketArray.forEach(bracketRow => {
-        let tableRow = table.insertRow()
-        bracketRow.forEach(bracketCell => {
-          if (bracketCell !== null) {
-            buildPickMatchup(tableRow.insertCell(), bracketCell)
+      const bracketOptions = {
+        onMatchSideClick: (thisMatch, thisTopBottom) => {
+          // if click is already on winner, don't do anything
+          if (thisMatch.sides[thisTopBottom].isWinner) {
+            return
           }
-        })
-      })
 
-      // adds the on-click listeners to populate picks in bracket
-      addBracketListeners()
+          // if we clicked on space where no team had yet been picked, do nothing
+          if (thisMatch.sides[thisTopBottom].contestantId === undefined) {
+            return
+          }
+
+          // highlight winner for clicked match
+          thisMatch.sides[thisTopBottom].isWinner = true
+          delete thisMatch.sides[1 - thisTopBottom].isWinner
+
+          let updateMatches = [thisMatch]
+
+          // grab the full current bracket once. contains deep_copy so not efficient
+          const allData = bracket.getAllData()
+
+          let [nextMatch, nextTopBottom] = getNextMatch(allData, thisMatch.roundIndex, thisMatch.order)
+
+          let firstNext = true
+          
+          // keep going down bracket if pick we changed is winner
+          while (nextMatch !== null) {
+            // for first nextGame, fill in new pick name
+            if (firstNext) {
+              nextMatch.sides[nextTopBottom].contestantId = thisMatch.sides[thisTopBottom].contestantId 
+              delete nextMatch.sides[nextTopBottom].title
+              firstNext = false
+            }
+            else {
+              nextMatch.sides[nextTopBottom].title = ""
+              delete nextMatch.sides[nextTopBottom].contestantId
+            }
+
+            // can't delete isWinner once nextMatch is pushed, so save for later
+            const isWinner = nextMatch.sides[nextTopBottom].isWinner
+            delete nextMatch.sides[nextTopBottom].isWinner
+            updateMatches.push(nextMatch)
+
+            if (isWinner) {
+              // can't use destructuring here.
+              const nxt = getNextMatch(allData, nextMatch.roundIndex, nextMatch.order)
+              nextMatch = nxt[0]
+              nextTopBottom = nxt[1]
+            }
+            else {
+              nextMatch = null
+            }
+          }
+          bracket.applyMatchesUpdates(updateMatches)
+        }
+      }
+
+      bracket = createBracket(bracketData, document.getElementById("bracketdiv"), bracketOptions)
     }
   })
 }
@@ -183,19 +230,43 @@ function populateRoundStart(args) {
 function submitPicks() {
   $("#statustext").text("")
 
-  // gather picks by putting all winnerspan entries into array
-  const numPicks = $("[id^=cell_").length
-  let picks = Array(numPicks).fill(null)
+  let matches = bracket.getAllData().matches
 
-  $("span.winnerspan").each(function(i, e) {
-    picks[e.flatIndex] = e.topBottom
+  let incomplete = 0
+  matches.forEach(match => {
+    if (!(match.sides[0].isWinner || match.sides[1].isWinner)) { 
+      incomplete++
+      // TODO could keep track of incomplete here for highlighting
+    }
   })
 
-  // make sure that all picks have been made
-  if (picks.some((e) => e === null)) {
-    $("#statustext").text("Error: all picks must be made before submission")
+  if (incomplete > 0) {
+    $("#statustext").text("Error: " + String(incomplete) + " missing picks")
     return
   }
+
+  matches.sort((a, b) => {
+    if (a.roundIndex < b.roundIndex) {
+      return -1
+    }
+    else if (a.roundIndex > b.roundIndex) {
+      return 1
+    }
+    else if (a.order < b.order) {
+      return -1
+    }
+    else if (a.order > b.order) {
+      return 1
+    }
+    else {
+      return 0
+    }
+  })
+
+  let picks = []
+  matches.forEach(match => {
+    picks.push(match.sides[0].isWinner ? 0 : 1)
+  })
 
   const data = {"year": yearSubmit, "cid": cidSubmit, "pid": pidSubmit, "picks": picks}
 
@@ -215,128 +286,90 @@ function submitPicks() {
 }
 
 
-// this needs to happen after bracket table is loaded
-function addBracketListeners() {
-  // all spans in bracket
-  $("[id^=span_]").each(function() {
-    $(this).on("click", function() {
-      
-      // click will fire event even if already selected
-      if ($(this).hasClass("winnerspan")) {
-        return
-      }
-
-      // toggle winner for this game competition
-      $(this).addClass("winnerspan")
-      $("#" + $(this).prop("opponentId")).removeClass("winnerspan")
-
-      // for next round only, want to add in name of this winner 
-      let nextId = $(this).prop("nextId")
-      if (nextId !== null) {
-        $("#" + nextId).text($(this).text())
-
-        // only keep going if we changed a winner
-        if ($("#" + nextId).hasClass("winnerspan")) {
-          $("#" + nextId).removeClass("winnerspan")
-          nextId = $("#" + nextId).prop("nextId")
-        }
-        else {
-          nextId = null
-        }
-      }
-
-      // for all later rounds, just clear winner/name if this was already winner
-      while (nextId !== null) {
-        $("#" + nextId).text("---")
-
-        if ($("#" + nextId).hasClass("winnerspan")) {
-          $("#" + nextId).removeClass("winnerspan")
-          nextId = $("#" + nextId).prop("nextId")
-        }
-        else {
-          nextId = null
-        }
-      }
-    })
-  })
-}
-
-
-// populate spans in each matchup
-function buildPickMatchup(tableCell, bracketCell) {
+function makeBracketryStartData(startGames) {
+  let data = {
+    rounds: [],
+    matches: [],
+    contestants: {}
+  }
   
-  const rnd = bracketCell.index[0]
-  const gm = bracketCell.index[1]
-  
-  const nextRnd = bracketCell.nextIndex[0]
-  const nextGm = bracketCell.nextIndex[1]
-  const nextSpan = gm % 2 // tells us whether this goes into top or bottom span entry of next game
-  const nextSpanId = nextRnd === null ? null : "span_" + nextRnd + "_" + nextGm + "_" + nextSpan
+  const roundNames = ["First Round", "Second Round",
+    "Sweet 16", "Elite 8", "Final 4", "Championship"]
 
-  tableCell.rowSpan = bracketCell.rowSpan
-  tableCell.id = "cell_" + rnd + "_" + gm
+  // 32 games means we are in First Round
+  const startRound = 5 - Math.log2(startGames.length)
 
-  let t0 = document.createElement("span")
-  t0.textContent = bracketCell.teams[0] === null ? "---" : "#" + bracketCell.seeds[0] + " " + bracketCell.teams[0]
-
-  let t1 = document.createElement("span")
-  t1.textContent = bracketCell.teams[1] === null ? "---" : "#" + bracketCell.seeds[1] + " " + bracketCell.teams[1]
-
-  t0.id = "span_" + rnd + "_" + gm + "_" + "0"
-  t0.opponentId = "span_" + rnd + "_" + gm + "_" + "1"
-  t0.nextId = nextSpanId
-  t0.flatIndex = bracketCell.flatIndex  // helps with populating flat picks arrray
-  t0.topBottom = 0  // helps with flat picks array
-
-  t1.id = "span_" + rnd + "_" + gm + "_" + "1"
-  t1.opponentId = "span_" + rnd + "_" + gm + "_" + "0"
-  t1.nextId = nextSpanId
-  t1.flatIndex = bracketCell.flatIndex
-  t1.topBottom = 1
-
-  tableCell.appendChild(t0)
-  tableCell.appendChild(document.createElement("br"))
-  tableCell.appendChild(t1)
-}
-
-
-// reformat nested games into 2D array mapping to each cell and add rowspan property to game
-function buildStartBracketArray(startGames) {
-  const numRows = startGames.length
-
-  let numCols = 1
-
-  while (2 ** (numCols - 1) < numRows) {
-    numCols++
+  for (let i = startRound; i < roundNames.length; i++) {
+    data.rounds.push({ name: roundNames[i] })
   }
 
-  let bracketArray = [...Array(numRows)].map(() => Array(numCols).fill(null))
-
-  // round 0 is the only one that has populated games
-  let i
-  let flat = 0
-  for (i = 0; i < numRows; i++) {
-    let game = startGames[i]
-    game.rowSpan = 1
-    game.index = [0, i] // index contains round, game-within round index for id referencing later
-    game.flatIndex = flat // flat index for keeping track of how game fits in flat pick submission
-    game.nextIndex = numCols == 1 ? [null, null] : [1, Math.floor(i / 2)] // index of the game where winner goes
-    bracketArray[i][0] = game
-    flat++
-  }
-
-  let rnd
-  for (rnd = 1; rnd < numCols; rnd++) {
-    for (i = 0; i < numRows; i += 2 ** rnd) {
-      let game = {"teams": [null, null],
-        "rowSpan": 2 ** rnd,
-        "index": [rnd, i / (2 ** rnd)],
-        "flatIndex": flat,
-        "nextIndex": numCols == (rnd + 1) ? [null, null] : [rnd + 1, Math.floor(i / (2 ** (rnd + 1)))]}
-      bracketArray[i][rnd] = game
-      flat++
+  // add all matches in startRound
+  startGames.forEach((game, gInd) => {
+    data.contestants[game.teams[0]] = {
+      entryStatus: String(game.seeds[0]),
+      players: [
+        {
+          title: game.teams[0]
+        }
+      ]
     }
+    data.contestants[game.teams[1]] = {
+      entryStatus: String(game.seeds[1]),
+      players: [
+        {
+          title: game.teams[1]
+        }
+      ]
+    }
+
+    // even if startRound > 0, the first round in bracket is 0
+    const match = {
+      roundIndex: 0,
+      order: gInd,
+      sides: [
+        { contestantId: game.teams[0] },
+        { contestantId: game.teams[1] }
+      ]
+    }
+    data.matches.push(match)
+  })
+
+  let prevRoundGames = startGames.length
+
+  // add empty matches beyond startRound
+  for (let i = 1; i < data.rounds.length; i++) {
+    for (let j = 0; j < prevRoundGames / 2; j++) {
+      const match = {
+        roundIndex: i,
+        order: j,
+        sides: [
+          { title: "" },
+          { title: "" }
+        ]
+      }
+      data.matches.push(match)
+    }
+    prevRoundGames /= 2
   }
-  return bracketArray
+
+  return data
+}
+
+
+// return [nextRoundIndex, nextOrder, 0/1 (top/bottom)] for
+// where winner of this game will go
+// note: nextOrder is index within nextRound
+function getNextMatchInds(roundIndex, order) {
+  return [roundIndex + 1, Math.floor(order / 2), order % 2]
+}
+
+// return [nextMatch, 0/1 (top/bottom)]
+function getNextMatch(bracketData, roundIndex, order) {
+  const [nextRoundIndex, nextOrder, nextTopBottom] = getNextMatchInds(roundIndex, order)
+  const nextMatchIndex = bracketData.matches.findIndex(m => {
+    return m.roundIndex === nextRoundIndex && m.order === nextOrder
+  })
+
+  return [nextMatchIndex == -1 ? null : bracketData.matches[nextMatchIndex], nextTopBottom]
 }
 
