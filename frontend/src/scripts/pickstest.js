@@ -230,19 +230,43 @@ function populateRoundStart(args) {
 function submitPicks() {
   $("#statustext").text("")
 
-  // gather picks by putting all winnerspan entries into array
-  const numPicks = $("[id^=cell_").length
-  let picks = Array(numPicks).fill(null)
+  let matches = bracket.getAllData().matches
 
-  $("span.winnerspan").each(function(i, e) {
-    picks[e.flatIndex] = e.topBottom
+  let incomplete = 0
+  matches.forEach(match => {
+    if (!(match.sides[0].isWinner || match.sides[1].isWinner)) { 
+      incomplete++
+      // TODO could keep track of incomplete here for highlighting
+    }
   })
 
-  // make sure that all picks have been made
-  if (picks.some((e) => e === null)) {
-    $("#statustext").text("Error: all picks must be made before submission")
+  if (incomplete > 0) {
+    $("#statustext").text("Error: " + String(incomplete) + " missing picks")
     return
   }
+
+  matches.sort((a, b) => {
+    if (a.roundIndex < b.roundIndex) {
+      return -1
+    }
+    else if (a.roundIndex > b.roundIndex) {
+      return 1
+    }
+    else if (a.order < b.order) {
+      return -1
+    }
+    else if (a.order > b.order) {
+      return 1
+    }
+    else {
+      return 0
+    }
+  })
+
+  let picks = []
+  matches.forEach(match => {
+    picks.push(match.sides[0].isWinner ? 0 : 1)
+  })
 
   const data = {"year": yearSubmit, "cid": cidSubmit, "pid": pidSubmit, "picks": picks}
 
@@ -339,11 +363,7 @@ function getNextMatchInds(roundIndex, order) {
   return [roundIndex + 1, Math.floor(order / 2), order % 2]
 }
 
-// return [prevRoundIndex, prevOrder] where topBottom is 0/1 int
-function getPrevMatchInds(roundIndex, order, topBottom) {
-  return [roundIndex - 1, 2 * order + topBottom]
-}
-
+// return [nextMatch, 0/1 (top/bottom)]
 function getNextMatch(bracketData, roundIndex, order) {
   const [nextRoundIndex, nextOrder, nextTopBottom] = getNextMatchInds(roundIndex, order)
   const nextMatchIndex = bracketData.matches.findIndex(m => {
