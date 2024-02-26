@@ -1,4 +1,5 @@
 import json
+import math
 
 from common import tournament as trn
 from common import points
@@ -11,13 +12,13 @@ def lambda_handler(event, context):
 
     Input: year, cid (opt), pid (opt), completed_rounds (opt)
     Output: nested list of games
-            [[{"teams": [a,b], "seeds": [a,b], "score": [a,b], "result": 0/1, "picks": [[a,a,a], [b,b,b]], "points": [0/1/2, 0/1/2]}, (r0g1), ...],
+            [[{"teams": [a,b], "seeds": [a,b], "score": [a,b], "result": 0/1, "picks": [[a,b,0/1], ], "points": None/0/1/2/..., "correct": None/#}, (r0g1), ...],
              [(r1g0), (r1g1), ...],
              ...]
 
     "picks" and "points" are null is pid is missing
 
-    "picks" respresents who we picked to be *playing* in the game, not who we picked to win the game.
+    "picks" tuple is picked contestants for game and 0/1 winner
     """
     year = event["queryStringParameters"].get("year")
     cid = event["queryStringParameters"].get("cid", None)
@@ -87,14 +88,10 @@ def lambda_handler(event, context):
                 "seeds": [seeds[i_upper] if i_upper is not None else None, seeds[i_lower] if i_lower is not None else None],
                 "score": scores[i],
                 "result": results[i],
-                "picks": [[], []]}
+                "picks": []}
 
-        # player_points contains how many points you get for game i, but games list contains the points won
-        #  for picking the participants of game i.
-        prev_upper, prev_lower = trn.PREV_GAME[i]
-        points_upper = player_points[prev_upper] if prev_upper is not None else 0
-        points_lower = player_points[prev_lower] if prev_lower is not None else 0
-        game["points"] = [points_upper, points_lower]
+        game["points"] = player_points[i]
+        game["correct"] = 0 if player_points[i] == 0 else 1 + int(math.log2(player_points[i])) 
 
         games.append(game)
 
@@ -109,16 +106,16 @@ def lambda_handler(event, context):
     # write each round of picks into games flat list
     for rnd, picks_rnd in enumerate(player_picks):
         # results leading up to this round of picks
-        results_pre = results[0:sum(trn.GAMES_PER_ROUND[0:rnd])]
+        prev_games = sum(trn.GAMES_PER_ROUND[0:rnd])
+        results_pre = results[0:prev_games]
 
         abs_inds = make_absolute_bracket(results_pre, picks_rnd)
 
-        first_pick = sum(trn.GAMES_PER_ROUND[0:rnd+1])
+        first_pick = sum(trn.GAMES_PER_ROUND[0:rnd])
 
         for i in range(first_pick, trn.NUMGAMES):
             i_upper, i_lower = abs_inds[i]
-            games[i]["picks"][0].append(names[i_upper])
-            games[i]["picks"][1].append(names[i_lower])
+            games[i]["picks"].append([names[i_upper], names[i_lower], picks_rnd[i - first_pick]])
 
         # bracket winner is not in games
         champion_abs_ind = abs_inds[-1][picks_rnd[-1]]
