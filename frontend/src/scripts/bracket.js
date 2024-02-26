@@ -271,9 +271,11 @@ function makeMatchSides(game) {
     }]
   }
 
-  if (game.result !== null) {
-    side0.isWinner = game.result == 0
-    side1.isWinner = game.result == 1
+  if (game.result == 0) {
+    side0.isWinner = true
+  }
+  else if (game.result == 1) {
+    side1.isWinner = true
   }
 
   return [side0, side1]

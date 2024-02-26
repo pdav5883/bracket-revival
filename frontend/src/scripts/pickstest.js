@@ -165,24 +165,63 @@ function populateRoundStart(args) {
 
       const bracketOptions = {
         onMatchSideClick: (thisMatch, thisTopBottom) => {
-          const [nextRoundIndex, nextOrder, nextTopBottom] = getNextMatch(thisMatch.roundIndex, thisMatch.order)
+          // if click is already on winner, don't do anything
+          if (thisMatch.sides[thisTopBottom].isWinner) {
+            return
+          }
 
-          // start from next match already in bracket
-          // note: this isn't efficient, but it's what bracketry exposes and how it does its own updates
-          const allData = bracket.getAllData() // contains deep_copy of entire bracket, not efficient
-          const nextMatchIndex = allData.matches.findIndex(m => {
-            return m.roundIndex === nextRoundIndex && m.order === nextOrder
-          })
-          let nextMatch = allData.matches[nextMatchIndex]
-          nextMatch.sides[nextTopBottom] = {
-            contestantId: thisMatch.sides[thisTopBottom].contestantId
+          // if we clicked on space where no team had yet been picked, do nothing
+          if (thisMatch.sides[thisTopBottom].contestantId === undefined) {
+            return
           }
 
           // highlight winner for clicked match
           thisMatch.sides[thisTopBottom].isWinner = true
-          thisMatch.sides[1 - thisTopBottom].isWinner = false
+          delete thisMatch.sides[1 - thisTopBottom].isWinner
 
-          bracket.applyMatchesUpdates([nextMatch, thisMatch])
+          let updateMatches = [thisMatch]
+
+          // grab the full current bracket once. contains deep_copy so not efficient
+          const allData = bracket.getAllData()
+
+          let [nextMatch, nextTopBottom] = getNextMatch(allData, thisMatch.roundIndex, thisMatch.order)
+
+          // thisMatch is championship
+          if (nextMatch === null) {
+            bracket.applyMatchesUpdates(updateMatches)
+            return
+          }
+          // for match following thisMatch, fill in new pick name
+          else {
+            nextMatch.sides[nextTopBottom].contestantId = thisMatch.sides[thisTopBottom].contestantId 
+            delete nextMatch.sides[nextTopBottom].title
+          }
+          
+          // keep going down bracket if pick we changed is winner
+          while (nextMatch !== null) {
+            if (nextMatch.sides[nextTopBottom].isWinner) {
+              delete nextMatch.sides[nextTopBottom].isWinner
+              updateMatches.push(nextMatch)
+
+              // get following match and remove name - for some reason can't use destructuring here...
+              const nxt = getNextMatch(allData, nextMatch.roundIndex, nextMatch.order)
+              nextMatch = nxt[0]
+              nextTopBottom = nxt[1]
+
+              // doesn't make sense to check for null here and in while
+              if (nextMatch !== null) {
+                nextMatch.sides[nextTopBottom].title = ""
+                delete nextMatch.sides[nextTopBottom].contestantId
+              }
+            }
+            else {
+              break
+            }
+          }
+          if (nextMatch !== null) {
+            updateMatches.push(nextMatch)
+          }
+          bracket.applyMatchesUpdates(updateMatches)
         }
       }
 
@@ -301,58 +340,21 @@ function makeBracketryStartData(startGames) {
 // return [nextRoundIndex, nextOrder, 0/1 (top/bottom)] for
 // where winner of this game will go
 // note: nextOrder is index within nextRound
-function getNextMatch(roundIndex, order) {
+function getNextMatchInds(roundIndex, order) {
   return [roundIndex + 1, Math.floor(order / 2), order % 2]
 }
 
 // return [prevRoundIndex, prevOrder] where topBottom is 0/1 int
-function getPrevMatch(roundIndex, order, topBottom) {
+function getPrevMatchInds(roundIndex, order, topBottom) {
   return [roundIndex - 1, 2 * order + topBottom]
 }
 
-// this needs to happen after bracket table is loaded
-function addBracketListeners() {
-  // all spans in bracket
-  $("[id^=span_]").each(function() {
-    $(this).on("click", function() {
-      
-      // click will fire event even if already selected
-      if ($(this).hasClass("winnerspan")) {
-        return
-      }
-
-      // toggle winner for this game competition
-      $(this).addClass("winnerspan")
-      $("#" + $(this).prop("opponentId")).removeClass("winnerspan")
-
-      // for next round only, want to add in name of this winner 
-      let nextId = $(this).prop("nextId")
-      if (nextId !== null) {
-        $("#" + nextId).text($(this).text())
-
-        // only keep going if we changed a winner
-        if ($("#" + nextId).hasClass("winnerspan")) {
-          $("#" + nextId).removeClass("winnerspan")
-          nextId = $("#" + nextId).prop("nextId")
-        }
-        else {
-          nextId = null
-        }
-      }
-
-      // for all later rounds, just clear winner/name if this was already winner
-      while (nextId !== null) {
-        $("#" + nextId).text("---")
-
-        if ($("#" + nextId).hasClass("winnerspan")) {
-          $("#" + nextId).removeClass("winnerspan")
-          nextId = $("#" + nextId).prop("nextId")
-        }
-        else {
-          nextId = null
-        }
-      }
-    })
+function getNextMatch(bracketData, roundIndex, order) {
+  const [nextRoundIndex, nextOrder, nextTopBottom] = getNextMatchInds(roundIndex, order)
+  const nextMatchIndex = bracketData.matches.findIndex(m => {
+    return m.roundIndex === nextRoundIndex && m.order === nextOrder
   })
+
+  return [nextMatchIndex == -1 ? null : bracketData.matches[nextMatchIndex], nextTopBottom]
 }
 
