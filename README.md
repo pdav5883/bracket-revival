@@ -4,13 +4,9 @@ Work in progress
 ## TODO
 - Refactor js into shared utils
 - Incorporate picks and points into bracketry view
-	- Bracket will show true winners in the main bracket position, latest picks in unplayed bracket
-	- True winners picked correctly will by GREEN, unplayed picks will be black
-	- True winners picked incorreclty will be black, with superscript pick crossed out in red
+	- Show latest picks for unplayed games
 	- Each game will show points awarded for picking that game
 	- Maybe number of checkmarks for how many rounds picked it correct
-	- Clicking a game will pop up with history of picks for that game in format "Pick 1. Oklahoma over Texas"
-	- Will need to adjust backend, since currently picks corresponds to who player picked to compete in game
 
 ## Advanced TODO
 - Prepopulate picks with teams still alive from previous bracket

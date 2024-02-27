@@ -7,6 +7,7 @@ import "bootstrap/dist/css/bootstrap.min.css"
 import $ from "jquery"
 
 let bracket
+let matches // keep track of matches at top scope to help with playerHTML
 let index
 
 
@@ -223,12 +224,115 @@ function populateBracket(args) {
 
           let modal = Modal.getOrCreateInstance(document.getElementById("gameModal"))
           modal.show()
+        },
+        getScoresHTML: (thisSide, thisMatch) => {
+          // game not played yet
+          if (thisSide.scores === undefined) {
+            return ""
+          }
+
+          const score = thisSide.scores[0].mainScore
+          const scoreSpan = thisSide.isWinner ? "<span>" + String(score) + "</span>" : "<span style='opacity: 0.54'>" + String(score) + "</span>"
+          
+          // game played, but no picks
+          if (thisMatch.picks.length == 0) {
+            return "<p>" + scoreSpan + "</p>"
+          }
+
+          // if picked incorrectly put X in loser, if picked correctly put num checks in winner, otherwise just score
+          if (thisMatch.correct == 0 && thisSide.isWinner === undefined) {
+            return "<p>" + "X" + " " + scoreSpan + "</p>"
+          }
+          else if (thisMatch.correct > 0 && thisSide.isWinner) {
+            return "<p>" + "U".repeat(thisMatch.correct) + " " + scoreSpan + "</p>"
+          }
+          else {
+            return "<p>" + scoreSpan + "</p>"
+          }
+            
+        },
+
+        getMatchTopHTML: (thisMatch) => {
+          // if picked incorrectly put X in loser, if picked correctly put num checks in winner, otherwise just score
+          if (thisMatch.correct == 0 && thisMatch.sides[1].isWinner) {
+            return "X"
+          }
+          else if (thisMatch.correct > 0 && thisMatch.sides[0].isWinner) {
+            return "U".repeat(thisMatch.correct)
+          }
+          else {
+            return ""
+          }
+        },
+
+        getMatchBottomHTML: (thisMatch) => {
+          // if picked incorrectly put X in loser, if picked correctly put num checks in winner, otherwise just score
+          if (thisMatch.correct == 0 && thisMatch.sides[0].isWinner) {
+            return "X"
+          }
+          else if (thisMatch.correct > 0 && thisMatch.sides[1].isWinner) {
+            return "U".repeat(thisMatch.correct)
+          }
+          else {
+            return ""
+          }
+        },
+
+        getPlayerTitleHTML: (player, context) => {
+          const numCorrect = getPicksCorrect(context.roundIndex, context.matchOrder, context.contestantId)
+
+          // getPlayerTitleHTML only gets called if there is contestantId in context, so should never get to return "" case
+          if (numCorrect === null) {
+            return ""
+          }
+          else if (numCorrect > 0) {
+            return player.title + " " + "U".repeat(numCorrect)
+          }
+          else if (numCorrect < 0) {
+            return player.title + " " + "X"
+          }
+          else {
+            return player.title
+          }
         }
+
       }
 
+      matches = bracketData.matches
       bracket = createBracket(bracketData, document.getElementById("bracketdiv"), bracketOptions)
     }
   })
+}
+
+// helper function to grab match info for getPlayerTitleHTML, which assumes contestantId is not null
+function getPicksCorrect(roundIndex, order, contestantId) {
+  const thisMatch = matches[roundOrderToAbs(roundIndex, order)]
+  const sideIndex = thisMatch.sides[0].contestantId == contestantId ? 0 : 1
+
+  if (thisMatch.correct == 0 && thisMatch.sides[1 - sideIndex].isWinner) {
+    return -1
+  }
+  else if (thisMatch.correct > 0 && thisMatch.sides[sideIndex].isWinner) {
+    return thisMatch.correct
+  }
+  else {
+    return 0
+  }
+}
+
+
+// convert the roundIndex and order to absolute index into matches
+function roundOrderToAbs(roundIndex, order) {
+  let gamesPerRound
+  if (matches.length == 63) {
+    gamesPerRound = [32, 16, 8, 4, 2, 1]
+  }
+  else if (matches.length == 7) {
+    gamesPerRound = [4, 2, 1]
+  }
+
+  // reduce takes sum of sliced array
+  return gamesPerRound.slice(0, roundIndex).reduce((a, b) => a + b, 0) + order
 }
 
 
