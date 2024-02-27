@@ -1,6 +1,6 @@
 // API_URL is in global namespace from constants.js
 
-import { API_URL } from "./constants.js" 
+import { API_URL, ROUND_NAMES } from "./constants.js" 
 import { createBracket } from "bracketry"
 import { Modal } from "bootstrap"
 import "bootstrap/dist/css/bootstrap.min.css"
@@ -8,6 +8,7 @@ import $ from "jquery"
 
 let bracket
 let index
+
 
 $(document).ready(function() {
   $("#gobutton").on("click", changeBracket)
@@ -179,7 +180,27 @@ function populateBracket(args) {
 
       const bracketOptions = {
         onMatchClick: (thisMatch) => {
-          const allData = bracket.getAllData()
+          // bracket not returned with picks
+          if (thisMatch.picks.length == 0) {
+            return
+          }
+
+          let gameHeader = document.getElementById("gameheader")
+          gameHeader.textContent = ROUND_NAMES[thisMatch.roundIndex] + " - Game " + String(thisMatch.order + 1)
+
+          let gameResult = document.getElementById("gameresult")
+          gameResult.textContent = "Result: "
+
+          if (thisMatch.sides[0].isWinner) {
+            gameResult.textContent += thisMatch.sides[0].contestantId + " over " + thisMatch.sides[1].contestantId
+          }
+          else if (thisMatch.sides[1].isWinner) {
+            gameResult.textContent += thisMatch.sides[1].contestantId + " over " + thisMatch.sides[0].contestantId
+          }
+          else {
+            gameResult.textContent += "?"
+          }
+
           let pickList = document.getElementById("picklist")
           pickList.innerHTML = ""
 
@@ -196,9 +217,8 @@ function populateBracket(args) {
           })
 
           if (thisMatch.points !== null) {
-            let pickItem = document.createElement("li")
-            pickItem.textContent = "Points Awarded: " + String(thisMatch.points)
-            pickList.appendChild(pickItem)
+            let gameFooter = document.getElementById("gamepoints")
+            gameFooter.textContent = String(thisMatch.points) + (thisMatch.points == 1 ? " Point" : " Points")
           }
 
           let modal = Modal.getOrCreateInstance(document.getElementById("gameModal"))
@@ -220,21 +240,14 @@ function makeBracketryData(gamesNested) {
   }
 
   if (gamesNested.length == 6) {
-    data.rounds = [
-      { name: "First Round" },
-      { name: "Second Round" },
-      { name: "Sweet 16" },
-      { name: "Elite 8" },
-      { name: "Final 4" },
-      { name: "Championship" }
-    ]
+    ROUND_NAMES.forEach(rname => {
+      data.rounds.push({ name: rname })
+    })
   }
   else if (gamesNested.length == 3) {
-    data.rounds = [
-      { name: "Elite 8" },
-      { name: "Final 4" },
-      { name: "Championship" }
-    ]
+    ROUND_NAMES.slice(3).forEach(rname => {
+      data.rounds.push({ name: rname })
+    })
   }
 
   // first round has all contestants

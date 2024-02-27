@@ -12,4 +12,13 @@ export const API_URL = {
   admin: BASE_URL + "/admin"
 }
 
+export const ROUND_NAMES = [
+  "First Round",
+  "Second Round",
+  "Sweet 16",
+  "Elite 8",
+  "Final 4",
+  "Championship"
+]
+
 
