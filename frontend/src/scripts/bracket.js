@@ -237,12 +237,7 @@ function populateBracket(args) {
         },
 
         getPlayerTitleHTML: (player, context) => {
-          const [numCorrect, isLoser] = getPicksCorrect(context.roundIndex, context.matchOrder, context.contestantId)
-
-          // getPlayerTitleHTML only gets called if there is contestantId in context, so should never get to return "" case
-          if (numCorrect === null) {
-            return ""
-          }
+          const [numCorrect, correctHist, isLoser] = getPicksCorrect(context.roundIndex, context.matchOrder, context.contestantId)
 
           const playerHTML = isLoser ? ("<span style='opacity: 0.54'>" + player.title + "</span>") : player.title
 
@@ -250,17 +245,22 @@ function populateBracket(args) {
 
           const xmark = "<svg xmlns='http://www.w3.org/2000/svg' height='18' width='18' viewBox='0 0 512 512'><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill='#e21212' d='M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM175 175c9.4-9.4 24.6-9.4 33.9 0l47 47 47-47c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-47 47 47 47c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-47-47-47 47c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l47-47-47-47c-9.4-9.4-9.4-24.6 0-33.9z'/></svg>"
 
-          if (numCorrect > 0) {
-            return playerHTML + " " + xmark.repeat(context.roundIndex + 1 - numCorrect) + checkmark.repeat(numCorrect)
-          }
-          else if (numCorrect < 0) {
-            return playerHTML + " " + xmark.repeat(context.roundIndex + 1)
-          }
-          else {
+          if (numCorrect == 0) {
             return playerHTML
           }
+          else {
+            let titleHTML = playerHTML + " "
+            correctHist.forEach(correct => {
+              if (correct) {
+                titleHTML += checkmark
+              }
+              else {
+                titleHTML += xmark
+              }
+            })
+            return titleHTML
+          }
         }
-
       }
 
       matches = bracketData.matches
@@ -279,21 +279,42 @@ function populateBracket(args) {
 // also returns isLoser to help HTML render figure out whether to set opacity, and is returned whether or
 // not there are picks
 // numCorrect: 1+ for correct picks, -1 for incorrect pick, 0 for no pick
+// correctHist: [] for no picks, [True/False,...] for each round of picks
 function getPicksCorrect(roundIndex, order, contestantId) {
   const thisMatch = matches[roundOrderToAbs(roundIndex, order)]
   const sideIndex = thisMatch.sides[0].contestantId == contestantId ? 0 : 1
 
   const isLoser = thisMatch.sides[1 - sideIndex].isWinner
 
+  // compare picks to actual winner for pick history - bit of a hack, but easier to do comparison here
+  // than in backend at this point
+  let numCorrect
+  let winnerId
+
   if (thisMatch.correct == 0 && thisMatch.sides[1 - sideIndex].isWinner) {
-    return [-1, isLoser]
+    numCorrect = -1
+    winnerId = thisMatch.sides[1 - sideIndex].contestantId
   }
   else if (thisMatch.correct > 0 && thisMatch.sides[sideIndex].isWinner) {
-    return [thisMatch.correct, isLoser]
+    numCorrect = thisMatch.correct
+    winnerId = thisMatch.sides[sideIndex].contestantId
   }
+  // no picks made, so this is an empty bracket
   else {
-    return [0, isLoser]
+    return [0, [], isLoser]
   }
+
+  let correctHist = []
+
+  thisMatch.picks.forEach(pick => {
+    if (pick[pick[2]] == winnerId) {
+      correctHist.push(true)
+    }
+    else {
+      correctHist.push(false)
+    }
+  })
+  return [numCorrect, correctHist, isLoser]
 }
 
 
