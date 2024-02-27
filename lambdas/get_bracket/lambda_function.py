@@ -90,8 +90,12 @@ def lambda_handler(event, context):
                 "result": results[i],
                 "picks": []}
 
-        game["points"] = player_points[i]
-        game["correct"] = 0 if player_points[i] == 0 else 1 + int(math.log2(player_points[i])) 
+        if player is None:
+            game["points"] = None
+            game["correct"] = None
+        else:
+            game["points"] = player_points[i]
+            game["correct"] = 0 if player_points[i] == 0 else 1 + int(math.log2(player_points[i])) 
 
         games.append(game)
 
