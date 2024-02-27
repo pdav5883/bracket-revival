@@ -5,8 +5,6 @@ Work in progress
 - Refactor js into shared utils
 - Incorporate picks and points into bracketry view
 	- Show latest picks for unplayed games
-	- Each game will show points awarded for picking that game
-	- Maybe number of checkmarks for how many rounds picked it correct
 
 ## Advanced TODO
 - Prepopulate picks with teams still alive from previous bracket

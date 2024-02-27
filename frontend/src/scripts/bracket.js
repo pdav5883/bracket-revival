@@ -225,6 +225,7 @@ function populateBracket(args) {
           let modal = Modal.getOrCreateInstance(document.getElementById("gameModal"))
           modal.show()
         },
+        
         getScoresHTML: (thisSide, thisMatch) => {
           // game not played yet
           if (thisSide.scores === undefined) {
@@ -232,67 +233,31 @@ function populateBracket(args) {
           }
 
           const score = thisSide.scores[0].mainScore
-          const scoreSpan = thisSide.isWinner ? "<span>" + String(score) + "</span>" : "<span style='opacity: 0.54'>" + String(score) + "</span>"
-          
-          // game played, but no picks
-          if (thisMatch.picks.length == 0) {
-            return "<p>" + scoreSpan + "</p>"
-          }
-
-          // if picked incorrectly put X in loser, if picked correctly put num checks in winner, otherwise just score
-          if (thisMatch.correct == 0 && thisSide.isWinner === undefined) {
-            return "<p>" + "X" + " " + scoreSpan + "</p>"
-          }
-          else if (thisMatch.correct > 0 && thisSide.isWinner) {
-            return "<p>" + "U".repeat(thisMatch.correct) + " " + scoreSpan + "</p>"
-          }
-          else {
-            return "<p>" + scoreSpan + "</p>"
-          }
-            
-        },
-
-        getMatchTopHTML: (thisMatch) => {
-          // if picked incorrectly put X in loser, if picked correctly put num checks in winner, otherwise just score
-          if (thisMatch.correct == 0 && thisMatch.sides[1].isWinner) {
-            return "X"
-          }
-          else if (thisMatch.correct > 0 && thisMatch.sides[0].isWinner) {
-            return "U".repeat(thisMatch.correct)
-          }
-          else {
-            return ""
-          }
-        },
-
-        getMatchBottomHTML: (thisMatch) => {
-          // if picked incorrectly put X in loser, if picked correctly put num checks in winner, otherwise just score
-          if (thisMatch.correct == 0 && thisMatch.sides[0].isWinner) {
-            return "X"
-          }
-          else if (thisMatch.correct > 0 && thisMatch.sides[1].isWinner) {
-            return "U".repeat(thisMatch.correct)
-          }
-          else {
-            return ""
-          }
+          return thisSide.isWinner ? "<span>" + String(score) + "</span>" : "<span style='opacity: 0.54'>" + String(score) + "</span>"
         },
 
         getPlayerTitleHTML: (player, context) => {
-          const numCorrect = getPicksCorrect(context.roundIndex, context.matchOrder, context.contestantId)
+          const [numCorrect, isLoser] = getPicksCorrect(context.roundIndex, context.matchOrder, context.contestantId)
 
           // getPlayerTitleHTML only gets called if there is contestantId in context, so should never get to return "" case
           if (numCorrect === null) {
             return ""
           }
-          else if (numCorrect > 0) {
-            return player.title + " " + "U".repeat(numCorrect)
+
+          const playerHTML = isLoser ? ("<span style='opacity: 0.54'>" + player.title + "</span>") : player.title
+
+          const checkmark = "<svg xmlns='http://www.w3.org/2000/svg' height='18' width='18' viewBox='0 0 512 512'><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill='#22bc20' d='M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z'/></svg>"
+
+          const xmark = "<svg xmlns='http://www.w3.org/2000/svg' height='18' width='18' viewBox='0 0 512 512'><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill='#e21212' d='M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM175 175c9.4-9.4 24.6-9.4 33.9 0l47 47 47-47c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-47 47 47 47c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-47-47-47 47c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l47-47-47-47c-9.4-9.4-9.4-24.6 0-33.9z'/></svg>"
+
+          if (numCorrect > 0) {
+            return playerHTML + " " + checkmark.repeat(numCorrect)
           }
           else if (numCorrect < 0) {
-            return player.title + " " + "X"
+            return playerHTML + " " + xmark
           }
           else {
-            return player.title
+            return playerHTML
           }
         }
 
@@ -300,23 +265,34 @@ function populateBracket(args) {
 
       matches = bracketData.matches
       bracket = createBracket(bracketData, document.getElementById("bracketdiv"), bracketOptions)
+
+      // change opacity for player-title div to 1, so that icons will not be opaque. Loser text is still made to be grayed
+      // out in getPlayerTitleHTML
+      for (const playerDiv of document.getElementsByClassName("player-title")) {
+        playerDiv.style.opacity = "1"
+      }
     }
   })
 }
 
 // helper function to grab match info for getPlayerTitleHTML, which assumes contestantId is not null
+// also returns isLoser to help HTML render figure out whether to set opacity, and is returned whether or
+// not there are picks
+// numCorrect: 1+ for correct picks, -1 for incorrect pick, 0 for no pick
 function getPicksCorrect(roundIndex, order, contestantId) {
   const thisMatch = matches[roundOrderToAbs(roundIndex, order)]
   const sideIndex = thisMatch.sides[0].contestantId == contestantId ? 0 : 1
 
+  const isLoser = thisMatch.sides[1 - sideIndex].isWinner
+
   if (thisMatch.correct == 0 && thisMatch.sides[1 - sideIndex].isWinner) {
-    return -1
+    return [-1, isLoser]
   }
   else if (thisMatch.correct > 0 && thisMatch.sides[sideIndex].isWinner) {
-    return thisMatch.correct
+    return [thisMatch.correct, isLoser]
   }
   else {
-    return 0
+    return [0, isLoser]
   }
 }
 
