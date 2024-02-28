@@ -237,9 +237,18 @@ function populateBracket(args) {
         },
 
         getPlayerTitleHTML: (player, context) => {
-          const [numCorrect, correctHist, isLoser] = getPicksCorrect(context.roundIndex, context.matchOrder, context.contestantId)
+          const [numCorrect, correctHist, isLoser, isFromPick] = playerHtmlHelper(context.roundIndex, context.matchOrder, context.contestantId)
 
-          const playerHTML = isLoser ? ("<span style='opacity: 0.54'>" + player.title + "</span>") : player.title
+          let playerHTML
+          if (isLoser) {
+            playerHTML = "<span style='opacity: 0.54'>" + player.title + "</span>"
+          }
+          else if (isFromPick) {
+            playerHTML = "<span style='color: #003ae6'>" + player.title + "</span>"
+        }
+          else {
+            playerHTML = player.title
+          }
 
           const checkmark = "<svg xmlns='http://www.w3.org/2000/svg' height='18' width='18' viewBox='0 0 512 512'><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill='#22bc20' d='M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z'/></svg>"
 
@@ -273,63 +282,6 @@ function populateBracket(args) {
       }
     }
   })
-}
-
-// helper function to grab match info for getPlayerTitleHTML, which assumes contestantId is not null
-// also returns isLoser to help HTML render figure out whether to set opacity, and is returned whether or
-// not there are picks
-// numCorrect: 1+ for correct picks, -1 for incorrect pick, 0 for no pick
-// correctHist: [] for no picks, [True/False,...] for each round of picks
-function getPicksCorrect(roundIndex, order, contestantId) {
-  const thisMatch = matches[roundOrderToAbs(roundIndex, order)]
-  const sideIndex = thisMatch.sides[0].contestantId == contestantId ? 0 : 1
-
-  const isLoser = thisMatch.sides[1 - sideIndex].isWinner
-
-  // compare picks to actual winner for pick history - bit of a hack, but easier to do comparison here
-  // than in backend at this point
-  let numCorrect
-  let winnerId
-
-  if (thisMatch.correct == 0 && thisMatch.sides[1 - sideIndex].isWinner) {
-    numCorrect = -1
-    winnerId = thisMatch.sides[1 - sideIndex].contestantId
-  }
-  else if (thisMatch.correct > 0 && thisMatch.sides[sideIndex].isWinner) {
-    numCorrect = thisMatch.correct
-    winnerId = thisMatch.sides[sideIndex].contestantId
-  }
-  // no picks made, so this is an empty bracket
-  else {
-    return [0, [], isLoser]
-  }
-
-  let correctHist = []
-
-  thisMatch.picks.forEach(pick => {
-    if (pick[pick[2]] == winnerId) {
-      correctHist.push(true)
-    }
-    else {
-      correctHist.push(false)
-    }
-  })
-  return [numCorrect, correctHist, isLoser]
-}
-
-
-// convert the roundIndex and order to absolute index into matches
-function roundOrderToAbs(roundIndex, order) {
-  let gamesPerRound
-  if (matches.length == 63) {
-    gamesPerRound = [32, 16, 8, 4, 2, 1]
-  }
-  else if (matches.length == 7) {
-    gamesPerRound = [4, 2, 1]
-  }
-
-  // reduce takes sum of sliced array
-  return gamesPerRound.slice(0, roundIndex).reduce((a, b) => a + b, 0) + order
 }
 
 
@@ -393,18 +345,28 @@ function makeBracketryData(gamesNested) {
 function makeMatchSides(game) {
   let side0, side1
 
-  if (game.teams[0] === null) {
-    side0 = { title: "" }
-  }
-  else {
+  if (game.teams[0] !== null) {
     side0 = { contestantId: game.teams[0] }
   }
 
-  if (game.teams[1] === null) {
-    side1 = { title: "" }
+  // use most recent picks if game not yet played
+  else if (game.picks.length > 0) {
+    side0 = { contestantId: game.picks[game.picks.length - 1][0],
+    fromPick: true }
   }
   else {
+    side0 = { title: "" }
+  }
+
+  if (game.teams[1] !== null) {
     side1 = { contestantId: game.teams[1] }
+  }
+  else if (game.picks.length > 0) {
+    side1 = { contestantId: game.picks[game.picks.length - 1][1],
+    fromPick: true }
+  }
+  else {
+    side1 = { title: "" }
   }
 
   if (game.score[0] !== null) {
@@ -424,4 +386,63 @@ function makeMatchSides(game) {
   }
 
   return [side0, side1]
+}
+
+
+// helper function to grab match info for getPlayerTitleHTML, which assumes contestantId is not null
+// also returns isLoser to help HTML render figure out whether to set opacity, and is returned whether or
+// not there are picks
+// numCorrect: 1+ for correct picks, -1 for incorrect pick, 0 for no pick
+// correctHist: [] for no picks, [True/False,...] for each round of picks
+function playerHtmlHelper(roundIndex, order, contestantId) {
+  const thisMatch = matches[roundOrderToAbs(roundIndex, order)]
+  const sideIndex = thisMatch.sides[0].contestantId == contestantId ? 0 : 1
+
+  const isLoser = thisMatch.sides[1 - sideIndex].isWinner
+  const isFromPick = thisMatch.sides[sideIndex].fromPick
+
+  // compare picks to actual winner for pick history - bit of a hack, but easier to do comparison here
+  // than in backend at this point
+  let numCorrect
+  let winnerId
+
+  if (thisMatch.correct == 0 && thisMatch.sides[1 - sideIndex].isWinner) {
+    numCorrect = -1
+    winnerId = thisMatch.sides[1 - sideIndex].contestantId
+  }
+  else if (thisMatch.correct > 0 && thisMatch.sides[sideIndex].isWinner) {
+    numCorrect = thisMatch.correct
+    winnerId = thisMatch.sides[sideIndex].contestantId
+  }
+  // no picks made, so this is an empty bracket
+  else {
+    return [0, [], isLoser, isFromPick]
+  }
+
+  let correctHist = []
+
+  thisMatch.picks.forEach(pick => {
+    if (pick[pick[2]] == winnerId) {
+      correctHist.push(true)
+    }
+    else {
+      correctHist.push(false)
+    }
+  })
+  return [numCorrect, correctHist, isLoser, isFromPick]
+}
+
+
+// convert the roundIndex and order to absolute index into matches
+function roundOrderToAbs(roundIndex, order) {
+  let gamesPerRound
+  if (matches.length == 63) {
+    gamesPerRound = [32, 16, 8, 4, 2, 1]
+  }
+  else if (matches.length == 7) {
+    gamesPerRound = [4, 2, 1]
+  }
+
+  // reduce takes sum of sliced array
+  return gamesPerRound.slice(0, roundIndex).reduce((a, b) => a + b, 0) + order
 }

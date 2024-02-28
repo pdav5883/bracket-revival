@@ -72,7 +72,9 @@ def lambda_handler(event, context):
             scores[i] = [None, None]
 
         if player is not None:
-            player_picks = player_picks[0:completed_rounds]
+            # +1 because we'll show picks that take into account everything that happened through completed_rounds, but also need to check that these picks have been made
+            if len(player_picks) > completed_rounds:
+                player_picks = player_picks[0:completed_rounds+1]
 
     # points calc returns all zeros if picks is empty
     player_points = points.calc_points_revival(player_picks, results)

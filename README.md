@@ -3,8 +3,6 @@ Work in progress
 
 ## TODO
 - Refactor js into shared utils
-- Incorporate picks and points into bracketry view
-	- Show latest picks for unplayed games
 
 ## Advanced TODO
 - Prepopulate picks with teams still alive from previous bracket
