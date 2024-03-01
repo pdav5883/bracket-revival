@@ -3,7 +3,6 @@
 import { API_URL, ROUND_NAMES } from "./constants.js" 
 import { createBracket } from "bracketry"
 import { Modal } from "bootstrap"
-import "bootstrap/dist/css/bootstrap.min.css"
 import $ from "jquery"
 
 let bracket

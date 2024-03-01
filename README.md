@@ -7,14 +7,18 @@ Work in progress
 ## Advanced TODO
 - Prepopulate picks with teams still alive from previous bracket
 - Show points that each pick would yield during picking
-- Test page to play smaller version to understand rules
-- Managing no picks submitted
 - Player creation page
-- Secret tokens to make picks
+- Improve UI for existing pages
+- How to manage round transitions (what if someone hasn't submitted picks)
+- Secret tokens with picks
+
+- Test page to play smaller version to understand rules
 - Email/text reminders
 - Team logos
-- Lock only games that have started, or lock entire round once it starts? Allow partial picks?
+- Deploy to AWS without html extension
+- Fully deploy
 - Set up webpack for production
+- Refactor shared js
 
 ## Lambdas
 #### calc_score

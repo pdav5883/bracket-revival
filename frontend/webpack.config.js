@@ -1,5 +1,6 @@
 const path = require("path")
 const HtmlWebpack = require("html-webpack-plugin")
+const CopyWebpack = require("copy-webpack-plugin")
 
 module.exports = {
   entry: {
@@ -50,6 +51,20 @@ module.exports = {
       filename: "scoreboard.html",
       template: "./src/scoreboard.html",
       chunks: ["shared", "scoreboard"]
+    }),
+    new HtmlWebpack({
+      title: "New Player",
+      filename: "newplayer.html",
+      template: "./src/newplayer.html",
+      chunks: ["shared"]
+    }),
+    new CopyWebpack({
+      patterns: [
+        {
+          from: "./src/nav.html",
+          to: "assets",
+        }
+      ]
     }),
   ],
   module: {
