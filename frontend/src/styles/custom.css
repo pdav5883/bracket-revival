@@ -4,6 +4,9 @@
 .pickspan {
   font-size: smaller;
 }
+.form-label {
+  font-weight: bold;
+}
 #scoreboardtable {
   border-collapse: collapse;
 }

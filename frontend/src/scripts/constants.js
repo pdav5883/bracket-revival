@@ -9,7 +9,8 @@ export const API_URL = {
   start: BASE_URL + "/start",
   update: BASE_URL + "/update",
   competitions: BASE_URL + "/competitions",
-  admin: BASE_URL + "/admin"
+  admin: BASE_URL + "/admin",
+  add: BASE_URL + "/add"
 }
 
 export const ROUND_NAMES = [

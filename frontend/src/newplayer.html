@@ -6,30 +6,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
   </head>
   <body>
-    <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
-      <div class="container-fluid">
-	<a class="navbar-brand" href="#">BLR</a>
-	<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-	  <span class="navbar-toggler-icon"></span>
-	</button>
-	<div class="collapse navbar-collapse" id="navbarCollapse">
-	  <ul class="navbar-nav me-auto mb-2 mb-md-0">
-	    <li class="nav-item">
-	      <a class="nav-link active" aria-current="page" href="/scoreboard.html">Scoreboard</a>
-	    </li>
-	    <li class="nav-item">
-	      <a class="nav-link active" href="/bracket.html">Bracket</a>
-	    </li>
-	    <li class="nav-item dropdown">
-	      <a class="nav-link active dropdown-toggle" href="#" data-bs-toggle="dropdown">More</a>
-	      <ul class="dropdown-menu">
-		<li><a class="dropdown-item" href="/about.html">About</a></li>
-		<li><a class="dropdown-item" href="/newplayer.html">New Player</a></li>
-		<li><a class="dropdown-item" href="/practice.html">Practice</a></li>
-	    </li>
-	  </ul>
+    <div id="nav-placeholder"></div>
+    <div class="col-10 col-8-md mx-auto p-3 py-md-5">
+      <h1>Create New Player</h1>
+      <div class="col-8 col-sm-12 row">
+	<div class="col-sm-3 gy-4">
+	  <label for="yearsel" class="form-label">Tournament Year</label>
+	  <select class="form-select" id="yearsel">
+	  </select>
+	</div>
+	<div class="col-sm-5 gy-4">
+	  <label for="compsel" class="form-label">Competition</label>
+	  <select class="form-select" id="compsel">
+	  </select>
+	</div>
+
+      </div>
+      <div class="row mb-3">
+	<div class="col-6 col-sm-4 col-lg-3 gy-4">
+	  <label for="nameinput" class="form-label">Name</label>
+	  <input type="text" class="form-control" id="nameinput" placeholder="John">
+	  <div class="form-text">Your name as it will appear on the scoreboard</div>
+	</div>
+	<div class="col-sm-8 col-lg-5 gy-4">
+	  <label for="emailinput" class="form-label">Email</label>
+	  <input type="text" class="form-control" id="emailinput" placeholder="john.doe@gmail.com">
+	  <div class="form-text">Where to send your link for making each round of picks.<br>No spam, I promise!</div>
 	</div>
       </div>
-    </nav>
+      <div class="pt-3">
+	<button type="button" id="submitbutton" class="btn btn-primary">Submit</button>
+      </div>
+      <div class="pt-3">
+        <p id="statustext"></p>
+      </div>
+    </div>
   </body>
 </html>

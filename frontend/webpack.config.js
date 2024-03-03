@@ -20,6 +20,10 @@ module.exports = {
       import: "./src/scripts/scoreboard.js",
       dependOn: "shared"
     },
+    newplayer: {
+      import: "./src/scripts/newplayer.js",
+      dependOn: "shared"
+    },
     shared: "./src/scripts/shared.js"
   },
   mode: "development",
@@ -56,7 +60,7 @@ module.exports = {
       title: "New Player",
       filename: "newplayer.html",
       template: "./src/newplayer.html",
-      chunks: ["shared"]
+      chunks: ["shared", "newplayer"]
     }),
     new CopyWebpack({
       patterns: [

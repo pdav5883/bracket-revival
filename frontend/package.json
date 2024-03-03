@@ -16,6 +16,7 @@
     "webpack-dev-server": "^5.0.2"
   },
   "scripts": {
-    "build": "webpack"
+    "build": "webpack",
+    "serve": "webpack serve --port 8000"
   }
 }

@@ -17,17 +17,20 @@ def lambda_handler(event, context):
            - playername (for player)
     Output: None
     """
-    #body = json.loads(event["body"])
-    #typ = body.get("type")
-    #year = body.get("year", None)
-    #cname = body.get("compname", None)
-    #pname = body.get("playername", None)
+    # for testing only, allow GET request
+    if len(event.get("queryStringParameters", {})) > 0:
+        typ = event["queryStringParameters"].get("type")
+        year = event["queryStringParameters"].get("year", None)
+        cname = event["queryStringParameters"].get("compname", None)
+        pname = event["queryStringParameters"].get("playername", None)
 
-    # for testing only
-    typ = event["queryStringParameters"].get("type")
-    year = event["queryStringParameters"].get("year", None)
-    cname = event["queryStringParameters"].get("compname", None)
-    pname = event["queryStringParameters"].get("playername", None)
+    else:
+        body = json.loads(event["body"])
+        typ = body.get("type")
+        year = body.get("year", None)
+        cname = body.get("compname", None)
+        pname = body.get("playername", None)
+
 
     if typ == "year":
         return add_year(year)
