@@ -7,7 +7,6 @@ Work in progress
 ## Advanced TODO
 - Prepopulate picks with teams still alive from previous bracket
 - Show points that each pick would yield during picking
-- Player creation page
 - Improve UI for existing pages
 - How to manage round transitions (what if someone hasn't submitted picks)
 - Secret tokens with picks

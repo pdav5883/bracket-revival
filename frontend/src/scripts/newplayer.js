@@ -7,7 +7,8 @@ $(document).ready(function() {
   $.get("assets/nav.html", navbar => {
     $("#nav-placeholder").replaceWith(navbar)
   })
-  
+ 
+  $("#scoreboarddiv").hide()
   $("#submitbutton").on("click", submitNewPlayer)
   $("#yearsel").on("change", populateCompetitions)
 
@@ -84,7 +85,24 @@ function submitNewPlayer() {
   $("#statustext").text()
   $("#submitbutton").prop("disabled", true)
 
-  // client validation - TODO
+  // client validation
+  const validateId = ["yearsel", "compsel", "nameinput", "emailinput"]
+  let validationErr = false
+  validateId.forEach(v => {
+    if ($("#" + v).val() == "") {
+      $("#" + v).addClass("is-invalid")
+      validationErr = true
+    }
+    else {
+      $("#" + v).addClass("is-valid")
+    }
+  })
+
+  if (validationErr) {
+    $("#statustext").text("Missing entries")
+    $("#submitbutton").prop("disabled", false)
+    return
+  }
 
   const data = {"type": "player",
     "year": $("#yearsel").val(),
@@ -102,10 +120,15 @@ function submitNewPlayer() {
     success: function() {
       $("#submitbutton").prop("disabled", false)
       $("#statustext").text("Success! Check your email to make picks.")
+
+      $("#submitdiv").hide()
+      $("#scoreboarddiv").show()
+      $("#scoreboardbutton").attr("href", "/scoreboard.html?year=" + data.year + "&cid=" + data.compname)
     },
     failure: function() {
       $("#submitbutton").prop("disabled", false)
       $("#statustext").text("Server Error: TODO")
+      // TODO: wait for deployment to test case where picks are locked for competition
     }
   }) 
 }

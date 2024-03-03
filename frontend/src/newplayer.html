@@ -31,14 +31,17 @@
 	<div class="col-sm-8 col-lg-5 gy-4">
 	  <label for="emailinput" class="form-label">Email</label>
 	  <input type="text" class="form-control" id="emailinput" placeholder="john.doe@gmail.com">
-	  <div class="form-text">Where to send your link for making each round of picks.<br>No spam, I promise!</div>
+	  <div class="form-text">Where to send your links to make picks before each round.<br>No spam, I promise!</div>
 	</div>
       </div>
-      <div class="pt-3">
+      <div id="submitdiv" class="pt-3">
 	<button type="button" id="submitbutton" class="btn btn-primary">Submit</button>
       </div>
       <div class="pt-3">
         <p id="statustext"></p>
+      </div>
+      <div id="scoreboarddiv" class="pt-3">
+	<a id="scoreboardbutton" class="btn btn-dark" href="#">Go To Scoreboard</a>
       </div>
     </div>
   </body>
