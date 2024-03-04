@@ -165,6 +165,8 @@ function populateRoundStart(args) {
       prepopulateBracket(bracketData)
 
       const bracketOptions = {
+        //maxMatchWidth: 250,
+        displayWholeRounds: true,
         liveMatchBorderColor: "#ff4545",
         matchStatusBgColor: "#5a9cd8",
         onMatchSideClick: (thisMatch, thisTopBottom) => {

@@ -10,6 +10,7 @@ Work in progress
 - How to manage round transitions (what if someone hasn't submitted picks)
 - Secret tokens with picks
 
+- Set up bracketry for mobile
 - Test page to play smaller version to understand rules
 - Email/text reminders
 - Team logos
