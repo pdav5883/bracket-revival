@@ -3,10 +3,9 @@ Work in progress
 
 ## TODO
 - Refactor js into shared utils
+- Handle browser error when request picks with no picks to make
 
 ## Advanced TODO
-- Prepopulate picks with teams still alive from previous bracket
-- Show points that each pick would yield during picking
 - Improve UI for existing pages
 - How to manage round transitions (what if someone hasn't submitted picks)
 - Secret tokens with picks

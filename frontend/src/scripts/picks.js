@@ -2,7 +2,6 @@ import { API_URL } from "./constants.js"
 import { createBracket } from "bracketry"
 import $ from "jquery"
 
-let matches
 let bracket
 let index
 let yearSubmit // these submit variables store the values
@@ -162,7 +161,8 @@ function populateRoundStart(args) {
       // game: {teams: [], seeds: [], score: [], result: 0/1}
       // teams/seeds/score=[null, null], result=null
 
-      const bracketData = makeBracketryStartData(result.start_games, result.bonus_games)
+      let bracketData = makeBracketryStartData(result.start_games, result.bonus_games)
+      prepopulateBracket(bracketData)
 
       const bracketOptions = {
         liveMatchBorderColor: "#ff4545",
@@ -208,18 +208,23 @@ function populateRoundStart(args) {
             if (firstNext) {
               nextMatch.sides[nextTopBottom].contestantId = thisMatch.sides[thisTopBottom].contestantId 
               delete nextMatch.sides[nextTopBottom].title
-              delete nextMatch.matchStatus
+              //delete nextMatch.matchStatus
               firstNext = false
             }
             else {
               nextMatch.sides[nextTopBottom].title = ""
               delete nextMatch.sides[nextTopBottom].contestantId
-              delete nextMatch.matchStatus
+              //delete nextMatch.matchStatus
             }
 
             // can't delete isWinner once nextMatch is pushed, so save for later
             const isWinner = nextMatch.sides[nextTopBottom].isWinner
             delete nextMatch.sides[nextTopBottom].isWinner
+
+            if (isWinner) {
+              delete nextMatch.matchStatus
+            }
+
             updateMatches.push(nextMatch)
 
             if (isWinner) {
@@ -236,12 +241,55 @@ function populateRoundStart(args) {
         }
       }
 
-      matches = bracketData.matches
       bracket = createBracket(bracketData, document.getElementById("bracketdiv"), bracketOptions)
     }
   })
 }
 
+
+// performs in-place edit of bracketData to clear bracket contents and prepopulate with picks still alive
+function prepopulateBracket(bracketData) {
+  // clear bracket after round 0, because this is also used as reset
+  bracketData.matches.forEach(match => {
+    if (match.roundIndex > 0) {
+      match.sides = [
+        { title: "" },
+        { title: "" }
+      ]
+      delete match.matchStatus
+    }
+  })
+
+  let nextMatch, nextTopBottom
+  
+  // populate winners, points, contestantIds in next game
+  bracketData.matches.forEach(match => {
+    if (match.prevPickWinner !== undefined && match.prevPickWinner == match.sides[0].contestantId) {
+      match.sides[0].isWinner = true
+      match.matchStatus = String(2 ** (match.roundIndex + match.prevPickWinnerNum))
+
+      const nxt = getNextMatch(bracketData, match.roundIndex, match.order)
+      nextMatch = nxt[0]
+      nextTopBottom = nxt[1]
+
+      if (nextMatch !== null) {
+        nextMatch.sides[nextTopBottom].contestantId = match.sides[0].contestantId
+      }
+    }
+    else if (match.prevPickWinner !== undefined && match.prevPickWinner == match.sides[1].contestantId) {
+      match.sides[1].isWinner = true
+      match.matchStatus = String(2 ** (match.roundIndex + match.prevPickWinnerNum))
+
+      const nxt = getNextMatch(bracketData, match.roundIndex, match.order)
+      nextMatch = nxt[0]
+      nextTopBottom = nxt[1]
+
+      if (nextMatch !== null) {
+        nextMatch.sides[nextTopBottom].contestantId = match.sides[1].contestantId
+      }
+    }
+  })
+}
 
 
 function submitPicks() {

@@ -98,6 +98,10 @@ def get_start_games_abs_ind(results, round_start):
 
 
 def get_bonus_games(results, picks, round_start, teams):
+    # if no picks made, no bonus games
+    if picks is None or len(picks) == 0:
+        return []
+
     # convert picks to absolute index of teams that each pick represents
     abs_picks = []
 
