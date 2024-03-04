@@ -1,26 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <!-- Basic Page Needs -->
-  <meta charset="utf-8">
-  <!-- Mobile Specific Metas -->
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- FONT -->
-  <!-- <link rel="stylesheet" href="/styles/custom.css">-->
-</head>
-<body>
-  <div id="nav-placeholder"></div>
-  <label id="yearlabel" for="yearsel">Year</label>
-  <select id="yearsel"></select>
-  <label id="complabel" for="compsel">Game</label>
-  <select id="compsel"></select>
-  <label id="rndlabel" for="rndinput">Completed Rounds</label>
-  <input id="rndinput" type="text" size=3>
-  <button id="gobutton">Go</button>
-  <button id="editbutton">Change Game</button>
-  <p id="textstatus"></p>
-  
-  <table id="scoreboardtable">
-  </table>
-</body>
+  <head>
+    <!-- Basic Page Needs -->
+    <meta charset="utf-8">
+    <!-- Mobile Specific Metas -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+  <body>
+    <div id="nav-placeholder"></div>
+    <div class="col-10 col-8-md mx-auto">
+      <h1>Scoreboard</h1>
+      <div class="row">
+	<div class="col-4 col-sm-3 col-lg-2 mb-2">
+	  <label id="yearlabel" for="yearsel" class="form-label">Year</label>
+          <select class="form-select" id="yearsel"></select>
+	</div>
+	<div class="col-8 col-sm-5 col-lg-3 mb-2">
+          <label id="complabel" for="compsel" class="form-label">Competition</label>
+          <select id="compsel" class="form-select"></select>
+	</div>
+	<div class="col-sm-3 col-lg-2 mb-2 d-flex align-items-end">
+	    <button id="gobutton" class="btn btn-primary">Go</button>
+          <button id="editbutton" class="btn btn-dark">Change Game</button>
+	</div>
+      </div>
+    <p id="textstatus"></p>
+    
+    <table id="scoreboardtable">
+    </table>
+  </body>
 </html>

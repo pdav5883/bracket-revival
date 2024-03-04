@@ -9,6 +9,10 @@ let cidSubmit  // used to populate round start
 let pidSubmit
 
 $(document).ready(function() {
+  $.get("assets/nav.html", navbar => {
+    $("#nav-placeholder").replaceWith(navbar)
+  })
+  
   $("#gobutton").on("click", changeRoundStart)
   $("#submitbutton").on("click", submitPicks)
   $("#yearsel").on("change", populateCompetitions)

@@ -11,6 +11,10 @@ let index
 
 
 $(document).ready(function() {
+  $.get("assets/nav.html", navbar => {
+    $("#nav-placeholder").replaceWith(navbar)
+  })
+  
   $("#gobutton").on("click", changeBracket)
   $("#yearsel").on("change", populateCompetitions)
   $("#compsel").on("change", populatePlayerNames)
