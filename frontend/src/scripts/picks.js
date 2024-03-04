@@ -2,6 +2,7 @@ import { API_URL } from "./constants.js"
 import { createBracket } from "bracketry"
 import $ from "jquery"
 
+let matches
 let bracket
 let index
 let yearSubmit // these submit variables store the values
@@ -157,14 +158,15 @@ function populateRoundStart(args) {
     url: API_URL.start,
     data: queryData,
     crossDomain: true,
-    success: function(startGames) {
+    success: function(result) {
       // game: {teams: [], seeds: [], score: [], result: 0/1}
       // teams/seeds/score=[null, null], result=null
 
-      const bracketData = makeBracketryStartData(startGames)
+      const bracketData = makeBracketryStartData(result.start_games, result.bonus_games)
 
       const bracketOptions = {
         liveMatchBorderColor: "#ff4545",
+        matchStatusBgColor: "#5a9cd8",
         onMatchSideClick: (thisMatch, thisTopBottom) => {
           // if click is already on winner, don't do anything
           if (thisMatch.sides[thisTopBottom].isWinner) {
@@ -179,6 +181,14 @@ function populateRoundStart(args) {
           // highlight winner for clicked match
           thisMatch.sides[thisTopBottom].isWinner = true
           delete thisMatch.sides[1 - thisTopBottom].isWinner
+
+          // insert points for clicked match
+          if (thisMatch.sides[thisTopBottom].contestantId == thisMatch.prevPickWinner) {
+            thisMatch.matchStatus = String(2 ** (thisMatch.roundIndex + thisMatch.prevPickWinnerNum))
+          }
+          else {
+            thisMatch.matchStatus = String(2 ** thisMatch.roundIndex)
+          }
 
           // isLive used to show missing picks
           delete thisMatch.isLive
@@ -198,11 +208,13 @@ function populateRoundStart(args) {
             if (firstNext) {
               nextMatch.sides[nextTopBottom].contestantId = thisMatch.sides[thisTopBottom].contestantId 
               delete nextMatch.sides[nextTopBottom].title
+              delete nextMatch.matchStatus
               firstNext = false
             }
             else {
               nextMatch.sides[nextTopBottom].title = ""
               delete nextMatch.sides[nextTopBottom].contestantId
+              delete nextMatch.matchStatus
             }
 
             // can't delete isWinner once nextMatch is pushed, so save for later
@@ -224,6 +236,7 @@ function populateRoundStart(args) {
         }
       }
 
+      matches = bracketData.matches
       bracket = createBracket(bracketData, document.getElementById("bracketdiv"), bracketOptions)
     }
   })
@@ -292,7 +305,7 @@ function submitPicks() {
 }
 
 
-function makeBracketryStartData(startGames) {
+function makeBracketryStartData(startGames, bonusGames) {
   let data = {
     rounds: [],
     matches: [],
@@ -358,6 +371,15 @@ function makeBracketryStartData(startGames) {
     prevRoundGames /= 2
   }
 
+  // work through bonusGames to add multipliers and picks from last round
+  bonusGames.forEach(bonusGame => {
+    const [bonusRoundInd, bonusGameInd, bonusTeam, bonusNum] = bonusGame
+    const bonusGameIndAbs = roundOrderToAbs(bonusRoundInd, bonusGameInd, data.matches.length)
+
+    data.matches[bonusGameIndAbs].prevPickWinner = bonusTeam
+    data.matches[bonusGameIndAbs].prevPickWinnerNum = bonusNum
+  })
+
   return data
 }
 
@@ -379,3 +401,32 @@ function getNextMatch(bracketData, roundIndex, order) {
   return [nextMatchIndex == -1 ? null : bracketData.matches[nextMatchIndex], nextTopBottom]
 }
 
+
+function roundOrderToAbs(roundIndex, order, numMatches) {
+  if (numMatches === undefined) {
+    numMatches = matches.length
+  }
+
+  let gamesPerRound
+  if (numMatches == 63) {
+    gamesPerRound = [32, 16, 8, 4, 2, 1]
+  }
+  else if (numMatches == 31) {
+    gamesPerRound = [16, 8, 4, 2, 1]
+  }
+  else if (numMatches == 15) {
+    gamesPerRound = [8, 4, 2, 1]
+  }
+  else if (numMatches == 7) {
+    gamesPerRound = [4, 2, 1]
+  }
+  else if (numMatches == 3) {
+    gamesPerRound = [2, 1]
+  }
+  else if (numMatches == 1) {
+    gamesPerRound = [1]
+  }
+
+  // reduce takes sum of sliced array
+  return gamesPerRound.slice(0, roundIndex).reduce((a, b) => a + b, 0) + order
+}

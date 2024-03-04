@@ -18,6 +18,8 @@ Work in progress
 - Fully deploy
 - Set up webpack for production
 - Refactor shared js
+- About page
+- Rules page
 
 ## Lambdas
 #### calc_score
@@ -35,7 +37,8 @@ Work in progress
 #### get_round_start
 - GET: Returns list of games starting in given round to populate bracket
 - Input: year, cid, round_start
-- Output: [{"teams": [a,b], "seeds": [a,b]}, (round 0 game 1), (round 0 game 2), ...]
+- Output: {"start_games": [{"teams": [a,b], "seeds": [a,b]}, (round 0 game 1), (round 0 game 2), ...],
+           "bonus_games": [[round ind, game ind, team name, num correct],...]}
 #### update_picks
 - POST: Adds picks to a player's data file
 - Input: year, cid, pid, picks: [0/1 flat list of picks]
