@@ -32,7 +32,7 @@ function initBracketPage() {
 
   // check query params first, then local storage for year/comp
   if (params.has("year") && params.has("cid")) {
-    displayMode()
+    displayMode(params.get("year"), params.get("cid"), params.has("pid") ? params.get("pid") : "None")
     populateBracket({"year": params.get("year"),
       "cid": params.get("cid"),
       "pid": params.has("pid") ? params.get("pid") : "",
@@ -48,15 +48,18 @@ function initBracketPage() {
 
 function editMode() {
   $("#editbutton").hide()
+  $("#yeardisplay").hide()
+  $("#compdisplay").hide()
+  $("#playerdisplay").hide()
   $("#yearsel").show()
   $("#compsel").show()
   $("#playersel").show()
-  $("#rndinput").show()
   $("#yearlabel").show()
   $("#complabel").show()
   $("#playerlabel").show()
-  $("#rndlabel").show()
   $("#gobutton").show()
+  $("#buttondiv").removeClass("align-items-center")
+  $("#buttondiv").addClass("align-items-end")
 
   // first time we populate selects, call backend
   if (index === undefined) {
@@ -85,17 +88,23 @@ function editMode() {
 }
 
 
-function displayMode() {
+function displayMode(year, cid, pid) {
   $("#editbutton").show()
+  $("#yeardisplay").show()
+  $("#compdisplay").show()
   $("#yearsel").hide()
   $("#compsel").hide()
   $("#playersel").hide()
-  $("#rndinput").hide()
   $("#yearlabel").hide()
   $("#complabel").hide()
   $("#playerlabel").hide()
-  $("#rndlabel").hide()
   $("#gobutton").hide()
+  $("#buttondiv").removeClass("align-items-end")
+  $("#buttondiv").addClass("align-items-center")
+
+  $("#yearinsert").text(year)
+  $("#compinsert").text(cid)
+  $("#playerinsert").text(pid)
 
 }
 
