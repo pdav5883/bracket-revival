@@ -6,7 +6,6 @@ Work in progress
 - Handle browser error when request picks with no picks to make
 
 ## Advanced TODO
-- Improve UI for existing pages
 - How to manage round transitions (what if someone hasn't submitted picks)
 - Secret tokens with picks
 

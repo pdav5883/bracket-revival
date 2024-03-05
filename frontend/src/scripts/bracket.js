@@ -92,6 +92,7 @@ function displayMode(year, cid, pid) {
   $("#editbutton").show()
   $("#yeardisplay").show()
   $("#compdisplay").show()
+  $("#playerdisplay").show()
   $("#yearsel").hide()
   $("#compsel").hide()
   $("#playersel").hide()

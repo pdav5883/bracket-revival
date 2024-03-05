@@ -32,7 +32,7 @@ function initPickPage() {
   if (params.has("year") &&
       params.has("cid") &&
       params.has("pid")) {
-    displayMode()
+    displayMode(params.get("year"), params.get("cid"), params.get("pid"))
     populateRoundStart({"year": params.get("year"),
       "cid": params.get("cid"),
       "pid": params.get("pid")})
@@ -45,6 +45,9 @@ function initPickPage() {
 
 
 function editMode() {
+  $("#yeardisplay").hide()
+  $("#compdisplay").hide()
+  $("#playerdisplay").hide()
   $("#yearsel").show()
   $("#compsel").show()
   $("#playersel").show()
@@ -81,7 +84,10 @@ function editMode() {
 }
 
 
-function displayMode() {
+function displayMode(year, cid, pid) {
+  $("#yeardisplay").show()
+  $("#compdisplay").show()
+  $("#playerdisplay").show()
   $("#yearsel").hide()
   $("#compsel").hide()
   $("#playersel").hide()
@@ -91,6 +97,9 @@ function displayMode() {
   $("#gobutton").hide()
   $("#submitbutton").show()
 
+  $("#yearinsert").text(year)
+  $("#compinsert").text(cid)
+  $("#playerinsert").text(pid)
 }
 
 
