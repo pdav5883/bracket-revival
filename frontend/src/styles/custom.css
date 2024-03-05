@@ -7,9 +7,3 @@
 .form-label {
   font-weight: bold;
 }
-#scoreboardtable {
-  border-collapse: collapse;
-}
-#scoreboardtable td, th {
-  border: 1px solid;
-}

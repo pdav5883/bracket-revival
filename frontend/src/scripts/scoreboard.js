@@ -24,7 +24,7 @@ function initScoreboardPage() {
 
   // check query params first, then local storage for year/comp
   if (params.has("year") && params.has("cid")) {
-    displayMode()
+    displayMode(params.get("year"), params.get("cid"))
     populateScoreboard({"year": params.get("year"),
       "cid": params.get("cid"),
       "completedRounds": params.has("rounds") ? params.get("rounds") : ""
@@ -39,6 +39,8 @@ function initScoreboardPage() {
 
 function editMode() {
   $("#editbutton").hide()
+  $("#yeardisplay").hide()
+  $("#compdisplay").hide()
   $("#yearsel").show()
   $("#compsel").show()
   $("#rndinput").show()
@@ -46,6 +48,8 @@ function editMode() {
   $("#complabel").show()
   $("#rndlabel").show()
   $("#gobutton").show()
+  $("#buttondiv").removeClass("align-items-center")
+  $("#buttondiv").addClass("align-items-end")
 
   // first time we populate selects, call backend
   if (index === undefined) {
@@ -73,8 +77,10 @@ function editMode() {
 }
 
 
-function displayMode() {
+function displayMode(year, cid) {
   $("#editbutton").show()
+  $("#yeardisplay").show()
+  $("#compdisplay").show()
   $("#yearsel").hide()
   $("#compsel").hide()
   $("#rndinput").hide()
@@ -82,7 +88,11 @@ function displayMode() {
   $("#complabel").hide()
   $("#rndlabel").hide()
   $("#gobutton").hide()
+  $("#buttondiv").removeClass("align-items-end")
+  $("#buttondiv").addClass("align-items-center")
 
+  $("#yearinsert").text(year)
+  $("#compinsert").text(cid)
 }
 
 
@@ -135,7 +145,6 @@ function populateScoreboard(args) {
     crossDomain: true,
     success: function(result) {
       // {names: [], total_points: [], round_points: []}
-      const numRounds = result.round_points[0].length
 
       // reconfigure results to allow sorting
       let leaders = []
@@ -145,59 +154,66 @@ function populateScoreboard(args) {
 
       leaders.sort((a, b) => ((a.total >= b.total) ? -1 : 1))
 
-      // Table Header Contents
-      let roundNames = []
-
-      for (let i = numRounds; i > 0; i--) {
-        switch (i) {
-        case 1:
-          roundNames.push("Championship")
-          break
-        case 2:
-          roundNames.push("Final 4")
-          break
-        case 3:
-          roundNames.push("Elite 8")
-          break
-        case 4:
-          roundNames.push("Sweet 16")
-          break
-        default:
-          roundNames.push("Rnd of " + 2 ** i)
+      // add rank
+      if (leaders.length > 0) {
+        leaders[0].rank = 1
+        for (let i = 1; i < leaders.length; i++) {
+          if (leaders[i].total < leaders[i - 1].total) {
+            leaders[i].rank = leaders[i - 1].rank + 1
+          }
+          else {
+            leaders[i].rank = leaders[i - 1].rank
+          }
         }
       }
+
+      // Table Header Contents
+      let colLabels = [
+        "Rank",
+        "Name",
+        "Score",
+        "R1",
+        "R2",
+        "S16",
+        "E8",
+        "F4",
+        "CH"
+      ]
+
       let table = document.getElementById("scoreboardtable")
       table.innerHTML = ""
       let tableRow = table.insertRow()
-      let tableCell = document.createElement("th")
+      let tableCell
 
-      tableRow.appendChild(tableCell)
-
-      roundNames.forEach(rName => {
+      colLabels.forEach(cLab => {
         tableCell = document.createElement("th")
-        tableCell.textContent = rName
+        tableCell.textContent = cLab
         tableRow.appendChild(tableCell)
       })
-
-      tableCell = document.createElement("th")
-      tableCell.textContent = "TOTAL"
-      tableRow.appendChild(tableCell)
 
       let tablePlayer
       leaders.forEach(leader => {
         tableRow = table.insertRow()
+        tableCell = document.createElement("th")
+        tableCell.textContent = leader.rank
+        tableRow.appendChild(tableCell)
+
         tableCell = tableRow.insertCell()
         tablePlayer = document.createElement("a")
+        tablePlayer.classList.add("text-decoration-none")
         tablePlayer.textContent = leader.name
         tablePlayer.href = "/bracket.html?year=" + year + "&cid=" + cid + "&pid=" + leader.name
         tableCell.append(tablePlayer)
 
+        tableCell = tableRow.insertCell()
+        tableCell.textContent = leader.total
+
         leader.round.forEach(points => {
           tableCell = tableRow.insertCell()
           tableCell.textContent = points
+          tableCell.classList.add("text-muted")
         })
-        tableCell = tableRow.insertCell()
-        tableCell.textContent = leader.total
+
       })
     }
   })
