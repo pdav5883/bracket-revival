@@ -67,8 +67,7 @@ function populateResultsTable(year) {
     url: API_URL.bracket,
     data: {"year": year},
     crossDomain: true,
-    success: function(result) {
-      let gamesNested = result.games
+    success: function(gamesNested) {
 
       let table = document.getElementById("admintable")
       table.innerHTML = ""

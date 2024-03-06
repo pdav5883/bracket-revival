@@ -4,6 +4,8 @@ Work in progress
 ## TODO
 - Refactor js into shared utils
 - Handle browser error when request picks with no picks to make
+- Admin sending 200 status code when bad auth
+- Player creation is working, but response not showing on creation page
 
 ## Advanced TODO
 - How to manage round transitions (what if someone hasn't submitted picks)

@@ -67,6 +67,9 @@ def lambda_handler(event, context):
     # set all results beyond played rounds to None and hide picks beyond round
     if completed_rounds < trn.NUMROUNDS:
         played_games = sum(trn.GAMES_PER_ROUND[0:completed_rounds])
+        print(f"Completed round {completed_rounds}")
+        print(f"Results {results}")
+        print(f"Played games {played_games}")
         for i in range(played_games, trn.NUMGAMES):
             results[i] = None
             scores[i] = [None, None]

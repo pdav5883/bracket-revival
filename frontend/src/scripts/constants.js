@@ -1,8 +1,9 @@
 const BASE_URL_LOCAL = "http://0.0.0.0:5000"
-const BASE_URL_AWS = "https://3en8z5ljfi.execute-api.us-east-1.amazonaws.com/"
+const BASE_URL_AWS = "https://3en8z5ljfi.execute-api.us-east-1.amazonaws.com"
 
 //const BASE_URL = window.location.host.includes("localhost") ? BASE_URL_LOCAL : BASE_URL_AWS
 const BASE_URL = BASE_URL_AWS
+//const BASE_URL = BASE_URL_LOCAL
 
 export const API_URL = {
   scoreboard: BASE_URL + "/scoreboard",

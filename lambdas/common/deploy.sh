@@ -19,6 +19,7 @@ version=$(aws lambda list-layer-versions --layer-name bracket-revival-common | p
 
 # update lambdas to use new layer
 aws lambda update-function-configuration --function-name BracketAddElement --layers $version
+aws lambda update-function-configuration --function-name BracketAdminAuth --layers $version
 aws lambda update-function-configuration --function-name BracketAdminEdit --layers $version
 aws lambda update-function-configuration --function-name BracketGetBracket --layers $version
 aws lambda update-function-configuration --function-name BracketGetRoundStart --layers $version
