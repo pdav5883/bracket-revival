@@ -19,6 +19,7 @@ Work in progress
 - Refactor shared js
 - About page
 - Rules page
+- Home page
 
 ## Lambdas
 #### calc_score

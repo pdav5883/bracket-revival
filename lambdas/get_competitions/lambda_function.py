@@ -11,8 +11,9 @@ def lambda_handler(event, context):
 
     If no input, return index.json, if year/cid input return competition.json
     """
-    year = event["queryStringParameters"].get("year", None)
-    cid = event["queryStringParameters"].get("cid", None)
+    params = event.get("queryStringParameters", {})
+    year = params.get("year", None)
+    cid = params.get("cid", None)
 
     if year is None or cid is None:
         return utils.read_file("index.json")

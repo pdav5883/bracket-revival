@@ -11,7 +11,7 @@ rm -rf _tmp
 # update layer in AWS
 aws lambda publish-layer-version \
     --layer-name bracket-revival-common \
-    --zip-file fileb:///home/peter/Projects/bracket-revival/lambdas/common/common.zip \
+    --zip-file fileb://`pwd`/common.zip \
     --description "$1" \
     --compatible-runtimes python3.10
 
@@ -19,6 +19,11 @@ version=$(aws lambda list-layer-versions --layer-name bracket-revival-common | p
 
 # update lambdas to use new layer
 aws lambda update-function-configuration --function-name BracketAddElement --layers $version
-aws lambda update-function-configuration --function-name BracketGetCompetitions --layers $version
+aws lambda update-function-configuration --function-name BracketAdminEdit --layers $version
+aws lambda update-function-configuration --function-name BracketGetBracket --layers $version
+aws lambda update-function-configuration --function-name BracketGetRoundStart --layers $version
+aws lambda update-function-configuration --function-name BracketGetScoreboard --layers $version
+aws lambda update-function-configuration --function-name BracketUpdatePicks --layers $version
+aws lambda update-function-configuration --function-name BracketUpdateScoreboard --layers $version
 
 

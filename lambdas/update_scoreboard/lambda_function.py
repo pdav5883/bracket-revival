@@ -7,13 +7,8 @@ from common import utils
 
 def lambda_handler(event, context):
     """
-    POST request (GET for testing)
+    GET request (should really be POST, but much easier this way)
     """
-    #body = json.loads(event["body"])
-    #year = body.get("year")
-    #cid = body.get("cid").replace(" ", "").lower()
-
-    # for testing only
     year = event["queryStringParameters"].get("year")
     cid = event["queryStringParameters"].get("cid")
 

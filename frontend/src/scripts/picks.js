@@ -354,7 +354,7 @@ function submitPicks() {
 
   $.ajax({
     method: "POST",
-    url: API_URL.update,
+    url: API_URL.picks,
     contentType: "application/json; charset=utf-8",
     data: JSON.stringify(data),
     crossDomain: true,

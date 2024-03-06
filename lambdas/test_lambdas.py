@@ -1,6 +1,5 @@
 import json
 
-from calc_score import lambda_function as calc_score
 from update_picks import lambda_function as update_picks
 from get_bracket import lambda_function as get_bracket
 from get_round_start import lambda_function as get_round_start
@@ -18,15 +17,7 @@ app = Flask(__name__)
 CORS(app)
 
 
-@app.route("/score", methods=["GET"])
-def score_function():
-    event = make_event()
-    data = calc_score.lambda_handler(event, None)
-
-    return jsonify(data)
-
-
-@app.route("/update", methods=["POST"])
+@app.route("/picks", methods=["POST"])
 def update_function():
     event = make_event()
     data = update_picks.lambda_handler(event, None)
