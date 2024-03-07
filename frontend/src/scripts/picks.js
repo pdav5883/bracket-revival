@@ -309,6 +309,7 @@ function prepopulateBracket(bracketData) {
 
 function submitPicks() {
   $("#statustext").text("")
+  $("#submitbutton").prop("disabled", true)
 
   let matches = bracket.getAllData().matches
 
@@ -323,6 +324,7 @@ function submitPicks() {
 
   if (incomplete.length > 0) {
     $("#statustext").text("Error: " + String(incomplete.length) + " missing picks")
+    $("#submitbutton").prop("disabled", false)
     bracket.applyMatchesUpdates(incomplete)
     return
   }
@@ -359,9 +361,11 @@ function submitPicks() {
     data: JSON.stringify(data),
     crossDomain: true,
     success: function() {
+      $("#submitbutton").prop("disabled", false)
       $("#statustext").text("Submission successful!")
     },
     failure: function() {
+      $("#submitbutton").prop("disabled", false)
       $("#statustext").text("Server Error: TODO")
     }
   })

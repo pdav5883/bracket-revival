@@ -7,15 +7,11 @@ Work in progress
 - Admin sending 200 status code when bad auth
 - Admin team get not working bc of change to GetBracket
 
-- When to sync scoreboard:
-	- Any admin action
-	- New player added
-	- Picks submitted
-
 ## Advanced TODO
 - How to manage round transitions (what if someone hasn't submitted picks)
 - Secret tokens with picks
 
+- Pick populate if game completed is still giving results for extra round, then not tripping failure function
 - Scoreboard shows game status and who has submitted picks
 - Set up bracketry for mobile
 - Test page to play smaller version to understand rules
@@ -31,6 +27,8 @@ Work in progress
 - Admin add game
 - Admin add year
 - Admin delete game
+- Picks reset button
+- Picks see previous bracket button
 - Admin delete player
 
 ## Lambdas
