@@ -5,6 +5,7 @@ Work in progress
 - Refactor js into shared utils
 - Handle browser error when request picks with no picks to make
 - Admin sending 200 status code when bad auth
+- Admin team get not working bc of change to GetBracket
 
 - When to sync scoreboard:
 	- Any admin action

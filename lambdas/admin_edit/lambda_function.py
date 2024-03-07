@@ -80,8 +80,12 @@ def update_results(year, new_data):
     # update results.json file
     utils.write_file(obj_key, write_data)
 
-    return {"statusCode": 200,
-            "body": "Successful update"}
+    # sync scoreboard for all competitions in year
+    index = utils.read_file("index.json")
+    for cid in index[year]:
+        utils.trigger_sync(year, cid.replace(" ", "").lower())
+
+    return {"body": "Successful results update"}
 
 
 def update_teams(year, new_teams):
@@ -108,8 +112,7 @@ def update_teams(year, new_teams):
 
     utils.write_file(obj_key, new_data)
 
-    return {"statusCode": 200,
-            "body": "Successful update"}
+    return {"body": "Successful teams update"}
 
 
 def update_competition(year, cid, new_competition):
@@ -134,6 +137,7 @@ def update_competition(year, cid, new_competition):
             old_player_key = year + "/" + cid.replace(" ", "").lower()  + "/" + old_pid + ".json"
             new_player_key = year + "/" + cid.replace(" ", "").lower()  + "/" + new_pid + ".json"
 
+            # update {name}.json
             player = utils.read_file(old_player_key)
             player["pid"] = new_pid
             player["name"] = new_name
@@ -156,5 +160,10 @@ def update_competition(year, cid, new_competition):
     print(f"TO:")
     print(new_data)
 
+    # update competition.json
     utils.write_file(competition_key, new_data)
 
+    # sync scoreboard
+    utils.trigger_sync(year, cid)
+
+    return {"body": "Successful competition update"}

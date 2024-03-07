@@ -45,6 +45,9 @@ def lambda_handler(event, context):
     
     utils.write_file(player_key, player)
 
-    return f"Successfully added new picks for round {rnd} to player {pid} in game {cid}"
+    # sync scoreboard
+    utils.trigger_sync(year, cid)
+    
+    return {"body": f"Successfully added new picks for round {rnd} to player {pid} in game {cid}"}
 
 
