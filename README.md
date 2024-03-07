@@ -2,34 +2,36 @@
 Work in progress
 
 ## TODO
+- Pick secret tokens
+- Update player.json to include email
+- Email to make picks
+- Error handling
+	- Requesting picks when all picks made
+	- Requesting picks when picks can't be made yet
+	- Admin auth failure
+- Game open/close to new players
+- Rules page
+- About page
+- Admin page
+	- Fix team name edit (not working bc of change to GetBracket)
+	- Add game (can do with curl)
+	- Delete game
+	- Add year (can do with curl)
+	- Delete player
+- Home page
+- Figure out how to manage round transitions in real time
+- Figure out how to manage picks not submitted
+- Test page to play smaller version to understand rules
+- Button on picks page to reset bracket
+- Button on picks page to see previous bracket
+- Deploy frontend, with webpack in production
+
+# Maybe TODO
 - Refactor js into shared utils
-- Handle browser error when request picks with no picks to make
-- Admin sending 200 status code when bad auth
-- Admin team get not working bc of change to GetBracket
-
-## Advanced TODO
-- How to manage round transitions (what if someone hasn't submitted picks)
-- Secret tokens with picks
-
-- Pick populate if game completed is still giving results for extra round, then not tripping failure function
 - Scoreboard shows game status and who has submitted picks
 - Set up bracketry for mobile
-- Test page to play smaller version to understand rules
-- Email/text reminders
+- Email reminders
 - Team logos
-- Deploy to AWS without html extension
-- Fully deploy
-- Set up webpack for production
-- Refactor shared js
-- About page
-- Rules page
-- Home page
-- Admin add game
-- Admin add year
-- Admin delete game
-- Picks reset button
-- Picks see previous bracket button
-- Admin delete player
 
 ## Lambdas
 #### calc_score
