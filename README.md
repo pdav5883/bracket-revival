@@ -13,7 +13,6 @@ Work in progress
 - Rules page
 - About page
 - Admin page
-	- Fix team name edit (not working bc of change to GetBracket)
 	- Add game (can do with curl)
 	- Delete game
 	- Add year (can do with curl)
@@ -27,6 +26,7 @@ Work in progress
 - Deploy frontend, with webpack in production
 
 # Maybe TODO
+- Load page once all formatting is ready to avoid jump from unformatted
 - Refactor js into shared utils
 - Scoreboard shows game status and who has submitted picks
 - Set up bracketry for mobile
