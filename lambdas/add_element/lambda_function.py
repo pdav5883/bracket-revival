@@ -17,7 +17,7 @@ def lambda_handler(event, context):
            - playername (for player)
     Output: None
     """
-    # for testing only, allow GET request
+    # allow GET requests for testing
     if len(event.get("queryStringParameters", {})) > 0:
         typ = event["queryStringParameters"].get("type")
         year = event["queryStringParameters"].get("year", None)
@@ -169,6 +169,9 @@ def add_player(year, compname, playername):
     index[year][competition["name"]].append(playername)
     
     utils.write_file("index.json", index)
+
+    # sync scoreboard
+    utils.trigger_sync(year, cid)
 
     return {"body": f"Successfully created new player {playername} in competition {compname} in year {year}"}
 

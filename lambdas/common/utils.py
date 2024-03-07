@@ -59,7 +59,8 @@ def write_file_s3(key, data):
 
 
 def delete_file_s3(key):
-    pass
+    response = s3.delete_object(Bucket=bucket, Key=key)
+    return None
 
 
 def read_parameter_ssm(name):
@@ -67,6 +68,19 @@ def read_parameter_ssm(name):
         return ssm.get_parameter(Name=name)["Parameter"]["Value"]
     except ClientError as e:
         return None
+
+
+def trigger_sync_sns(year, cid):
+    msg = json.dumps({"year": year, "cid": cid.replace(" ", "").lower()})
+    response = sns.publish(TopicArn=sync_topic_arn, Message=msg)
+    return None
+
+
+def trigger_sync_local(year, cid):
+    cid = cid.replace(" ", "").lower()
+
+    print(f"Cannot perform local auto sync. Run manually in browser by visiting [local host]sync?year={year}&cid={cid}")
+    return None
 
 
 # allow switch to local testing with env variables
@@ -78,14 +92,18 @@ if "BRACKET_REVIVAL_LOCAL_PREFIX" in os.environ:
     write_file = write_file_local
     delete_file = delete_file_local
     read_parameter = read_parameter_local
+    trigger_sync = trigger_sync_local
 
 else:
     bucket = "bracket-revival-private"
+    sync_topic_arn = "arn:aws:sns:us-east-1:014374244911:bracket-revival-sync-topic"
     s3 = boto3.client("s3")
     ssm = boto3.client("ssm")
+    sns = boto3.client("sns")
 
     key_exists = key_exists_s3
     read_file = read_file_s3
     write_file = write_file_s3
     delete_file = delete_file_s3
     read_parameter = read_parameter_ssm
+    trigger_sync = trigger_sync_sns

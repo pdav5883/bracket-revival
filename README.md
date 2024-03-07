@@ -5,12 +5,17 @@ Work in progress
 - Refactor js into shared utils
 - Handle browser error when request picks with no picks to make
 - Admin sending 200 status code when bad auth
-- Player creation is working, but response not showing on creation page
+
+- When to sync scoreboard:
+	- Any admin action
+	- New player added
+	- Picks submitted
 
 ## Advanced TODO
 - How to manage round transitions (what if someone hasn't submitted picks)
 - Secret tokens with picks
 
+- Scoreboard shows game status and who has submitted picks
 - Set up bracketry for mobile
 - Test page to play smaller version to understand rules
 - Email/text reminders
@@ -22,6 +27,10 @@ Work in progress
 - About page
 - Rules page
 - Home page
+- Admin add game
+- Admin add year
+- Admin delete game
+- Admin delete player
 
 ## Lambdas
 #### calc_score

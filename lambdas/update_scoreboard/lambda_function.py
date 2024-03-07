@@ -8,9 +8,18 @@ from common import utils
 def lambda_handler(event, context):
     """
     GET request (should really be POST, but much easier this way)
+
+    or
+
+    SNS topic subscription
     """
-    year = event["queryStringParameters"].get("year")
-    cid = event["queryStringParameters"].get("cid")
+    if "queryStringParameters" in event:
+        year = event["queryStringParameters"].get("year")
+        cid = event["queryStringParameters"].get("cid")
+    elif "Records" in event:
+        msg = json.loads(event["Records"][0]["Sns"]["Message"])
+        year = msg.get("year")
+        cid = msg.get("cid")
 
     # TODO: assert arguments exist
 
