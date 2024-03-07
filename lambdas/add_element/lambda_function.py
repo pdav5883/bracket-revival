@@ -81,7 +81,7 @@ def add_year(year):
     index[str(year)] = {}
     utils.write_file("index.json", index)
 
-    return f"Successfully created new year {year}"
+    return {"body": f"Successfully created new year {year}"}
 
 
 def add_competition(year, compname):
@@ -121,7 +121,7 @@ def add_competition(year, compname):
     index[year][compname] = []
     utils.write_file("index.json", index)
 
-    return f"Successfully created new competition {compname} in year {year}"
+    return {"body": f"Successfully created new competition {compname} in year {year}"}
 
 
 def add_player(year, compname, playername):
@@ -170,7 +170,7 @@ def add_player(year, compname, playername):
     
     utils.write_file("index.json", index)
 
-    return f"Successfully created new player {playername} in competition {compname} in year {year}"
+    return {"body": f"Successfully created new player {playername} in competition {compname} in year {year}"}
 
 
 
