@@ -29,6 +29,10 @@ def delete_file_local(key):
     os.remove(prefix + key)
 
 
+def delete_directory_local(key):
+    os.rmdir(prefix + key)
+
+
 def read_parameter_local(name):
     """
     For testing always return test
@@ -63,6 +67,11 @@ def delete_file_s3(key):
     return None
 
 
+def delete_directory_s3(key):
+    # directories don't exist in S3
+    return None
+
+
 def read_parameter_ssm(name):
     try:
         return ssm.get_parameter(Name=name)["Parameter"]["Value"]
@@ -91,6 +100,7 @@ if "BRACKET_REVIVAL_LOCAL_PREFIX" in os.environ:
     read_file = read_file_local
     write_file = write_file_local
     delete_file = delete_file_local
+    delete_directory = delete_directory_local
     read_parameter = read_parameter_local
     trigger_sync = trigger_sync_local
 
@@ -105,5 +115,6 @@ else:
     read_file = read_file_s3
     write_file = write_file_s3
     delete_file = delete_file_s3
+    delete_directory = delete_directory_s3
     read_parameter = read_parameter_ssm
     trigger_sync = trigger_sync_sns

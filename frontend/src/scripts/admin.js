@@ -144,14 +144,21 @@ function populateCompetitionTable(year, cid) {
       let table = document.getElementById("admintable")
       table.innerHTML = ""
 
-      // open picks
+      // delete game
       let row = table.insertRow()
-      
       let cell = row.insertCell()
+      let input = makeCheckboxInput("delete_competition", "Delete Competition?")
+      cell.appendChild(input[0])
+      input[1].classList.add("form-label")
+      cell.appendChild(input[1])
+
+      // open picks
+      row = table.insertRow()
+      cell = row.insertCell()
       cell.textContent = "Open Picks"
       
       cell = row.insertCell()
-      let input = makeBooleanSelect("selpicks", result.open_picks)
+      input = makeBooleanSelect("selpicks", result.open_picks)
       cell.appendChild(input)
 
       // completed rounds
@@ -172,13 +179,13 @@ function populateCompetitionTable(year, cid) {
         cell = row.insertCell()
         input = makeTextInput("new_" + i, 10, name)
         cell.appendChild(input)
+
+        // add delete checkbox
+        cell = row.insertCell()
+        input = makeCheckboxInput("delete_" + i, "Delete?")
+        cell.appendChild(input[0]) // checkbox
+        cell.appendChild(input[1]) // label
       })
-      
-      // completed_rounds
-      //
-      // open_picks
-      //
-      // names are keys in scoreboard 
     }
   })
 }
@@ -265,6 +272,18 @@ function makeTextInput(id, numchar=2, current="") {
   input.setAttribute("value", current)
 
   return input
+}
+
+function makeCheckboxInput(id, labelStr) {
+  let input = document.createElement("input")
+  input.setAttribute("type", "checkbox")
+  input.setAttribute("id", id)
+
+  let label = document.createElement("label")
+  label.textContent = labelStr
+  label.setAttribute("for", id)
+  
+  return [input, label]
 }
 
 
@@ -368,9 +387,16 @@ function submitCompetitionEdits() {
 
   for (let i = 0; i < numPlayers; i++) {
     players[$("#old_" + i).text()] = $("#new_" + i).val()
+
+    // setting player to null deletes from competition
+    if ($("#delete_" + i).is(":checked")) {
+      players[$("#old_" + i).text()] = null
+    }
   }
 
-  const data = {"completed_rounds": parseInt($("#inprounds").val()),
+  const data = {
+    "delete_competition": $("#delete_competition").is(":checked"),
+    "completed_rounds": parseInt($("#inprounds").val()),
     "open_picks": $("#selpicks").val(),
     "players": players}
 

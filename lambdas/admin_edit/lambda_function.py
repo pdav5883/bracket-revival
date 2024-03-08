@@ -17,9 +17,10 @@ with etype argument in request body:
     - etype=results: {"results": [0/1/None,....],
                       "scores": [[#/None, #/None],...]}
     - etype=teams: [[name, shortname],...] where order is same as
-    - etype=competition: {"completed_rounds":,
+    - etype=competition: {"delete_competition":,
+                          "completed_rounds":,
                           "open_picks",
-                          "players": {old_name: new_name,...}}
+                          "players": {old_name: new_name,...}} if new_name is None,  delete the player
     bracket order in teams.json
     - etype=competition TODO
 """
@@ -119,6 +120,23 @@ def update_competition(year, cid, new_competition):
     competition_key = year + "/" + cid.replace(" ", "").lower() + "/competition.json"
     old_competition = utils.read_file(competition_key)
 
+    delete_competition = new_competition.pop("delete_competition")
+
+    if delete_competition:
+        # remove all pid.json, competition.json, update index.json
+        for playername in old_competition["scoreboard"]:
+            player_key = year + "/" + cid.replace(" ", "").lower() + "/" + playername.replace(" ", "").lower() + ".json"
+            utils.delete_file(player_key)
+
+        utils.delete_file(competition_key)
+        utils.delete_directory(year + "/" + cid.replace(" ", ""))
+
+        index = utils.read_file("index.json")
+        index[year].pop(cid)
+        utils.write_file("index.json", index)
+
+        return
+
     # validation checks TODO
 
     # start from old competition
@@ -129,7 +147,22 @@ def update_competition(year, cid, new_competition):
 
     # for player name edits, must update competition.json, index.json, {name}.json, and change filename
     for old_name, new_name in new_competition["players"].items():
-        if old_name != new_name:
+        if new_name is None:
+            print(f"Deleting player name {old_name} from competition")
+            old_pid = old_name.replace(" ", "").lower()
+            old_player_key = year + "/" + cid.replace(" ", "").lower()  + "/" + old_pid + ".json"
+            utils.delete_file(old_player_key)
+
+            # update competition.json
+            new_data["scoreboard"].pop(old_name)
+
+            # update index.json
+            index = utils.read_file("index.json")
+            player_list = index[year][new_data["name"]] # competition is under full name in index.json
+            player_list.remove(old_name)
+            utils.write_file("index.json", index)
+
+        elif old_name != new_name:
             print(f"Replace player name {old_name} with {new_name}")
             old_pid = old_name.replace(" ", "").lower()
             new_pid = new_name.replace(" ", "").lower()
