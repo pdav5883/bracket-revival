@@ -1,6 +1,11 @@
 # bracket-revival
 Work in progress
 
+## WIP
+- Show/hide email field in newplayer.js
+- Respect require_secret and open_picks in update_picks
+- Pass through secret in picks.js
+
 ## TODO
 - Pick secret tokens
 - Update player.json to include email
@@ -13,14 +18,15 @@ Work in progress
 - Rules page
 - About page
 - Home page
-- Figure out how to manage round transitions in real time
-- Figure out how to manage picks not submitted
+- Send email script
+- Populate missing picks script
 - Test page to play smaller version to understand rules
 - Button on picks page to reset bracket
 - Button on picks page to see previous bracket
 - Deploy frontend, with webpack in production
+- License and ref to bracketry
 
-# Maybe TODO
+## Maybe TODO
 - Load page once all formatting is ready to avoid jump from unformatted
 - Refactor js into shared utils
 - Scoreboard shows game status and who has submitted picks
@@ -28,6 +34,28 @@ Work in progress
 - Email reminders
 - Team logos
 
+### Real-time game flow
+- Year is created
+- Admin edits teams.json to create bracket
+- Game is created, set `open_players=true`, `open_picks=true`, `completed_rounds=0`
+- Player is created, visits picks.html to make picks64
+- First game in first round begins, set `open_players=false`, `open_picks=false`, `completed_rounds=1`
+- Admin edits results.json with scores, scoreboard will update with points
+- Last game in first round completes, set `open_picks=true`, run send emails for picks links/reminders
+- First game in second round begins, set `open_picks=false`, `completed_rounds=2`, run auto-pick script
+- Admin edits results.json with scores
+- ...
+
+## Data Model
+index.json - {"yr": {"Comp Name 1": ["Name 1",...],  "Comp Name 2",...},...}
+/{year}
+  teams.json - list of teams with {"name", "short_name", "seed"}
+  results.json - {"results": list of 0/1/null, "score": list of [a,b]/null}
+  /{cid}
+    competition.json - state of competition {"cid": "lowernospaces", "name": "Actual Name" , "completed_rounds": N, "open_picks": true/false, "open_players": true/false, "require_secret": true/false
+                                             "scoreboard": {"Actual pName": [r0, r1, ...],...}}
+    {pid}.json - {"pid": "lowernospaces", "name": "Actual Name", "picks": [[],[],..], "email": (opt), "secret": (opt) }
+ 
 ## Lambdas
 #### calc_score
 - GET: Reads data files and returns flat list of points for each game
@@ -63,47 +91,34 @@ Work in progress
 	- Assumes that all player names have been added to competition.json
 - Input: year, cid
 - Output: None
-#### add_player
-- POST: Adds a new player to competition
-	- Adds player name to competition.json scoreboard
-	- Adds player name to index.json
-	- Adds pid.json file in competition dir
-- WIP
-#### add_competition
-- POST: Adds a new competition to year
-	- Adds a new competition dir with competition.json
-	- Adds competition name to index.json
-- WIP
-#### add_year
-- POST: Adds a new year
-	- Adds year dir, results.json, teams.json empty
-	- Adds year to index.json
-- WIP
+#### add_element
+- POST: Adds a new year/competition/player
 
-## How to Test
+## Testing
 - In terminal 1:
 	- `cd frontend`
-	- `python -m http.server`
-- In terminal 2:
+	- In `frontend/src/scripts/constants.js` uncomment `BASE_URL = BASE_URL_LOCAL` if local backend desired 
+	- `npm run serve`
+- In terminal 2: (optional if local backend desired)
 	-`cd lambdas`
 	- Activate venv with flask, flask_cors, boto3
-	- `export BRACKET_REVIVAL_LOCAL_PREFIX="../test_data/"` 
+	- `export BRACKET_REVIVAL_LOCAL_PREFIX="../test_data/"`
 	- `python -m test_lambdas`
 - In browser go to `localhost:8000/{page}.html` 
-
-## Data Model
-index.json - {"yr": {"Comp Name 1": ["Name 1",...],  "Comp Name 2",...},...}
-/{year}
-  teams.json - list of teams with {"name", "short_name", "seed"}
-  results.json - {"results": list of 0/1/null, "score": list of [a,b]/null}
-  /{cid}
-    competition.json - state of competition {"cid": "lowernospaces", "name": "Actual Name" , "completed_rounds": N, "open_picks": true/false (can make any picks any time)
-                                             "scoreboard": {"Actual pName": [r0, r1, ...],...}}
-    {pid}.json - {"pid": "lowernospaces", "name": "Actual Name", "picks": [[],[],..]}
-  
+ 
+## Questions/Misc Thoughts
+- How should I take care of controlling when pick submissions are allowed? Plan use a combo of open_picks and completed_rounds in competition.json. open_picks must be true, and completed_rounds must be >= to the round submission being attempted. 
+- index.json will contain all years, cids, and player names. This may not scale well, but get to that problem if it becomes one. For now it's simpler to pass all this data at once rather than create a new endpoit just to grab names whenever a new cid is selected in bracket dropdown.
+- How much data does the backend send back for get_bracket?
+	- Backend will look at three sources to determine how much data to send.
+	- 1. completed_rounds in competition.json. If completed_rounds = 1, then it will show all available results and picks for round 0.
+	- 2. completed_rounds in query param. Same behavior as #1
+	- 3. Picks made by pid. If pid has only submitted picks for round 0 and round 1, this is equivalent to setting completed_rounds = 2. 
+	- Rationale: this pushes complexity from the frontend to the backend, where I can write better code. This way I can also use completed_rounds in competition.json to hide picks from other players until a round starts. For example, with completed_rounds = 0, players wouldn't be able to see anyone elses picks. Then once the first rounds starts I'd set completed_rounds = 1 and all picks would be visible. Downside is that players would not be able to see their own picks until the round starts. (Could get around this by allowing edits).
+- If you change your pick to have a team keep going when you had them going out, should you get all the bonus?
+	- No bonus should be awarded based on when the pick is made, not whether you correctly picked the team to this point. If you switch a pick in the current round, that pick should always be worth 1.
 
 ## Computing Points
-- Play in game? NO
 1. current pick is correct: point = 1, else point = 0 and break
 2. loop through prev rounds: current pick is correct and children back to that round are correct: point * K, else break
 
@@ -119,78 +134,3 @@ index.json - {"yr": {"Comp Name 1": ["Name 1",...],  "Comp Name 2",...},...}
 	- Prev: pick = result
 	- Prev-prev: pick = result
 	- points MULT
-## Questions/Misc Thoughts
-- How should I take care of controlling when pick submissions are allowed? Plan use a combo of open_picks and completed_rounds in competition.json. open_picks must be true, and completed_rounds must be >= to the round submission being attempted. 
-- index.json will contain all years, cids, and player names. This may not scale well, but get to that problem if it becomes one. For now it's simpler to pass all this data at once rather than create a new endpoit just to grab names whenever a new cid is selected in bracket dropdown.
-- How much data does the backend send back for get_bracket?
-	- Backend will look at three sources to determine how much data to send.
-	- 1. completed_rounds in competition.json. If completed_rounds = 1, then it will show all available results and picks for round 0.
-	- 2. completed_rounds in query param. Same behavior as #1
-	- 3. Picks made by pid. If pid has only submitted picks for round 0 and round 1, this is equivalent to setting completed_rounds = 2. 
-	- Rationale: this pushes complexity from the frontend to the backend, where I can write better code. This way I can also use completed_rounds in competition.json to hide picks from other players until a round starts. For example, with completed_rounds = 0, players wouldn't be able to see anyone elses picks. Then once the first rounds starts I'd set completed_rounds = 1 and all picks would be visible. Downside is that players would not be able to see their own picks until the round starts. (Could get around this by allowing edits).
-- If you change your pick to have a team keep going when you had them going out, should you get all the bonus?
-	- No bonus should be awarded based on when the pick is made, not whether you correctly picked the team to this point. If you switch a pick in the current round, that pick should always be worth 1.
-
-## References
-- https://github.com/TheChipmunks/react-tournament-bracket
-
-truth [0, 1, 1, 0, 0, 1, 1]
-
-test1 [[0, 0, 1, 1, 0, 0, 1], [0, 1, 0], [1]]
-        1  0  1  0                2  1    1  = 6
-
-test2 [[1, 0, 0, 0, 0, 1, 1], [0, 1, 1], [1]]
-        0  0, 0, 1             1  2       4 = 8  
-1
--1
-2
-   1
-3
--4
-4
-       7
-5
--6
-6
-   7
-7
--7
-8
-
-
-
-0 
-1  32
-2
-3  33 48
-4
-5  34
-6
-7  35 49 56
-
-8
-9  36
-10
-11 37 50
-12
-13 38
-14
-15 39 51 57 60
-
-16
-17 40
-18
-19 41 52
-20
-21 42
-22
-23 43 53 58
-
-24
-25 44
-26
-27 45 54
-28
-29 46
-30
-31 47 55 59 61 62

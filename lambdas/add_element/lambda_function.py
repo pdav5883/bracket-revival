@@ -3,6 +3,8 @@
 
 import json 
 import os
+import random
+import string
 
 from common import utils
 from common import tournament as trn
@@ -112,7 +114,9 @@ def add_competition(year, compname):
                    "name": compname,
                    "scoreboard": {},
                    "completed_rounds": 0,
-                   "open_picks": True}
+                   "open_picks": False,
+                   "open_players": False,
+                   "require_secret": False}
 
     utils.write_file(competition_key, competition)
 
@@ -124,7 +128,7 @@ def add_competition(year, compname):
     return {"body": f"Successfully created new competition {compname} in year {year}"}
 
 
-def add_player(year, compname, playername):
+def add_player(year, compname, playername, playeremail=None):
     """
     Adds pid.json. Competition must already exist
     """
@@ -142,11 +146,17 @@ def add_player(year, compname, playername):
     pid = playername.replace(" ", "").lower()
 
     competition_key = year + "/" + cid + "/competition.json"
+    competition = utils.read_file(competition_key)
+
+    if not competition["open_players"]:
+        return {"statusCode": 400,
+                "body": f"Competiton {compname} is not accepting new players"}
+    
     player_key = year + "/" + cid + "/" + pid + ".json"
 
     if not utils.key_exists(competition_key):
         return {"statusCode": 400,
-                "body": f"Competition {cid} does not yet exist"}
+                "body": f"Competition {compname} does not yet exist"}
 
     if utils.key_exists(player_key):
         return {"statusCode": 400,
@@ -156,10 +166,17 @@ def add_player(year, compname, playername):
               "name": playername,
               "picks": []}
 
+    if competition["require_secret"]:
+        if playeremail is None:
+            return {"statusCode": 400,
+                    "body": "Request requires playeremail parameter"}
+
+        player["email"] = email
+        player["secret"] = "".join(random.choices(string.ascii_lowercase, k=6))
+
     utils.write_file(player_key, player)
 
     # update competition file
-    competition = utils.read_file(competition_key)
     competition["scoreboard"][playername] = []
     utils.write_file(competition_key, competition)
 
@@ -167,7 +184,6 @@ def add_player(year, compname, playername):
     #  want to be robust to the compname input being the cid
     index = utils.read_file("index.json")
     index[year][competition["name"]].append(playername)
-    
     utils.write_file("index.json", index)
 
     # sync scoreboard
