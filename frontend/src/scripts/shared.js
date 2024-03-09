@@ -5,6 +5,37 @@ import "bootstrap/dist/css/bootstrap.min.css"
 import "bootstrap"
 
 
+export function initIndexYears(setIndexCallback) {
+  // need the setIndexCallback argument to allow calling script to set index,
+  // since returning from this function will happen before ajax query completes
+  $.ajax({
+    method: "GET",
+    url: API_URL.competitions,
+    data: {},
+    crossDomain: true,
+    success: function(index) {
+
+      //populate years
+      let yearOpt
+      for (const year in index) {
+        yearOpt = document.createElement("option")
+        yearOpt.value = year
+        yearOpt.textContent = year
+        $("#yearsel").append(yearOpt)
+      }
+
+      // this must happen before .change() below, which requires index
+      setIndexCallback(index)
+      
+      // set to latest year with change to populate competitions
+      $("#yearsel").val(yearOpt.value).change()
+
+
+    }
+  })
+}
+
+
 export function populateCompetitions(index) {
   $("#compsel").empty()
 

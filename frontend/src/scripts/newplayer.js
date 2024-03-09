@@ -1,5 +1,5 @@
 import { API_URL } from "./constants.js" 
-import { populateCompetitions } from "./shared.js"
+import { initIndexYears, populateCompetitions } from "./shared.js"
 import $ from "jquery"
 
 let index
@@ -24,7 +24,9 @@ function initNewPlayerPage() {
     initSingleYearCompetition(params.get("year"), params.get("compname"))
   }
   else {
-    initAllYearsCompetitions()
+    initIndexYears(function(ind) {
+      index = ind
+    })
   }
 }
 
@@ -41,30 +43,6 @@ function initSingleYearCompetition(year, compName) {
   opt.textContent = compName
   $("#compsel").append(opt)
   $("#compsel").val(compName)
-}
-
-
-function initAllYearsCompetitions() {
-  $.ajax({
-    method: "GET",
-    url: API_URL.competitions,
-    data: {},
-    crossDomain: true,
-    success: function(result) {
-      index = result
-
-      //populate years
-      let yearOpt
-      for (const year in index) {
-        yearOpt = document.createElement("option")
-        yearOpt.value = year
-        yearOpt.textContent = year
-        $("#yearsel").append(yearOpt)
-      }
-      // set to latest year with change to populate competitions
-      $("#yearsel").val(yearOpt.value).change()
-    }
-  })
 }
 
 

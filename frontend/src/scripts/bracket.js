@@ -1,8 +1,7 @@
 // API_URL is in global namespace from constants.js
 
 import { API_URL, ROUND_NAMES } from "./constants.js" 
-import { populateCompetitions } from "./shared.js"
-import { populatePlayerNames } from "./shared.js"
+import { initIndexYears, populateCompetitions, populatePlayerNames } from "./shared.js"
 import { createBracket } from "bracketry"
 import { Modal } from "bootstrap"
 import $ from "jquery"
@@ -65,26 +64,8 @@ function editMode() {
 
   // first time we populate selects, call backend
   if (index === undefined) {
-    $.ajax({
-      method: "GET",
-      url: API_URL.competitions,
-      data: {},
-      crossDomain: true,
-      success: function(result) {
-        index = result
-
-        //populate years
-        let yearOpt
-        for (const year in index) {
-          yearOpt = document.createElement("option")
-          yearOpt.value = year
-          yearOpt.textContent = year
-          $("#yearsel").append(yearOpt)
-        }
-
-        // set to latest year with change to populate competitions
-        $("#yearsel").val(yearOpt.value).change()
-      }
+    initIndexYears(function(ind) {
+      index = ind
     })
   }
 }
