@@ -28,9 +28,9 @@ export function initIndexYears(setIndexCallback) {
       setIndexCallback(index)
       
       // set to latest year with change to populate competitions
-      $("#yearsel").val(yearOpt.value).change()
-
-
+      if (yearOpt !== undefined) {
+        $("#yearsel").val(yearOpt.value).change()
+      }
     }
   })
 }
@@ -48,7 +48,9 @@ export function populateCompetitions(index) {
   }
 
   // set to last competition
-  $("#compsel").val(compOpt.value).change()
+  if (compOpt !== undefined) {
+    $("#compsel").val(compOpt.value).change()
+  }
 }
 
 
@@ -63,6 +65,7 @@ export function populatePlayerNames(index, emptyLabel) {
     $("#playersel").append(playerOpt)
   }
 
+  // can put empty option for "Results" in dropdown if arg is present
   if (emptyLabel !== undefined) {
     // Empty option
     playerOpt = document.createElement("option")
@@ -71,7 +74,9 @@ export function populatePlayerNames(index, emptyLabel) {
     $("#playersel").append(playerOpt)
   }
 
-  // set to latest 
-  $("#playersel").val(playerOpt.value).change()
+  // set to latest
+  if (playerOpt !== undefined) {
+    $("#playersel").val(playerOpt.value).change()
+  }
 }
 
