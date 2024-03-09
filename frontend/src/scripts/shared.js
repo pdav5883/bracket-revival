@@ -58,7 +58,7 @@ export function populatePlayerNames(index, emptyLabel) {
   $("#playersel").empty()
 
   let playerOpt
-  for (const playerName of index[$("#yearsel").val()][$("#compsel").val()]) {
+  for (const playerName of index[$("#yearsel").val()][$("#compsel").val()].players) {
     playerOpt = document.createElement("option")
     playerOpt.value = playerName
     playerOpt.textContent = playerName
