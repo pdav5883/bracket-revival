@@ -47,7 +47,7 @@ Work in progress
 - ...
 
 ## Data Model
-index.json - {"yr": {"Comp Name 1": ["Name 1",...],  "Comp Name 2",...},...}
+index.json - {"yr": {"Comp Name 1": {"players": ["Name 1",...], "require_secret": true/false},  "Comp Name 2",...},...}
 /{year}
   teams.json - list of teams with {"name", "short_name", "seed"}
   results.json - {"results": list of 0/1/null, "score": list of [a,b]/null}

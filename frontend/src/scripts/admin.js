@@ -120,11 +120,26 @@ function populateCompetitionTable(year, cid) {
       input[1].classList.add("form-label")
       cell.appendChild(input[1])
 
+      // require secret
+      row = table.insertRow()
+      cell = row.insertCell()
+      cell.textContent = "Require Secret"
+      cell = row.insertCell()
+      input = makeBooleanSelect("selsecret", result.require_secret)
+      cell.appendChild(input)
+      
+      // open players
+      row = table.insertRow()
+      cell = row.insertCell()
+      cell.textContent = "Open Players"
+      cell = row.insertCell()
+      input = makeBooleanSelect("selplayers", result.open_players)
+      cell.appendChild(input)
+
       // open picks
       row = table.insertRow()
       cell = row.insertCell()
       cell.textContent = "Open Picks"
-      
       cell = row.insertCell()
       input = makeBooleanSelect("selpicks", result.open_picks)
       cell.appendChild(input)
@@ -133,7 +148,6 @@ function populateCompetitionTable(year, cid) {
       row = table.insertRow()
       cell = row.insertCell()
       cell.textContent = "Completed Rounds"
-
       cell = row.insertCell()
       input = makeTextInput("inprounds", 2, result.completed_rounds)
       cell.appendChild(input)
@@ -366,6 +380,8 @@ function submitCompetitionEdits() {
     "delete_competition": $("#delete_competition").is(":checked"),
     "completed_rounds": parseInt($("#inprounds").val()),
     "open_picks": $("#selpicks").val(),
+    "open_players": $("#selplayers").val(),
+    "require_secret": $("#selsecret").val(),
     "players": players}
 
   $.ajax({

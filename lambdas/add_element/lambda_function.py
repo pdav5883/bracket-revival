@@ -122,7 +122,7 @@ def add_competition(year, compname):
 
     # update index file
     index = utils.read_file("index.json")
-    index[year][compname] = []
+    index[year][compname] = {"players": [], "require_secret": False}
     utils.write_file("index.json", index)
 
     return {"body": f"Successfully created new competition {compname} in year {year}"}
@@ -183,7 +183,7 @@ def add_player(year, compname, playername, playeremail=None):
     # update index.json. Grab the actual full competition name from competition.json since we
     #  want to be robust to the compname input being the cid
     index = utils.read_file("index.json")
-    index[year][competition["name"]].append(playername)
+    index[year][competition["name"]]["players"].append(playername)
     utils.write_file("index.json", index)
 
     # sync scoreboard

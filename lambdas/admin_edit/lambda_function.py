@@ -20,6 +20,8 @@ with etype argument in request body:
     - etype=competition: {"delete_competition":,
                           "completed_rounds":,
                           "open_picks",
+                          "open_players",
+                          "require_secret",
                           "players": {old_name: new_name,...}} if new_name is None,  delete the player
     bracket order in teams.json
     - etype=competition TODO
@@ -144,6 +146,13 @@ def update_competition(year, cid, new_competition):
 
     new_data["completed_rounds"] = int(new_competition["completed_rounds"])
     new_data["open_picks"] = new_competition["open_picks"] in (True, "true", "True", 1, "1")
+    new_data["open_players"] = new_competition["open_players"] in (True, "true", "True", 1, "1")
+    new_data["require_secret"] = new_competition["require_secret"] in (True, "true", "True", 1, "1")
+
+    # start updating index, do write after any updates from name edit loop below
+    index = utils.read_file("index.json")
+    index[year][new_data["name"]]["require_secret"] = new_data["require_secret"]
+    index_player_list = index[year][new_data["name"]]["players"]
 
     # for player name edits, must update competition.json, index.json, {name}.json, and change filename
     for old_name, new_name in new_competition["players"].items():
@@ -157,12 +166,9 @@ def update_competition(year, cid, new_competition):
             new_data["scoreboard"].pop(old_name)
 
             # update index.json
-            index = utils.read_file("index.json")
-            player_list = index[year][new_data["name"]] # competition is under full name in index.json
-            player_list.remove(old_name)
-            utils.write_file("index.json", index)
+            index_player_list.remove(old_name)
 
-        elif old_name != new_name:
+        elif new_name != old_name:
             print(f"Replace player name {old_name} with {new_name}")
             old_pid = old_name.replace(" ", "").lower()
             new_pid = new_name.replace(" ", "").lower()
@@ -182,11 +188,8 @@ def update_competition(year, cid, new_competition):
             new_data["scoreboard"][new_name] = score
 
             # update to index.json
-            index = utils.read_file("index.json")
-            player_list = index[year][new_data["name"]] # competition is under full name in index.json
-            player_list.remove(old_name)
-            player_list.append(new_name)
-            utils.write_file("index.json", index)
+            index_player_list.remove(old_name)
+            index_player_list.append(new_name)
 
     print(f"Rewriting {cid} competition.json FROM:")
     print(old_competition)
@@ -196,6 +199,9 @@ def update_competition(year, cid, new_competition):
     # update competition.json
     utils.write_file(competition_key, new_data)
 
+    # update index.json
+    utils.write_file("index.json", index)
+    
     # sync scoreboard
     utils.trigger_sync(year, cid)
 
