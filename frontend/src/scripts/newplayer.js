@@ -1,4 +1,5 @@
 import { API_URL } from "./constants.js" 
+import { populateCompetitions } from "./shared.js"
 import $ from "jquery"
 
 let index
@@ -10,7 +11,7 @@ $(document).ready(function() {
  
   $("#scoreboarddiv").hide()
   $("#submitbutton").on("click", submitNewPlayer)
-  $("#yearsel").on("change", populateCompetitions)
+  $("#yearsel").on("change", populateCompetitionsWrapper)
 
   initNewPlayerPage()
 })
@@ -67,16 +68,8 @@ function initAllYearsCompetitions() {
 }
 
 
-function populateCompetitions() {
-  $("#compsel").empty()
-
-  let compOpt
-  for (const compName in index[$("#yearsel").val()]) {
-    compOpt = document.createElement("option")
-    compOpt.value = compName
-    compOpt.textContent = compName
-    $("#compsel").append(compOpt)
-  }
+function populateCompetitionsWrapper() {
+  populateCompetitions(index)
 }
 
 

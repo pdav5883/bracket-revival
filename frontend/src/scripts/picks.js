@@ -1,4 +1,6 @@
 import { API_URL } from "./constants.js" 
+import { populateCompetitions } from "./shared.js"
+import { populatePlayerNames } from "./shared.js"
 import { createBracket } from "bracketry"
 import $ from "jquery"
 
@@ -15,8 +17,8 @@ $(document).ready(function() {
   
   $("#gobutton").on("click", changeRoundStart)
   $("#submitbutton").on("click", submitPicks)
-  $("#yearsel").on("change", populateCompetitions)
-  $("#compsel").on("change", populatePlayerNames)
+  $("#yearsel").on("change", populateCompetitionsWrapper)
+  $("#compsel").on("change", populatePlayerNamesWrapper)
 
   initPickPage()
 
@@ -103,42 +105,13 @@ function displayMode(year, cid, pid) {
 }
 
 
-function populateCompetitions() {
-  $("#compsel").empty()
-
-  let compOpt
-  for (const compName in index[$("#yearsel").val()]) {
-    compOpt = document.createElement("option")
-    compOpt.value = compName
-    compOpt.textContent = compName
-    $("#compsel").append(compOpt)
-  }
-
-  // set to last competition
-  // TODO is this right?
-  $("#compsel").val(compOpt.value).change()
+function populateCompetitionsWrapper() {
+  populateCompetitions(index)
 }
 
 
-function populatePlayerNames() {
-  $("#playersel").empty()
-
-  let playerOpt
-  for (const playerName of index[$("#yearsel").val()][$("#compsel").val()]) {
-    playerOpt = document.createElement("option")
-    playerOpt.value = playerName
-    playerOpt.textContent = playerName
-    $("#playersel").append(playerOpt)
-  }
-
-  // Empty option
-  playerOpt = document.createElement("option")
-  playerOpt.value = ""
-  playerOpt.textContent = ""
-  $("#playersel").append(playerOpt)
-
-  // set to empty 
-  $("#playersel").val(playerOpt.value).change()
+function populatePlayerNamesWrapper() {
+  populatePlayerNames(index)
 }
 
 

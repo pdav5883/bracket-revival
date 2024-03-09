@@ -1,6 +1,8 @@
 // API_URL is in global namespace from constants.js
 
 import { API_URL, ROUND_NAMES } from "./constants.js" 
+import { populateCompetitions } from "./shared.js"
+import { populatePlayerNames } from "./shared.js"
 import { createBracket } from "bracketry"
 import { Modal } from "bootstrap"
 import $ from "jquery"
@@ -16,8 +18,8 @@ $(document).ready(function() {
   })
   
   $("#gobutton").on("click", changeBracket)
-  $("#yearsel").on("change", populateCompetitions)
-  $("#compsel").on("change", populatePlayerNames)
+  $("#yearsel").on("change", populateCompetitionsWrapper)
+  $("#compsel").on("change", populatePlayerNamesWrapper)
 
   initBracketPage()
 
@@ -110,42 +112,13 @@ function displayMode(year, cid, pid) {
 }
 
 
-function populateCompetitions() {
-  $("#compsel").empty()
-
-  let compOpt
-  for (const compName in index[$("#yearsel").val()]) {
-    compOpt = document.createElement("option")
-    compOpt.value = compName
-    compOpt.textContent = compName
-    $("#compsel").append(compOpt)
-  }
-
-  // set to last competition
-  // TODO is this right?
-  $("#compsel").val(compOpt.value).change()
+function populateCompetitionsWrapper() {
+  populateCompetitions(index)
 }
 
 
-function populatePlayerNames() {
-  $("#playersel").empty()
-
-  let playerOpt
-  for (const playerName of index[$("#yearsel").val()][$("#compsel").val()]) {
-    playerOpt = document.createElement("option")
-    playerOpt.value = playerName
-    playerOpt.textContent = playerName
-    $("#playersel").append(playerOpt)
-  }
-
-  // Empty shows bracket
-  playerOpt = document.createElement("option")
-  playerOpt.value = ""
-  playerOpt.textContent = "--NONE--"
-  $("#playersel").append(playerOpt)
-
-  // set to bracket only 
-  $("#playersel").val(playerOpt.value).change()
+function populatePlayerNamesWrapper() {
+  populatePlayerNames(index, "--Results--")
 }
 
 

@@ -1,5 +1,7 @@
 import { API_URL } from "./constants.js" 
+import { populateCompetitions } from "./shared.js"
 import $ from "jquery"
+
 
 let index
 let typeArg
@@ -7,7 +9,7 @@ let yearArg
 let compArg
 
 $(document).ready(function() {
-  $("#yearsel").on("change", populateCompetitions)
+  $("#yearsel").on("change", populateCompetitionsWrapper)
   $("#subbutton").on("click", submitEdits)
   $("#gobutton").on("click", changeAdminPage)
   initAdminPage()
@@ -44,20 +46,8 @@ function initAdminPage() {
 }
 
 
-function populateCompetitions() {
-  $("#compsel").empty()
-
-  let compOpt
-  for (const compName in index[$("#yearsel").val()]) {
-    compOpt = document.createElement("option")
-    compOpt.value = compName
-    compOpt.textContent = compName
-    $("#compsel").append(compOpt)
-  }
-
-  // set to last competition
-  // TODO is this right?
-  $("#compsel").val(compOpt.value).change()
+function populateCompetitionsWrapper() {
+  populateCompetitions(index)
 }
 
 
