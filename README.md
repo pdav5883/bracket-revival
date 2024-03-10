@@ -7,7 +7,6 @@ Work in progress
 - Pass through secret in picks.js
 
 ## TODO
-- Pick secret tokens
 - Email to make picks
 - Error handling
 	- Requesting picks when all picks made
@@ -36,6 +35,7 @@ Work in progress
 - Set up bracketry for mobile
 - Email reminders
 - Team logos
+- picks query params only works if you use cid=compname rather than cid=cid since it looks into index file
 
 ### Real-time game flow
 - Year is created

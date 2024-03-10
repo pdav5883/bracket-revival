@@ -49,13 +49,17 @@ def lambda_handler(event, context):
     competition = utils.read_file(competition_key)
     completed_rounds = competition.get("completed_rounds")
 
+    if not competition["open_picks"]:
+        return {"statusCode": 400,
+                "body": f"Picks for {cid} are currently locked"}
+
     if round_start > completed_rounds:
         return {"statusCode": 400,
-                "body": f"Start round {round_start} is greater than completed rounds {completed_rounds}"}
+                "body": f"There are no picks to make right now - check back later."}
 
     if round_start >= trn.NUMROUNDS:
         return {"statusCode": 400,
-                "body": f"Start round {round_start} is great than number of rounds"}
+                "body": f"All picks have been made for this bracket"}
 
     start_games_ind = get_start_games_abs_ind(results, round_start)
     start_games = [{"teams":[teams[t0]["name"], teams[t1]["name"]], "seeds": [teams[t0]["seed"], teams[t1]["seed"]]} for t0, t1 in start_games_ind]

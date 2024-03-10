@@ -12,6 +12,7 @@ def lambda_handler(event, context):
     year = body.get("year")
     cid = body.get("cid").replace(" ", "").lower()
     pid = body.get("pid").replace(" ", "").lower()
+    secret = body.get("secret", None)
     new_picks = body.get("picks", None)
 
     # TODO: assert arguments exist
@@ -35,11 +36,15 @@ def lambda_handler(event, context):
 
     if not competition["open_picks"]:
         return {"statusCode": 400,
-                "body": f"Picks for game {cid} are currently locked"}
+                "body": f"Picks for {cid} are currently locked"}
+
+    if competition["require_secret"] and secret != player["secret"]:
+        return {"statusCode": 400,
+                "body": f"Pick submission secret is incorrect. Make sure to use your email link for picks."}
 
     if rnd > competition["completed_rounds"]:
         return {"statusCode": 400,
-                "body": f"Game {cid} completed rounds is {competition['completed_rounds']}, which is less than submission round {rnd}"}
+                "body": f"{cid} is not accepting picks for Round {rnd}. Try again later."}
 
     player["picks"].append(new_picks)
     
@@ -48,6 +53,6 @@ def lambda_handler(event, context):
     # sync scoreboard
     utils.trigger_sync(year, cid)
     
-    return {"body": f"Successfully added new picks for round {rnd} to player {pid} in game {cid}"}
+    return {"body": f"Successfully added new picks for round {rnd} to player {pid} in {cid}"}
 
 

@@ -1,5 +1,5 @@
 import { API_URL } from "./constants.js" 
-import { initIndexYears, populateCompetitions, populatePlayerNames } from "./shared.js"
+import { initIndexOnly, initIndexYears, populateCompetitions, populatePlayerNames } from "./shared.js"
 import { createBracket } from "bracketry"
 import $ from "jquery"
 
@@ -8,6 +8,7 @@ let index
 let yearSubmit // these submit variables store the values
 let cidSubmit  // used to populate round start
 let pidSubmit
+let secretSubmit
 
 $(document).ready(function() {
   $.get("assets/nav.html", navbar => {
@@ -30,16 +31,26 @@ function initPickPage() {
   const params = new URLSearchParams(window.location.search)
 
   // check query params first, then local storage for year/comp
-  if (params.has("year") &&
-      params.has("cid") &&
-      params.has("pid")) {
-    displayMode(params.get("year"), params.get("cid"), params.get("pid"))
-    populateRoundStart({"year": params.get("year"),
-      "cid": params.get("cid"),
-      "pid": params.get("pid")})
+  if (params.has("year") && params.has("cid") && params.has("pid")) {
+    // populate function goes inside the callback because we need index to be there before populate executes
+    initIndexOnly(function(ind) {
+      index = ind
+
+      displayMode(params.get("year"), params.get("cid"), params.get("pid"))
+
+      // params.get("secret") will default to null if secret not present
+      populateRoundStart({"year": params.get("year"),
+        "cid": params.get("cid"),
+        "pid": params.get("pid"),
+        "secret": params.get("secret")
+      })
+    })
   }
-  // else if localStorage
   else {
+    initIndexYears(function(ind) {
+      index = ind
+    })
+
     editMode()
   }
 }
@@ -56,14 +67,7 @@ function editMode() {
   $("#complabel").show()
   $("#playerlabel").show()
   $("#gobutton").show()
-  $("#submitbutton").show()
-
-  // first time we populate selects, call backend
-  if (index === undefined) {
-    initIndexYears(function(ind) {
-      index = ind
-    })
-  }
+  $("#submitbutton").hide()
 }
 
 
@@ -78,7 +82,7 @@ function displayMode(year, cid, pid) {
   $("#complabel").hide()
   $("#playerlabel").hide()
   $("#gobutton").hide()
-  $("#submitbutton").show()
+  $("#submitbutton").hide()
 
   $("#yearinsert").text(year)
   $("#compinsert").text(cid)
@@ -87,34 +91,47 @@ function displayMode(year, cid, pid) {
 
 
 function populateCompetitionsWrapper() {
+  $("#statustext").text("")
   populateCompetitions(index)
 }
 
 
 function populatePlayerNamesWrapper() {
+  $("#statustext").text("")
   populatePlayerNames(index)
 }
 
 
 function changeRoundStart() {
   // nests within function to avoid passing click arg to populate
+  $("#submitbutton").hide()
   populateRoundStart()
 }
 
 
 function populateRoundStart(args) {
   $("#statustext").text("")
+  $("#bracketdiv").html("")
   
   if (args === undefined) {
     yearSubmit = $("#yearsel").val()
     cidSubmit = $("#compsel").val()
     pidSubmit = $("#playersel").val()
+    secretSubmit = null
   }
 
   else {
     yearSubmit = args.year
     cidSubmit = args.cid
     pidSubmit = args.pid
+    secretSubmit = args.secret
+  }
+
+  // check whether secret is required for competition - don't show picking bracket if user won't be
+  // able to submit
+  if (index[yearSubmit][cidSubmit].require_secret === true && secretSubmit === null) {
+    $("#statustext").text("Picks for " + cidSubmit + " can only be accessed via your email link!")
+    return
   }
 
   const queryData = {"year": yearSubmit, "cid": cidSubmit, "pid": pidSubmit}
@@ -127,6 +144,8 @@ function populateRoundStart(args) {
     success: function(result) {
       // game: {teams: [], seeds: [], score: [], result: 0/1}
       // teams/seeds/score=[null, null], result=null
+
+      $("#submitbutton").show()
 
       let bracketData = makeBracketryStartData(result.start_games, result.bonus_games)
       prepopulateBracket(bracketData)
@@ -211,6 +230,9 @@ function populateRoundStart(args) {
       }
 
       bracket = createBracket(bracketData, document.getElementById("bracketdiv"), bracketOptions)
+    },
+    error: function(err) {
+      $("#statustext").text(err.responseText)
     }
   })
 }
@@ -306,7 +328,7 @@ function submitPicks() {
     picks.push(match.sides[0].isWinner ? 0 : 1)
   })
 
-  const data = {"year": yearSubmit, "cid": cidSubmit, "pid": pidSubmit, "picks": picks}
+  const data = {"year": yearSubmit, "cid": cidSubmit, "pid": pidSubmit, "picks": picks, "secret": secretSubmit}
 
   $.ajax({
     method: "POST",
@@ -318,9 +340,9 @@ function submitPicks() {
       $("#submitbutton").prop("disabled", false)
       $("#statustext").text("Submission successful!")
     },
-    failure: function() {
+    error: function(err) {
       $("#submitbutton").prop("disabled", false)
-      $("#statustext").text("Server Error: TODO")
+      $("#statustext").text(err.responseText)
     }
   })
 }
