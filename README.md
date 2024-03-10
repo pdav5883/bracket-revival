@@ -14,6 +14,9 @@ Work in progress
 	- Requesting picks when picks can't be made yet
 	- Admin auth failure
 	- Query params for bracket, scoreboard, picks are not valid (good for newplayer
+- Admin page
+	- View/edit emails
+	- View/edit secrets
 - Game open/close to new players
 - Rules page
 - About page

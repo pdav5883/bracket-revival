@@ -9,7 +9,7 @@ $(document).ready(function() {
     $("#nav-placeholder").replaceWith(navbar)
   })
  
-  $("#scoreboarddiv").hide()
+  $("#successdiv").hide()
   $("#submitbutton").on("click", submitNewPlayer)
   $("#yearsel").on("change", populateCompetitionsWrapper)
   $("#compsel").on("change", checkHideEmailWrapper)
@@ -124,16 +124,26 @@ function submitNewPlayer() {
     crossDomain: true,
     success: function() {
       $("#submitbutton").prop("disabled", false)
-      $("#statustext").text("Success! Check your email to make picks.")
 
-      $("#submitdiv").hide()
-      $("#scoreboarddiv").show()
-      $("#scoreboardbutton").attr("href", "/scoreboard.html?year=" + data.year + "&cid=" + data.compname)
+      if (index[data.year][data.compname].require_secret === false) {
+        $("#statustext").text("Success! Visit the picks page to pick your brackets.")
+        $("#submitdiv").hide()
+        $("#successdiv").show()
+        $("#successbutton").attr("href", "/picks.html?year=" + data.year + "&cid=" + data.compname + "&pid=" + data.playername)
+        $("#successbutton").text("Go To Picks")
+      }
+      else {
+        $("#statustext").text("Success! Check your email to make picks.")
+        $("#submitdiv").hide()
+        $("#successdiv").show()
+        $("#successbutton").attr("href", "/scoreboard.html?year=" + data.year + "&cid=" + data.compname)
+        $("#successbutton").text("Go To Scoreboard")
+      }
+
     },
     error: function(err) {
       $("#submitbutton").prop("disabled", false)
       $("#statustext").text(err.responseText)
-      // TODO: wait for deployment to test case where picks are locked for competition
     }
   }) 
 }
