@@ -25,6 +25,7 @@ def lambda_handler(event, context):
         year = event["queryStringParameters"].get("year", None)
         cname = event["queryStringParameters"].get("compname", None)
         pname = event["queryStringParameters"].get("playername", None)
+        pemail = event["queryStringParameters"].get("playeremail", None)
 
     else:
         body = json.loads(event["body"])
@@ -32,6 +33,7 @@ def lambda_handler(event, context):
         year = body.get("year", None)
         cname = body.get("compname", None)
         pname = body.get("playername", None)
+        pemail = body.get("playeremail", None)
 
 
     if typ == "year":
@@ -39,7 +41,7 @@ def lambda_handler(event, context):
     elif typ == "competition":
         return add_competition(year, cname)
     elif typ == "player":
-        return add_player(year, cname, pname)
+        return add_player(year, cname, pname, pemail)
     else:
         return {"statusCode": 400,
                 "body": f"Invalid element type {typ}"}
@@ -171,7 +173,7 @@ def add_player(year, compname, playername, playeremail=None):
             return {"statusCode": 400,
                     "body": "Request requires playeremail parameter"}
 
-        player["email"] = email
+        player["email"] = playeremail
         player["secret"] = "".join(random.choices(string.ascii_lowercase, k=6))
 
     utils.write_file(player_key, player)

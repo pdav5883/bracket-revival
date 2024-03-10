@@ -1,5 +1,5 @@
 import { API_URL } from "./constants.js" 
-import { initIndexYears, populateCompetitions } from "./shared.js"
+import { initIndexOnly, initIndexYears, populateCompetitions } from "./shared.js"
 import $ from "jquery"
 
 let index
@@ -12,6 +12,7 @@ $(document).ready(function() {
   $("#scoreboarddiv").hide()
   $("#submitbutton").on("click", submitNewPlayer)
   $("#yearsel").on("change", populateCompetitionsWrapper)
+  $("#compsel").on("change", checkHideEmailWrapper)
 
   initNewPlayerPage()
 })
@@ -21,6 +22,10 @@ function initNewPlayerPage() {
   const params = new URLSearchParams(window.location.search)
   
   if (params.has("year") && params.has("compname")) {
+    initIndexOnly(function(ind) {
+      index = ind
+    })
+
     initSingleYearCompetition(params.get("year"), params.get("compname"))
   }
   else {
@@ -43,6 +48,30 @@ function initSingleYearCompetition(year, compName) {
   opt.textContent = compName
   $("#compsel").append(opt)
   $("#compsel").val(compName)
+
+  // hide email if not required
+  if (index.hasOwn(year) && index[year].hasOwn(compname)) {
+    checkHideEmail(year, compname)
+  }
+  else {
+    $("#statustext").text("Invalid url params: " + year + ", " + compname)
+  }
+}
+
+
+function checkHideEmail(year, compname) {
+  if (index[year][compname].require_secret === false) {
+    $("#emaildiv").hide()
+  }
+  else {
+    $("#emaildiv").show()
+  }
+
+}
+
+
+function checkHideEmailWrapper() {
+  checkHideEmail($("#yearsel").val(), $("#compsel").val())
 }
 
 
@@ -57,7 +86,12 @@ function submitNewPlayer() {
   $("#submitbutton").prop("disabled", true)
 
   // client validation
-  const validateId = ["yearsel", "compsel", "nameinput", "emailinput"]
+  let validateId = ["yearsel", "compsel", "nameinput"]
+  
+  if (index[$("#yearsel").val()][$("#compsel").val()].require_secret === true) {
+    validateId.push("emailinput")
+  }
+
   let validationErr = false
   validateId.forEach(v => {
     if ($("#" + v).val() == "") {
@@ -96,9 +130,9 @@ function submitNewPlayer() {
       $("#scoreboarddiv").show()
       $("#scoreboardbutton").attr("href", "/scoreboard.html?year=" + data.year + "&cid=" + data.compname)
     },
-    failure: function() {
+    error: function(err) {
       $("#submitbutton").prop("disabled", false)
-      $("#statustext").text("Server Error: TODO")
+      $("#statustext").text(err.responseText)
       // TODO: wait for deployment to test case where picks are locked for competition
     }
   }) 

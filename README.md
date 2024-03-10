@@ -8,12 +8,12 @@ Work in progress
 
 ## TODO
 - Pick secret tokens
-- Update player.json to include email
 - Email to make picks
 - Error handling
 	- Requesting picks when all picks made
 	- Requesting picks when picks can't be made yet
 	- Admin auth failure
+	- Query params for bracket, scoreboard, picks are not valid (good for newplayer
 - Game open/close to new players
 - Rules page
 - About page

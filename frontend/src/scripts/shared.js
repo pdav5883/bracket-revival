@@ -5,6 +5,22 @@ import "bootstrap/dist/css/bootstrap.min.css"
 import "bootstrap"
 
 
+export function initIndexOnly(setIndexCallback) {
+  // need the setIndexCallback argument to allow calling script to set index,
+  // since returning from this function will happen before ajax query completes
+  $.ajax({
+    method: "GET",
+    url: API_URL.competitions,
+    data: {},
+    crossDomain: true,
+    success: function(index) {
+
+      // this must happen before .change() below, which requires index
+      setIndexCallback(index)
+    }
+  })
+}
+
 export function initIndexYears(setIndexCallback) {
   // need the setIndexCallback argument to allow calling script to set index,
   // since returning from this function will happen before ajax query completes
