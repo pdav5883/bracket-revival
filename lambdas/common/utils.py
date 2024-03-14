@@ -85,10 +85,22 @@ def trigger_sync_sns(year, cid):
     return None
 
 
+def trigger_email_sns(emailbatch):
+    # emailbatch: {"typ": t , "content": {}, "recipients": [pname1, pname2,...]}
+    msg = json.dumps(emailbatch)
+    response = sns.publish(TopicArn=email_topic_arn, Message=msg)
+    return None
+
+
 def trigger_sync_local(year, cid):
     cid = cid.replace(" ", "").lower()
 
     print(f"Cannot perform local auto sync. Run manually in browser by visiting [local host]sync?year={year}&cid={cid}")
+    return None
+
+
+def trigger_email_local(emailbatch):
+    print(f"Cannot perform local email trigger")
     return None
 
 
@@ -103,10 +115,12 @@ if "BRACKET_REVIVAL_LOCAL_PREFIX" in os.environ:
     delete_directory = delete_directory_local
     read_parameter = read_parameter_local
     trigger_sync = trigger_sync_local
+    tirgger_email = trigger_email_local
 
 else:
     bucket = "bracket-revival-private"
     sync_topic_arn = "arn:aws:sns:us-east-1:014374244911:bracket-revival-sync-topic"
+    email_topic_arn = "arn:aws:sns:us-east-1:014374244911:bracket-revival-email-topic"
     s3 = boto3.client("s3")
     ssm = boto3.client("ssm")
     sns = boto3.client("sns")
@@ -118,3 +132,4 @@ else:
     delete_directory = delete_directory_s3
     read_parameter = read_parameter_ssm
     trigger_sync = trigger_sync_sns
+    trigger_email = trigger_email_sns

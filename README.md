@@ -1,13 +1,12 @@
 # bracket-revival
 Work in progress
 
-## WIP
-- Show/hide email field in newplayer.js
-- Respect require_secret and open_picks in update_picks
-- Pass through secret in picks.js
-
 ## TODO
-- Email to make picks
+- Email
+	- BracketSendEmail is lambda that calls SES to send messages. Can make multiple SES calls in one invocation.
+	- Triggered by SNS topic bracket-revival-send-topic
+	- BracketAdminEdit can write to SNS topic in response to frontend calls to send updates (make picks, score updates, etc)
+	- BracketAddElement can write to SNS when new player is generated in require_secret=true game
 - Error handling
 	- Requesting picks when all picks made
 	- Requesting picks when picks can't be made yet
@@ -16,7 +15,6 @@ Work in progress
 - Admin page
 	- View/edit emails
 	- View/edit secrets
-- Game open/close to new players
 - Rules page
 - About page
 - Home page

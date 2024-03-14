@@ -26,5 +26,6 @@ aws lambda update-function-configuration --function-name BracketGetRoundStart --
 aws lambda update-function-configuration --function-name BracketGetScoreboard --layers $version
 aws lambda update-function-configuration --function-name BracketUpdatePicks --layers $version
 aws lambda update-function-configuration --function-name BracketUpdateScoreboard --layers $version
+aws lambda update-function-configuration --function-name BracketSendEmail --layers $version
 
 

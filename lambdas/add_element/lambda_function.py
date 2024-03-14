@@ -191,6 +191,11 @@ def add_player(year, compname, playername, playeremail=None):
     # sync scoreboard
     utils.trigger_sync(year, cid)
 
+    # send welcome email
+    if competition["require_secret"]:
+        email = {"typ": "welcome", "content": {"year": year, "compname": compname}, "recipients": [playername]}
+        utils.trigger_email(email)
+
     return {"body": f"Successfully created new player {playername} in competition {compname} in year {year}"}
 
 
