@@ -18,6 +18,7 @@ Work in progress
 - Button on picks page to reset bracket
 - Button on picks page to see previous bracket
 - License and ref to bracketry
+- Restricted endpoint to grab emails and pick links for players
 
 ## Maybe TODO
 - Load page once all formatting is ready to avoid jump from unformatted

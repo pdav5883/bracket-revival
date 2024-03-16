@@ -44,7 +44,7 @@ def lambda_handler(event, context):
             player_key = year + "/" + cid + "/" + pid + ".json"
             player = utils.read_file(player_key)
             
-            content["pick_url"] = f"localhost:8000/picks.html?year={year}&cid={compname}&pid={pname}&secret={player['secret']}"
+            content["pick_url"] = f"https://bracket.bearloves.rocks/picks.html?year={year}&cid={compname}&pid={pname}&secret={player['secret']}"
             content["pname"] = pname
 
             subject = templates[email_type]["subject"]
@@ -66,8 +66,6 @@ def lambda_handler(event, context):
     return "Successfully sent messages"
 
 
-
-
 welcome_template = {"subject": "Welcome to bracket-revival! ({{compname}} {{year}})",
                     "body": "<html>\
                                <head>\
@@ -76,7 +74,7 @@ welcome_template = {"subject": "Welcome to bracket-revival! ({{compname}} {{year
                                  <p>Hello {{pname}}!</p>\
                                  <p>Welcome to bracket-revival!</p>\
                                  <p>Click <a href='{{pick_url}}'>HERE</a> to make your first set of picks!</p>\
-                                 <p>You'll be making a fresh set of picks each round, so make sure to check your email at the end of every round to make your new picks. If you need a rule refresher click <a href=''>HERE</a><p>\
+                                 <p>You'll be making a fresh set of picks each round, so make sure to check your email at the end of every round to make your new picks. If you need a rule refresher click <a href='https://bracket.bearloves.rocks/rules.html'>HERE</a><p>\
                                  <p>Your Friend,<br>The Bracketmaster</p>\
                                </body>\
                              </html>"}
