@@ -7,9 +7,6 @@ Work in progress
 	- Requesting picks when picks can't be made yet
 	- Admin auth failure
 	- Query params for bracket, scoreboard, picks are not valid (good for newplayer
-- Admin page
-	- View/edit emails
-	- View/edit secrets
 - Rules page
 - About page
 - Home page
@@ -19,12 +16,13 @@ Work in progress
 - Button on picks page to see previous bracket
 - License and ref to bracketry
 - Restricted endpoint to grab emails and pick links for players
+- Bracket page shows bracket as soon as it is submitted. Needs to respect completed_rounds in the same way results does
+- HTML page title now showing
 
 ## Maybe TODO
 - Load page once all formatting is ready to avoid jump from unformatted
 - Refactor js into shared utils
 - Scoreboard shows game status and who has submitted picks
-- Set up bracketry for mobile
 - Email reminders
 - Team logos
 - picks query params only works if you use cid=compname rather than cid=cid since it looks into index file

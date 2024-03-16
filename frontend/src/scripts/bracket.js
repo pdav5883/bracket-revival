@@ -147,7 +147,7 @@ function populateBracket(args) {
       const bracketData = makeBracketryData(gamesNested)
 
       const bracketOptions = {
-        //matchMaxWidth: 250,
+        matchMaxWidth: 250,
         displayWholeRounds: true,
         onMatchClick: (thisMatch) => {
           // bracket not returned with picks
@@ -243,6 +243,47 @@ function populateBracket(args) {
 
       matches = bracketData.matches
       bracket = createBracket(bracketData, document.getElementById("bracketdiv"), bracketOptions)
+
+      const mobileOptions = {
+        navButtonsPosition: "beforeTitles",
+        leftNavButtonHTML: "<div style='padding: 15px 5px 15px 5px; font-weight: bold;'>< PREV ROUND</div>",
+        rightNavButtonHTML: "<div style='padding: 15px 5px 15px 5px; font-weight: bold;'>NEXT ROUND ></div>",
+        roundTitlesFontSize: 26,
+        roundTitlesVerticalPadding: 4,
+        matchFontSize: 14,
+        matchHorMargin: 14,
+        distanceBetweenScorePairs: 10,
+        scrollButtonPadding: "0px",
+        matchMaxWidth: 250
+      }
+
+      const desktopOptions = {
+        navButtonsPosition: "gutters",
+        leftNavButtonHTML: '<svg class="default-nav-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M16.67 0l2.83 2.829-9.339 9.175 9.339 9.167-2.83 2.829-12.17-11.996z"></path></svg>',
+        rightNavButtonHTML: '<svg class="default-nav-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M5 3l3.057-3 11.943 12-11.943 12-3.057-3 9-9z"></path></svg>',
+        roundTitlesFontSize: 22,
+        roundTitlesVerticalPadding: 8,
+        matchFontSize: 14,
+        matchHorMargin: 20,
+        distanceBetweenScorePairs: 14,
+        scrollButtonPadding: "4px",
+        matchMaxWidth: 250
+      }
+
+      const mediaQuery = window.matchMedia("(max-width: 600px)")
+
+      const adjust = () => {
+        if (mediaQuery.matches) {
+          bracket.applyNewOptions(mobileOptions)
+        }
+        else {
+          bracket.applyNewOptions(desktopOptions)
+        }
+      }
+
+      mediaQuery.addEventListener("change", adjust)
+
+      adjust()
 
       // change opacity for player-title div to 1, so that icons will not be opaque. Loser text is still made to be grayed
       // out in getPlayerTitleHTML
