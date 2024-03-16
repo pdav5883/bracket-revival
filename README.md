@@ -18,6 +18,7 @@ Work in progress
 - Restricted endpoint to grab emails and pick links for players
 - Bracket page shows bracket as soon as it is submitted. Needs to respect completed_rounds in the same way results does
 - HTML page title now showing
+- Reset max-age in S3 sync to 21600
 
 ## Maybe TODO
 - Load page once all formatting is ready to avoid jump from unformatted
