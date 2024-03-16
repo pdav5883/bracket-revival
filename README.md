@@ -13,12 +13,10 @@ Work in progress
 - Rules page
 - About page
 - Home page
-- Send email script
 - Populate missing picks script
 - Test page to play smaller version to understand rules
 - Button on picks page to reset bracket
 - Button on picks page to see previous bracket
-- Deploy frontend, with webpack in production
 - License and ref to bracketry
 
 ## Maybe TODO
@@ -29,6 +27,7 @@ Work in progress
 - Email reminders
 - Team logos
 - picks query params only works if you use cid=compname rather than cid=cid since it looks into index file
+- webpack into production
 
 ### Real-time game flow
 - Year is created

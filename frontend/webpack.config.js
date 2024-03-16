@@ -24,6 +24,10 @@ module.exports = {
       import: "./src/scripts/newplayer.js",
       dependOn: "shared"
     },
+    index: {
+      import: "./src/scripts/index.js",
+      dependOn: "shared"
+    },
     shared: "./src/scripts/shared.js"
   },
   mode: "development",
@@ -61,6 +65,12 @@ module.exports = {
       filename: "newplayer.html",
       template: "./src/newplayer.html",
       chunks: ["shared", "newplayer"]
+    }),
+    new HtmlWebpack({
+      title: "Home",
+      filename: "index.html",
+      template: "./src/index.html",
+      chunks: ["shared", "index"]
     }),
     new CopyWebpack({
       patterns: [
