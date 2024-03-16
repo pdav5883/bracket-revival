@@ -4,6 +4,7 @@ import { createBracket } from "bracketry"
 import $ from "jquery"
 
 let bracket
+let matches
 let index
 let yearSubmit // these submit variables store the values
 let cidSubmit  // used to populate round start
@@ -287,7 +288,7 @@ function submitPicks() {
   $("#statustext").text("")
   $("#submitbutton").prop("disabled", true)
 
-  let matches = bracket.getAllData().matches
+  matches = bracket.getAllData().matches
 
   // use bracketry isLive feature to highlight unpicked games
   let incomplete = []

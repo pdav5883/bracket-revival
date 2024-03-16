@@ -214,7 +214,7 @@ function populateBracket(args) {
           }
           else if (isFromPick) {
             playerHTML = "<span style='color: #003ae6'>" + player.title + "</span>"
-        }
+          }
           else {
             playerHTML = player.title
           }
@@ -321,7 +321,7 @@ function makeMatchSides(game) {
   // use most recent picks if game not yet played
   else if (game.picks.length > 0) {
     side0 = { contestantId: game.picks[game.picks.length - 1][0],
-    fromPick: true }
+      fromPick: true }
   }
   else {
     side0 = { title: "" }
@@ -332,7 +332,7 @@ function makeMatchSides(game) {
   }
   else if (game.picks.length > 0) {
     side1 = { contestantId: game.picks[game.picks.length - 1][1],
-    fromPick: true }
+      fromPick: true }
   }
   else {
     side1 = { title: "" }

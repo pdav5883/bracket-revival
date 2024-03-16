@@ -50,11 +50,11 @@ function initSingleYearCompetition(year, compName) {
   $("#compsel").val(compName)
 
   // hide email if not required
-  if (index.hasOwn(year) && index[year].hasOwn(compname)) {
-    checkHideEmail(year, compname)
+  if (index.hasOwn(year) && index[year].hasOwn(compName)) {
+    checkHideEmail(year, compName)
   }
   else {
-    $("#statustext").text("Invalid url params: " + year + ", " + compname)
+    $("#statustext").text("Invalid url params: " + year + ", " + compName)
   }
 }
 
