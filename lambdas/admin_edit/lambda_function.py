@@ -18,10 +18,12 @@ with etype argument in request body:
                       "scores": [[#/None, #/None],...]}
     - etype=teams: [[name, shortname],...] where order is same as
     - etype=competition: {"delete_competition":,
+                          "email_all":,
                           "completed_rounds":,
                           "open_picks",
                           "open_players",
                           "require_secret",
+                          "email_individual", [name1, ...],
                           "players": {old_name: new_name,...}} if new_name is None,  delete the player
     bracket order in teams.json
     - etype=competition TODO
@@ -204,5 +206,20 @@ def update_competition(year, cid, new_competition):
     
     # sync scoreboard
     utils.trigger_sync(year, cid)
+
+    # emails
+    if new_competition["email_all"]:
+        utils.trigger_email({"typ": "newround",
+                             "content": {"year": year,
+                                         "compname": new_data["name"],
+                                         "pick_round": new_data["completed_rounds"]},
+                             "recipients": index_player_list})
+
+    if len(new_competition["email_individual"]) > 0:
+        utils.trigger_email({"typ": "newround",
+                             "content": {"year": year,
+                                         "compname": new_data["name"],
+                                         "pick_round": new_data["completed_rounds"]},
+                             "recipients": new_competition["email_individual"]})
 
     return {"body": "Successful competition update"}

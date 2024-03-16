@@ -2,12 +2,14 @@ import json
 import boto3
 
 from common import utils
+from common import tournament as trn
 
 """
 event = {"Records": [{"Sns": {"Message": emailbatch}}]}
 
 emailbatch: {"typ": t , "content": {}, "recipients": [pname1, pname2,...]}
     welcome: year, compname
+    newround: year, compname, pick_round
 """
 
 ses = boto3.client("ses")
@@ -28,19 +30,29 @@ def lambda_handler(event, context):
         competition_key = year + "/" + cid + "/competition.json"
         competition = utils.read_file(competition_key)
 
+        # populate other content
+        email_type = batch["typ"]
+        content = batch["content"]
+        if email_type == "welcome":
+            pass
+        elif email_type == "newround":
+            content["pick_round_name"] = trn.ROUND_NAMES[content.pop("pick_round")]
+            content["closing_datetime"] = "Thur Mar 21 at 12:00PM EST"
+
         for pname in batch["recipients"]:
             pid = pname.replace(" ", "").lower()
             player_key = year + "/" + cid + "/" + pid + ".json"
             player = utils.read_file(player_key)
-            secret = player["secret"]
-
-            template = templates[batch["typ"]]
-            subject = template["subject"]
-            body = template["body"]
             
-            pick_url = f"localhost:8000/picks.html?year={year}&cid={compname}&pid={pname}&secret={secret}"
+            content["pick_url"] = f"localhost:8000/picks.html?year={year}&cid={compname}&pid={pname}&secret={player['secret']}"
+            content["pname"] = pname
 
-            body = body.replace("{{pname}}", pname).replace("{{pick_url}}", pick_url)
+            subject = templates[email_type]["subject"]
+            body = templates[email_type]["body"]
+
+            for key, val in content.items():
+                subject = subject.replace("{{" + key + "}}", val)
+                body = body.replace("{{" + key + "}}", val)
 
             ses.send_email(Source="bracket@bearloves.rocks",
                            Destination={"ToAddresses": [player["email"]]},
@@ -56,7 +68,7 @@ def lambda_handler(event, context):
 
 
 
-welcome_template = {"subject": "Welcome to bracket-revival!",
+welcome_template = {"subject": "Welcome to bracket-revival! ({{compname}} {{year}})",
                     "body": "<html>\
                                <head>\
                                </head>\
@@ -69,13 +81,23 @@ welcome_template = {"subject": "Welcome to bracket-revival!",
                                </body>\
                              </html>"}
 
-round_template = {"subject": "TBD",
-                  "body": "TBD"}
+newround_template = {"subject": "Time to Make More Picks! ({{compname}} {{year}})",
+                     "body": "<html>\
+                               <head>\
+                               </head>\
+                               <body>\
+                                 <p>Hello {{pname}},</p>\
+                                 <p>It's time to pick a fresh bracket starting in the {{pick_round_name}} and going all the way to the Championship.</p>\
+                                 <p>Click <a href='{{pick_url}}'>HERE</a> to make your picks.</p>\
+                                 <p>You have until <strong>{{closing_datetime}}</strong> when the next round starts to submit - so don't delay! If you need a rule refresher click <a href=''>HERE</a></p>\
+                                 <p>Your Friend,<br>The Bracketmaster</p>\
+                               </body>\
+                             </html>"}
 
 reminder_template = {"subject": "TBD",
                   "body": "TBD"}
 
 templates = {"welcome": welcome_template,
-             "round": round_template,
+             "newround": newround_template,
              "reminder": reminder_template}
 

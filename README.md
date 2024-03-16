@@ -2,11 +2,6 @@
 Work in progress
 
 ## TODO
-- Email
-	- BracketSendEmail is lambda that calls SES to send messages. Can make multiple SES calls in one invocation.
-	- Triggered by SNS topic bracket-revival-send-topic
-	- BracketAdminEdit can write to SNS topic in response to frontend calls to send updates (make picks, score updates, etc)
-	- BracketAddElement can write to SNS when new player is generated in require_secret=true game
 - Error handling
 	- Requesting picks when all picks made
 	- Requesting picks when picks can't be made yet

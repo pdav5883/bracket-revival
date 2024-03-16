@@ -19,3 +19,12 @@ PREV_GAME = ((None, None), (None, None), (None, None), (None, None), # round64
 GAMES_PER_ROUND = (32, 16, 8, 4, 2, 1)
 NUMROUNDS = len(GAMES_PER_ROUND)
 NUMGAMES = sum(GAMES_PER_ROUND)
+
+ROUND_NAMES = [
+  "First Round",
+  "Second Round",
+  "Sweet 16",
+  "Elite 8",
+  "Final 4",
+  "Championship"
+]

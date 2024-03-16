@@ -115,7 +115,15 @@ function populateCompetitionTable(year, cid) {
       // delete game
       let row = table.insertRow()
       let cell = row.insertCell()
-      let input = makeCheckboxInput("delete_competition", "Delete Competition?")
+      let input = makeCheckboxInput("delete_competition", "Delete Competition")
+      cell.appendChild(input[0])
+      input[1].classList.add("form-label")
+      cell.appendChild(input[1])
+
+      // email all
+      row = table.insertRow()
+      cell = row.insertCell()
+      input = makeCheckboxInput("email_all", "Email All")
       cell.appendChild(input[0])
       input[1].classList.add("form-label")
       cell.appendChild(input[1])
@@ -152,19 +160,28 @@ function populateCompetitionTable(year, cid) {
       input = makeTextInput("inprounds", 2, result.completed_rounds)
       cell.appendChild(input)
 
+      // players
       Object.keys(result.scoreboard).forEach((name, i) => {
+        // old name
         row = table.insertRow()
         cell = row.insertCell()
         cell.textContent = name
         cell.id = "old_" + i
 
+        // new name
         cell = row.insertCell()
         input = makeTextInput("new_" + i, 10, name)
         cell.appendChild(input)
 
         // add delete checkbox
         cell = row.insertCell()
-        input = makeCheckboxInput("delete_" + i, "Delete?")
+        input = makeCheckboxInput("delete_" + i, "Delete")
+        cell.appendChild(input[0]) // checkbox
+        cell.appendChild(input[1]) // label
+
+        // email
+        cell = row.insertCell()
+        input = makeCheckboxInput("email_" + i, "Email")
         cell.appendChild(input[0]) // checkbox
         cell.appendChild(input[1]) // label
       })
@@ -366,6 +383,7 @@ function submitCompetitionEdits() {
 
   const numPlayers = $("[id^=old_").length
   let players = {}
+  let emailNames = []
 
   for (let i = 0; i < numPlayers; i++) {
     players[$("#old_" + i).text()] = $("#new_" + i).val()
@@ -374,14 +392,20 @@ function submitCompetitionEdits() {
     if ($("#delete_" + i).is(":checked")) {
       players[$("#old_" + i).text()] = null
     }
+
+    if ($("#email_" + i).is(":checked")) {
+      emailNames.push($("#old_" + i).text())
+    }
   }
 
   const data = {
     "delete_competition": $("#delete_competition").is(":checked"),
+    "email_all": $("#email_all").is(":checked"),
     "completed_rounds": parseInt($("#inprounds").val()),
     "open_picks": $("#selpicks").val(),
     "open_players": $("#selplayers").val(),
     "require_secret": $("#selsecret").val(),
+    "email_individual": emailNames,
     "players": players}
 
   $.ajax({
