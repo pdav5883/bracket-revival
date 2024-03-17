@@ -67,7 +67,7 @@ module.exports = {
       chunks: ["shared", "newplayer"]
     }),
     new HtmlWebpack({
-      title: "Home",
+      title: "Bracket Revival",
       filename: "index.html",
       template: "./src/index.html",
       chunks: ["shared", "index"]

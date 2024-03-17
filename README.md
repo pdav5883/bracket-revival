@@ -4,7 +4,6 @@ Work in progress
 ## Now TODO
 - Rules page
 - Query params for bracket, scoreboard, picks are not valid (good for newplayer
-- HTML page title now showing
 - Clearer directions at pick submission
 - Fix buttons on wider pick submission for ios
 - Test page to play smaller version to understand rules
