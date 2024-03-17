@@ -28,6 +28,10 @@ module.exports = {
       import: "./src/scripts/index.js",
       dependOn: "shared"
     },
+    rules: {
+      import: "./src/scripts/rules.js",
+      dependOn: "shared"
+    },
     shared: "./src/scripts/shared.js"
   },
   mode: "development",
@@ -65,6 +69,12 @@ module.exports = {
       filename: "newplayer.html",
       template: "./src/newplayer.html",
       chunks: ["shared", "newplayer"]
+    }),
+    new HtmlWebpack({
+      title: "Rules",
+      filename: "rules.html",
+      template: "./src/rules.html",
+      chunks: ["shared", "rules"]
     }),
     new HtmlWebpack({
       title: "Bracket Revival",

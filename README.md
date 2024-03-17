@@ -10,7 +10,7 @@ Work in progress
 - Set up historicals
 - Bracket page shows bracket as soon as it is submitted. Needs to respect completed_rounds in the same way results does
 - Reset max-age in S3 sync to 21600
-- License and ref to bracketry
+- License and ref to bracketry, attribut bracket image
 
 ## Later TODO
 - Populate missing picks script
