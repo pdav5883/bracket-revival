@@ -1,33 +1,37 @@
 # bracket-revival
 Work in progress
 
-## TODO
-- Error handling
-	- Requesting picks when all picks made
-	- Requesting picks when picks can't be made yet
-	- Admin auth failure
-	- Query params for bracket, scoreboard, picks are not valid (good for newplayer
-- Rules page
-- About page
+## Now TODO
 - Home page
-- Populate missing picks script
+- Rules page
+- Query params for bracket, scoreboard, picks are not valid (good for newplayer
+- HTML page title now showing
+- Clearer directions at pick submission
+- Fix buttons on wider pick submission for ios
 - Test page to play smaller version to understand rules
+- Set up historicals
+- Bracket page shows bracket as soon as it is submitted. Needs to respect completed_rounds in the same way results does
+- Reset max-age in S3 sync to 21600
+- License and ref to bracketry
+
+## Later TODO
+- Populate missing picks script
 - Button on picks page to reset bracket
 - Button on picks page to see previous bracket
-- License and ref to bracketry
-- Restricted endpoint to grab emails and pick links for players
-- Bracket page shows bracket as soon as it is submitted. Needs to respect completed_rounds in the same way results does
-- HTML page title now showing
-- Reset max-age in S3 sync to 21600
+- Email reminders
+- Scoreboard shows game status and who has submitted picks
+- Load page once all formatting is ready to avoid jump from unformatted
+- Next round buttons anchored to top of screen
 
 ## Maybe TODO
-- Load page once all formatting is ready to avoid jump from unformatted
+- About page
 - Refactor js into shared utils
-- Scoreboard shows game status and who has submitted picks
-- Email reminders
+- Error handling
+	- Admin auth failure
 - Team logos
 - picks query params only works if you use cid=compname rather than cid=cid since it looks into index file
 - webpack into production
+- Restricted endpoint to grab emails and pick links for players
 
 ### Real-time game flow
 - Year is created
