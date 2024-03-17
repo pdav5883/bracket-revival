@@ -9,6 +9,10 @@ let yearArg
 let compArg
 
 $(document).ready(function() {
+  $.get("assets/nav.html", navbar => {
+    $("#nav-placeholder").replaceWith(navbar)
+  })
+  
   $("#yearsel").on("change", populateCompetitionsWrapper)
   $("#subbutton").on("click", submitEdits)
   $("#gobutton").on("click", changeAdminPage)

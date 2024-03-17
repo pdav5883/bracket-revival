@@ -1,16 +1,59 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
-    <!-- Basic Page Needs -->
     <meta charset="utf-8">
-    <!-- Mobile Specific Metas -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
   </head>
   <body>
     <div id="nav-placeholder"></div>
-    <div class="col-10 col-8-md mx-auto">
-      <h1>bracket-revival</h1>
-      <p>Work in progress</p>
-    </div>
+    <div class="col-lg-9 mx-auto p-3 py-md-5">
+
+      <h1>Welcome to <em>bracket-revival</em></h1>
+      <p class="fs-5 col-md-8">Do you love picking your NCAA March Madness bracket, but hate seeing all your Final Four teams crossed out after the first weekend? Busted brackets are no more with <em>bracket-revival</em>.
+
+      <!--<div class="mb-5 col-md-8 d-flex justify-content-center">-->
+      <div class="mb-5 col-md-8">
+        <a href="/newplayer.html" class="btn btn-primary btn-lg px-4">Join a Game</a>
+      </div>
+
+      <!--<hr class="col-3 col-md-2 mb-5">-->
+      <hr class="col-11 mx-auto mb-5">
+
+      <div class="row g-5">
+        <div class="col-md-6">
+	  <h2>The Rules</h2>
+	  <p>This is not your sports broadcaster's bracket competition. To start you will pick a full bracket, just like you are used to. Then after the First Round is over you'll pick again, and again after every round until the Championship. The catch? You'll score more points for correct picks you make in earlier brackets.</p>
+	  <div class="mb-5">
+	    <a href="/rules.html/" class="btn btn-primary btn-lg px-4">Read the Rules</a>
+	  </div>
+	</div>
+
+	<div class="col-md-6">
+	  <h2>Scoreboards</h2>
+	  <p>All your friends are playing. See how they're doing in current and historical games.</p>
+	  <div class="row">
+	    <div class="col-4 col-md-4 mb-3">
+	      <label id="yearlabel" for="yearsel" class="form-label">Year</label>
+	    </div>
+	    <div class="col-4 col-md-4 mb-3">
+	      <select class="form-select" id="yearsel"></select>
+	    </div>
+	  </div>
+	  <div class="row">
+	    <div class="col-4 col-md-4 mb-3">
+	      <label id="complabel" for="compsel" class="form-label">Competition</label>
+	    </div>
+	    <div class="col-6 col-md-6 mb-3">
+	      <select id="compsel" class="form-select"></select>
+	    </div>
+	  </div>
+	  <button id="gobutton" class="btn btn-primary btn-lg">Go</button>
+	</div>
+      </div>
+
+      <footer class="pt-2 my-5 text-muted border-top text-center">
+        A <a href="https://bearloves.rocks">Bear Loves Rocks</a> game 
+      </footer>
+    </div> 
   </body>
 </html>

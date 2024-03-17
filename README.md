@@ -2,7 +2,6 @@
 Work in progress
 
 ## Now TODO
-- Home page
 - Rules page
 - Query params for bracket, scoreboard, picks are not valid (good for newplayer
 - HTML page title now showing
