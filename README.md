@@ -19,6 +19,7 @@ Work in progress
 - Email reminders
 - Scoreboard shows game status and who has submitted picks
 - Load page once all formatting is ready to avoid jump from unformatted
+- Button to make next bracket of picks once picks are submitted
 - Next round buttons anchored to top of screen
 
 ## Maybe TODO
