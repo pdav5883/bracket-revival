@@ -10,11 +10,98 @@
     <div class="col-lg-9 mx-auto p-3 py-md-5">
 
       <h1><em>bracket-revival</em> Rules</h1>
-      <p class="fs-5">Do you love picking your NCAA March Madness bracket, but hate seeing all your Final Four teams crossed out after the first weekend? Busted brackets are no more with <em>bracket-revival</em>.
+      <p>In <em>bracket-revival</em> you get the chance to pick a fresh bracket after every round of the tournament. In each bracket you'll pick a winner for all remaining games, even if your earlier picks were terrible. If your earlier brackets correctly pick the winner for later rounds, you'll score more points.</p>
 
-      <div class="mb-5 col-md-8">
-        <a href="/newplayer.html" class="btn btn-primary btn-lg px-4">Join a Game</a>
+      <p>Here are the rules, which will be explained in more detail below:<p>
+
+      <ol>
+	<li>You'll submit a bracket with picks for all remaining games after each round.</li>
+	<li>Each bracket you submit will start with the correct teams, regardless of previous picks.</li>
+	<li>In order to score points for a game, you must pick the winner correctly in your <em>most recent</em> bracket [1 point].</li>
+	<li>You score bonus points for a game if you also pick the winner correctly in <em>earlier</em> brackets [2x points per bracket].</li>
+      </ol>
+
+      <h3>More Detail</h3>
+
+      <p>You might say this seems overly complicated, and you wouldn't be wrong, but it's a game about games so that's probably ok. If you take nothing else away from the rules, just remember:</p>
+      
+      <ul>
+	<li>Get as many picks right as you can</li>
+	<li>The earlier you make a correct pick, the more points you will get</li>
+	<li>Stick with any picks that are still alive from previous brackets (they will pre-populate)</li>
+      </ul>
+
+      <p>Let's start with some <em>bracket-revival</em> vocabulary:</p>
+
+      <ul>
+	<li><strong>Round</strong>: a set of games in the tournament. For example: First Round, Second Round, Sweet 16 (Round), Elite 8, Final Four, and Championship.</li>
+	<li><strong>Bracket</strong>: the picks you make after each round of the tournament. For example your <em>Second Bracket</em> will contain picks for all games from the <em>Second Round</em> through the <em>Championship</em>.</li>
+      </ul>
+
+      <p>When you make your picks for a bracket, your starting point will be all the teams that are still alive, regardless of how good or bad your previous bracket was. For example, if you get <strong>every</strong> First Round game wrong in your First Bracket, you'd be starting with a blank slate in your Second Bracket, and be picking between the teams that actually made it to the Second Round. Revival!</p>
+
+      <h3>A Small Example</h3>
+      <p>There's only so far we can go in the abstract. Let's say there is another global pandemic that hits, and the NCAA decides to skip the first four rounds of the tournament and start with the Final Four from 2022. Duke will be playing North Carolina and Kansas will be playing Villanova for a spot in the Championship. Let's say you're a Duke fan for some reason, and pick them to win it all against Kansas in the Championship. Here's what your First Bracket would look like:</p>
+      
+      <div class="mx-auto">
+        <img class="img-fluid mx-auto d-block" src="./assets/small_example_duke-first.png">
       </div>
-    </div> 
+      
+      <p class="mt-3">The blue squares show how many points you could win if you pick each game correctly. Unfortunately for you, the Heels send Coach K home again after he came out of retirement and the results of your First Bracket look like:</p>
+      
+      <div class="mx-auto">
+        <img class="img-fluid mx-auto d-block" src="./assets/small_example_duke-first-results.png">
+      </div>
+      
+      <p class="mt-3">The green check mark shows you that you picked Kansas correctly, which is worth one point. For your Second Bracket you'll be picking between Carolina and Kansas in the Championship. You pick Kansas since you hate what Carolina did to you: </p>
+      
+      <div class="mx-auto">
+        <img class="img-fluid mx-auto d-block" src="./assets/small_example_duke-second.png">
+      </div>
+      
+      <p class="mt-3">Lucky for you, Armando Bacot rolls...nevermind. Kansas wins and your bracket looks like:</p>
+      
+      <div class="mx-auto">
+        <img class="img-fluid mx-auto d-block" src="./assets/small_example_duke-second-results.png">
+      </div>
+      
+      <p class="mt-3">You get one point for correctly picking Kansas to win the Championship. You don't get any bonus points for that pick, since in your First Bracket you had Duke winning it all. That's a total of 2 points for your brackets.</p>
+
+      <p>Now, imagine a different scenario where you are a huge Kansas fan and are still mad at Roy Williams for abandoning you in 2003. In your First Bracket you pick Duke to beat Carolina, Kansas to beat Villanova, then Kansas to beat Carolina. Then in your Second Bracket you stick with Kansas beating Carolina. In this case your final bracket looks like:</p>
+      
+      <div class="mx-auto">
+        <img class="img-fluid mx-auto d-block" src="./assets/small_example_kansas-second-results.png">
+      </div>
+
+      <p class="mt-3">You still 0 points for picking Duke and 1 point for picking Kansas in the Final Four. In the Championship, you get 2 points for Kansas, since you picked them in both your Second and your First bracket (note the two green checks). That's a total of 3 points for your brackets.</p>
+
+      <h3>Calculating Points</h3>
+      <p>Thankfully you don't have to worry about this since the site does all the point calculation for you, but if you're interested in how points are calculated, keep reading.</p>
+      
+      <p>You get points for a game when it is played. In order to get any points at all you <strong>must</strong> pick the game correctly in your <em>most recent</em> bracket. This means that for a Second Round game, you must pick the winner correctly in your Second Bracket. For an Elite 8 game, you must pick the winner correctly in your Fourth Bracket. That gets you one point.</p>
+
+      <p>If you got the point, take a look at your previous bracket. If you picked the winner correctly in that bracket, then multiply your point total for the game by two. So if the game is a Second Round game you picked correctly in your Second Bracket, take a look at your First Bracket. If you picked the winner correctly there, then you get two points! If not, you just get the one point.</p>
+
+      <p>For an Elite 8 game (Fourth Round), you could potentially look through your Fourth, Third, Second, and First brackets, and if you got them all correct you'd have 8 points for the game. The max number of points available for each game in a round is:</p>
+
+      <ul>
+	<li>First Round: 1 point</li>
+	<li>Second Round: 2 points</li>
+	<li>Sweet Sixteen: 4 points</li>
+	<li>Elite Eight: 8 points</li>
+	<li>Final Four: 16 points</li>
+	<li>Championship: 32 points</li>
+      </ul>
+
+      <p>Note that there are 32 points available for every round.</p>
+
+      <p>As one final example, let's say for 2023 (UConn won it all) you picked UConn to win the Championship in your first five brackets, then changed your mind in the Sixth Bracket and decided they would lose to San Diego State. You would get <strong>0</strong> points! If you weren't so foolish and stuck to your guns with UConn in your Sixth Bracket, you'd get <strong>32</strong> points!</p>
+
+      <p>And now for a final gotcha that gets buried at the bottom of the rules page. When calculating the bonus multiplier, as you go back through previous brackets you stop counting when you see a pick other than the true winner. Back to the UConn example above, let's say you picked UConn to win the Championship in your first Four Brackets, then get cold feet in your Fifth Bracket and picked someone else, then went back to UConn in your Sixth Bracket. You would get one point for the Sixth Bracket, take a look at your Fifth Bracket and see not UConn, and get no bonus multiplier. It doesn't matter that you picked UConn before that!</p>
+
+      <h3>How to Read Your Picks</h3>
+      <h3>How to Read Your Bracket</h3>
+      <h3>More Details</h3>
+    </div>
   </body>
 </html>

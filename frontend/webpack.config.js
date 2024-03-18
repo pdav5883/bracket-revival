@@ -87,7 +87,11 @@ module.exports = {
         {
           from: "./src/nav.html",
           to: "assets",
-        }
+        },
+        {
+          from: "./src/images",
+          to: "assets",
+        },
       ]
     }),
   ],
@@ -96,7 +100,7 @@ module.exports = {
       {
         test: /\.css$/i,
         use: ["style-loader", "css-loader"]
-      }
+      },
     ]
   }
 }
