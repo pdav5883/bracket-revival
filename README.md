@@ -2,24 +2,17 @@
 Work in progress
 
 ## Now TODO
-- Set up 2024
-- Reset max-age in S3 sync to 600
-- Remove More dropdown not yet built
+- Bracket page shows bracket as soon as it is submitted. Needs to respect completed_rounds in the same way results does
+- Scoreboard shows game status and who has submitted picks
 
 ## Later TODO
-- Bracket page shows bracket as soon as it is submitted. Needs to respect completed_rounds in the same way results does
-- License and ref to bracketry, attribut bracket image
 - Set up historicals
+- License and ref to bracketry, attribut bracket image
 - Reset max-age in S3 sync to 21600
 - Populate missing picks script
 - Button on picks page to reset bracket
-- Button on picks page to see previous bracket
-- Test page to play smaller version to understand rules
 - Email reminders
-- Scoreboard shows game status and who has submitted picks
 - Load page once all formatting is ready to avoid jump from unformatted
-- Button to make next bracket of picks once picks are submitted
-- Next round buttons anchored to top of screen
 - Show completed rounds on scoreboard
 - Show pick round, bracket round on pages
 
@@ -28,6 +21,9 @@ Work in progress
 - Refactor js into shared utils
 - Error handling
 	- Admin auth failure
+- Test page to play smaller version to understand rules
+- Button on picks page to see previous bracket
+- Next round buttons anchored to top of screen
 - Team logos
 - picks query params only works if you use cid=compname rather than cid=cid since it looks into index file
 - webpack into production
