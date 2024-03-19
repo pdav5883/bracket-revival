@@ -3,8 +3,8 @@ Work in progress
 
 ## Now TODO
 - Clearer directions at pick submission
-- Fix buttons on wider pick submission for ios
 - Set up 2024
+- Reset max-age in S3 sync to 600
 
 ## Later TODO
 - Bracket page shows bracket as soon as it is submitted. Needs to respect completed_rounds in the same way results does
@@ -21,6 +21,7 @@ Work in progress
 - Button to make next bracket of picks once picks are submitted
 - Next round buttons anchored to top of screen
 - Show completed rounds on scoreboard
+- Show pick round, bracket round on pages
 
 ## Maybe TODO
 - About page
