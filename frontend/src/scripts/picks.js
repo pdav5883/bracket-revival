@@ -18,6 +18,10 @@ $(document).ready(function() {
   
   $("#gobutton").on("click", changeRoundStart)
   $("#submitbutton").on("click", submitPicks)
+  $("#scoreboardbutton").on("click", goToScoreboard)
+  $("#bracketbutton").on("click", goToBracket)
+  $("#morepicksbutton").on("click", changeRoundStart)
+
   $("#yearsel").on("change", populateCompetitionsWrapper)
   $("#compsel").on("change", populatePlayerNamesWrapper)
 
@@ -69,6 +73,9 @@ function editMode() {
   $("#playerlabel").show()
   $("#gobutton").show()
   $("#submitbutton").hide()
+  $("#scoreboardbutton").hide()
+  $("#bracketbutton").hide()
+  $("#morepicksbutton").hide()
 }
 
 
@@ -84,6 +91,9 @@ function displayMode(year, cid, pid) {
   $("#playerlabel").hide()
   $("#gobutton").hide()
   $("#submitbutton").hide()
+  $("#scoreboardbutton").hide()
+  $("#bracketbutton").hide()
+  $("#morepicksbutton").hide()
 
   $("#yearinsert").text(year)
   $("#compinsert").text(cid)
@@ -100,6 +110,16 @@ function populateCompetitionsWrapper() {
 function populatePlayerNamesWrapper() {
   $("#statustext").text("")
   populatePlayerNames(index)
+}
+
+
+function goToScoreboard() {
+  window.location = "/scoreboard.html?year=" + yearSubmit + "&cid=" + cidSubmit
+}
+
+
+function goToBracket() {
+  window.location = "/bracket.html?year=" + yearSubmit + "&cid=" + cidSubmit + "&pid=" + pidSubmit
 }
 
 
@@ -145,6 +165,11 @@ function populateRoundStart(args) {
     success: function(result) {
       // game: {teams: [], seeds: [], score: [], result: 0/1}
       // teams/seeds/score=[null, null], result=null
+
+      // in case we got here by checking for more picks
+      $("#scoreboardbutton").hide()
+      $("#bracketbutton").hide()
+      $("#morepicksbutton").hide()
 
       $("#submitbutton").show()
 
@@ -342,7 +367,7 @@ function submitPicks() {
   })
 
   if (incomplete.length > 0) {
-    $("#statustext").text("Error: " + String(incomplete.length) + " missing picks")
+    $("#statustext").text("Error: " + String(incomplete.length) + " missing picks. Use the Next/Prev Round buttons to navigate the full bracket.")
     $("#submitbutton").prop("disabled", false)
     bracket.applyMatchesUpdates(incomplete)
     return
@@ -381,7 +406,13 @@ function submitPicks() {
     crossDomain: true,
     success: function() {
       $("#submitbutton").prop("disabled", false)
+      $("#bracketdiv").html("") // clear the bracket so player doesn't try to edit picks
       $("#statustext").text("Submission successful!")
+
+      $("#submitbutton").hide()
+      $("#scoreboardbutton").show()
+      $("#bracketbutton").show()
+      $("#morepicksbutton").show()
     },
     error: function(err) {
       $("#submitbutton").prop("disabled", false)

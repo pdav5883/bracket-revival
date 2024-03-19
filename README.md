@@ -2,9 +2,9 @@
 Work in progress
 
 ## Now TODO
-- Clearer directions at pick submission
 - Set up 2024
 - Reset max-age in S3 sync to 600
+- Remove More dropdown not yet built
 
 ## Later TODO
 - Bracket page shows bracket as soon as it is submitted. Needs to respect completed_rounds in the same way results does
