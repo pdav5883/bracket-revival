@@ -2,25 +2,25 @@
 Work in progress
 
 ## Now TODO
-- Query params for bracket, scoreboard, picks are not valid (good for newplayer
 - Clearer directions at pick submission
 - Fix buttons on wider pick submission for ios
-- Test page to play smaller version to understand rules
-- Set up historicals
-- Bracket page shows bracket as soon as it is submitted. Needs to respect completed_rounds in the same way results does
-- Reset max-age in S3 sync to 21600
-- License and ref to bracketry, attribut bracket image
-- Insert date into emails
+- Set up 2024
 
 ## Later TODO
+- Bracket page shows bracket as soon as it is submitted. Needs to respect completed_rounds in the same way results does
+- License and ref to bracketry, attribut bracket image
+- Set up historicals
+- Reset max-age in S3 sync to 21600
 - Populate missing picks script
 - Button on picks page to reset bracket
 - Button on picks page to see previous bracket
+- Test page to play smaller version to understand rules
 - Email reminders
 - Scoreboard shows game status and who has submitted picks
 - Load page once all formatting is ready to avoid jump from unformatted
 - Button to make next bracket of picks once picks are submitted
 - Next round buttons anchored to top of screen
+- Show completed rounds on scoreboard
 
 ## Maybe TODO
 - About page
@@ -50,7 +50,7 @@ index.json - {"yr": {"Comp Name 1": {"players": ["Name 1",...], "require_secret"
   teams.json - list of teams with {"name", "short_name", "seed"}
   results.json - {"results": list of 0/1/null, "score": list of [a,b]/null}
   /{cid}
-    competition.json - state of competition {"cid": "lowernospaces", "name": "Actual Name" , "completed_rounds": N, "open_picks": true/false, "open_players": true/false, "require_secret": true/false
+    competition.json - state of competition {"cid": "lowernospaces", "name": "Actual Name" , "completed_rounds": N, "open_picks": true/false, "open_players": true/false, "require_secret": true/false, "first_deadline": datetime for email
                                              "scoreboard": {"Actual pName": [r0, r1, ...],...}}
     {pid}.json - {"pid": "lowernospaces", "name": "Actual Name", "picks": [[],[],..], "email": (opt), "secret": (opt) }
  

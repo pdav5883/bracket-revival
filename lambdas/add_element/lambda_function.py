@@ -118,7 +118,8 @@ def add_competition(year, compname):
                    "completed_rounds": 0,
                    "open_picks": False,
                    "open_players": False,
-                   "require_secret": False}
+                   "require_secret": False,
+                   "first_deadline": "Thursday at Noon (EST)"}
 
     utils.write_file(competition_key, competition)
 
@@ -193,7 +194,7 @@ def add_player(year, compname, playername, playeremail=None):
 
     # send welcome email
     if competition["require_secret"]:
-        email = {"typ": "welcome", "content": {"year": year, "compname": compname}, "recipients": [playername]}
+        email = {"typ": "welcome", "content": {"year": year, "compname": compname, "deadline": competition["first_deadline"]}, "recipients": [playername]}
         utils.trigger_email(email)
 
     return {"body": f"Successfully created new player {playername} in competition {compname} in year {year}"}

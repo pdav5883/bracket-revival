@@ -131,6 +131,9 @@ function populateCompetitionTable(year, cid) {
       cell.appendChild(input[0])
       input[1].classList.add("form-label")
       cell.appendChild(input[1])
+      cell = row.insertCell()
+      input = makeTextInput("email_deadline", 16, "DEADLINE")
+      cell.appendChild(input)
 
       // require secret
       row = table.insertRow()
@@ -405,6 +408,7 @@ function submitCompetitionEdits() {
   const data = {
     "delete_competition": $("#delete_competition").is(":checked"),
     "email_all": $("#email_all").is(":checked"),
+    "deadline": $("#email_deadline").val(),
     "completed_rounds": parseInt($("#inprounds").val()),
     "open_picks": $("#selpicks").val(),
     "open_players": $("#selplayers").val(),

@@ -212,7 +212,8 @@ def update_competition(year, cid, new_competition):
         utils.trigger_email({"typ": "newround",
                              "content": {"year": year,
                                          "compname": new_data["name"],
-                                         "pick_round": new_data["completed_rounds"]},
+                                         "pick_round": new_data["completed_rounds"],
+                                         "deadline": new_competition["deadline"]},
                              "recipients": index_player_list})
 
     if len(new_competition["email_individual"]) > 0:

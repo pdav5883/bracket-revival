@@ -36,14 +36,17 @@ def lambda_handler(event, context):
         if email_type == "welcome":
             pass
         elif email_type == "newround":
-            content["pick_round_name"] = trn.ROUND_NAMES[content.pop("pick_round")]
-            content["closing_datetime"] = "Thur Mar 21 at 12:00PM EST"
+            pick_round = content.pop("pick_round")
+            content["pick_round_name"] = trn.ROUND_NAMES[pick_round]
+            content["bracket_name"] = ["First", "Second", "Third", "Fourth", "Fifth", "Sixth"][pick_round]
 
         for pname in batch["recipients"]:
             pid = pname.replace(" ", "").lower()
             player_key = year + "/" + cid + "/" + pid + ".json"
             player = utils.read_file(player_key)
             
+            content["scoreboard_url"] = f"https://bracket.bearloves.rocks/scoreboard.html?year={year}&cid={compname}"
+            content["bracket_url"] = f"https://bracket.bearloves.rocks/bracket.html?year={year}&cid={compname}&pid={pname}"
             content["pick_url"] = f"https://bracket.bearloves.rocks/picks.html?year={year}&cid={compname}&pid={pname}&secret={player['secret']}"
             content["pname"] = pname
 
@@ -72,14 +75,16 @@ welcome_template = {"subject": "Welcome to bracket-revival! ({{compname}} {{year
                                </head>\
                                <body>\
                                  <p>Hello {{pname}}!</p>\
-                                 <p>Welcome to bracket-revival!</p>\
-                                 <p>Click <a href='{{pick_url}}'>HERE</a> to make your first set of picks!</p>\
-                                 <p>You'll be making a fresh set of picks each round, so make sure to check your email at the end of every round to make your new picks. If you need a rule refresher click <a href='https://bracket.bearloves.rocks/rules.html'>HERE</a><p>\
-                                 <p>Your Friend,<br>The Bracketmaster</p>\
+                                 <p>Welcome to bracket-revival! Before each round of March Madness, you'll be picking a fresh bracket from the surviving teams. The more times you correctly pick a team to win, the more points you'll score!</p>\
+                                 <p>Click <a href='{{pick_url}}'>HERE</a> to pick your First Bracket!</p>\
+                                 <p>You have until <strong>{{deadline}}</strong> when the first game starts to submit your picks - so don't delay!</p>\
+                                 <p>For more info, be sure to check out the <a href='https://bracket.bearloves.rocks/rules.html'>Rules</a> and your game's <a href='{{scoreboard_url}}'>Scoreboard</a>.</p>\
+                                 <p>Look for an email like this after every round with a link to pick your next bracket. Thanks for playing!</p>\
+                                 <p>Your Friend,<br>The BLR Commissioner</p>\
                                </body>\
                              </html>"}
 
-newround_template = {"subject": "Time to Make More Picks! ({{compname}} {{year}})",
+newround_template = {"subject": "Time to Pick Your {{bracket_name}} Bracket! ({{compname}} {{year}})",
                      "body": "<html>\
                                <head>\
                                </head>\
@@ -87,8 +92,9 @@ newround_template = {"subject": "Time to Make More Picks! ({{compname}} {{year}}
                                  <p>Hello {{pname}},</p>\
                                  <p>It's time to pick a fresh bracket starting in the {{pick_round_name}} and going all the way to the Championship.</p>\
                                  <p>Click <a href='{{pick_url}}'>HERE</a> to make your picks.</p>\
-                                 <p>You have until <strong>{{closing_datetime}}</strong> when the next round starts to submit - so don't delay! If you need a rule refresher click <a href='https://bracket.bearloves.rocks/rules.html'>HERE</a></p>\
-                                 <p>Your Friend,<br>The Bracketmaster</p>\
+                                 <p>You have until <strong>{{deadline}}</strong> when the next round starts - so don't delay!</p>\
+                                 <p>Looking for the <a href='{{scoreboard_url}}'>Scoreboard</a>, your <a href='{{bracket_url}}'>Brackets</a>, or a <a href='https://bracket.bearloves.rocks/rules.html'>Rules Refresher</a>?</p>\
+                                 <p>Your Friend,<br>The BLR Commissioner</p>\
                                </body>\
                              </html>"}
 
