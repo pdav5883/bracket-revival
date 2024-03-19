@@ -84,7 +84,7 @@
 
 /* Layout */
 @media (min-width: 768px) {
-  body {
+  .toc-body {
     display: grid;
     gap: 1rem;
     grid-template-columns: 5fr 1fr;
