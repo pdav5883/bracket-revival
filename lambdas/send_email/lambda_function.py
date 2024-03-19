@@ -87,7 +87,7 @@ newround_template = {"subject": "Time to Make More Picks! ({{compname}} {{year}}
                                  <p>Hello {{pname}},</p>\
                                  <p>It's time to pick a fresh bracket starting in the {{pick_round_name}} and going all the way to the Championship.</p>\
                                  <p>Click <a href='{{pick_url}}'>HERE</a> to make your picks.</p>\
-                                 <p>You have until <strong>{{closing_datetime}}</strong> when the next round starts to submit - so don't delay! If you need a rule refresher click <a href=''>HERE</a></p>\
+                                 <p>You have until <strong>{{closing_datetime}}</strong> when the next round starts to submit - so don't delay! If you need a rule refresher click <a href='https://bracket.bearloves.rocks/rules.html'>HERE</a></p>\
                                  <p>Your Friend,<br>The Bracketmaster</p>\
                                </body>\
                              </html>"}
