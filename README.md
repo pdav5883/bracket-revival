@@ -2,7 +2,6 @@
 Work in progress
 
 ## Now TODO
-- Rules page
 - Query params for bracket, scoreboard, picks are not valid (good for newplayer
 - Clearer directions at pick submission
 - Fix buttons on wider pick submission for ios
