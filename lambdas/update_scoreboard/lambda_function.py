@@ -36,6 +36,7 @@ def lambda_handler(event, context):
 
     # repopulate scoreboard
     scoreboard = {}
+    pick_status = {}
 
     for pname in player_names:
         pid = pname.replace(" ", "").lower()
@@ -51,8 +52,17 @@ def lambda_handler(event, context):
             first_game += gpr
 
         scoreboard[pname] = points_round
+        
+        # pick status is None if picks aren't currently open, True if picks submitted for this round, False if waiting
+        if not competition["open_picks"]:
+            pick_status[pname] = None
+        elif len(player["picks"]) > competition["completed_rounds"]:
+            pick_status[pname] = True
+        else:
+            pick_status[pname] = False
 
     competition["scoreboard"] = scoreboard
+    competition["pick_status"] = pick_status
 
     utils.write_file(competition_key, competition)
 

@@ -115,6 +115,7 @@ def add_competition(year, compname):
     competition = {"cid": cid,
                    "name": compname,
                    "scoreboard": {},
+                   "pick_status": {},
                    "completed_rounds": 0,
                    "open_picks": False,
                    "open_players": False,

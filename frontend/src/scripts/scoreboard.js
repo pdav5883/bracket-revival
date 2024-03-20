@@ -121,7 +121,7 @@ function populateScoreboard(args) {
       // reconfigure results to allow sorting
       let leaders = []
       result.names.forEach((name, i) => {
-        leaders.push({"name": name, "total": result.total_points[i], "round": result.round_points[i]})
+        leaders.push({"name": name, "total": result.total_points[i], "round": result.round_render[i]})
       })
 
       leaders.sort((a, b) => ((a.total >= b.total) ? -1 : 1))
@@ -180,10 +180,18 @@ function populateScoreboard(args) {
         tableCell = tableRow.insertCell()
         tableCell.textContent = leader.total
 
-        leader.round.forEach(points => {
+        leader.round.forEach(render => {
           tableCell = tableRow.insertCell()
-          tableCell.textContent = points
-          tableCell.classList.add("text-muted")
+          if (render === true) {
+            tableCell.innerHTML = checkmark
+          }
+          else if (render === false) {
+            tableCell.innerHTML = waitmark
+          }
+          else {
+            tableCell.textContent = render 
+            tableCell.classList.add("text-muted")
+          }
         })
 
       })
@@ -191,4 +199,7 @@ function populateScoreboard(args) {
   })
 }
 
+const checkmark = "<svg xmlns='http://www.w3.org/2000/svg' height='18' width='18' viewBox='0 0 512 512'><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><circle fill='#888888' cy='256' cx='256' r='260'/><circle fill='#ffffff' cy='256' cx='256' r='200'/><path fill='#22bc20' d='M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z'/></svg>"
+
+const waitmark = "<svg xmlns='http://www.w3.org/2000/svg' height='18' width='18' viewBox='0 0 512 512'><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><circle fill='#888888' cy='256' cx='256' r='260'/><circle fill='#ffffff' cy='256' cx='256' r='200'/><path fill='#22bc20' d='M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256z'/></svg>"
 

@@ -3,7 +3,6 @@ Work in progress
 
 ## Now TODO
 - Bracket page shows bracket as soon as it is submitted. Needs to respect completed_rounds in the same way results does
-- Scoreboard shows game status and who has submitted picks
 
 ## Later TODO
 - Set up historicals
@@ -15,6 +14,7 @@ Work in progress
 - Load page once all formatting is ready to avoid jump from unformatted
 - Show completed rounds on scoreboard
 - Show pick round, bracket round on pages
+- New player throws error at submit when query params are incorrect
 
 ## Maybe TODO
 - About page
