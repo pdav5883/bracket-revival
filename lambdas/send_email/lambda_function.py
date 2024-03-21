@@ -39,6 +39,10 @@ def lambda_handler(event, context):
             pick_round = content.pop("pick_round")
             content["pick_round_name"] = trn.ROUND_NAMES[pick_round]
             content["bracket_name"] = ["First", "Second", "Third", "Fourth", "Fifth", "Sixth"][pick_round]
+        elif email_type == "reminder":
+            pick_round = content.pop("pick_round")
+            content["pick_round_name"] = trn.ROUND_NAMES[pick_round]
+            content["bracket_name"] = ["First", "Second", "Third", "Fourth", "Fifth", "Sixth"][pick_round]
 
         for pname in batch["recipients"]:
             pid = pname.replace(" ", "").lower()
@@ -98,8 +102,17 @@ newround_template = {"subject": "Time to Pick Your {{bracket_name}} Bracket! ({{
                                </body>\
                              </html>"}
 
-reminder_template = {"subject": "TBD",
-                  "body": "TBD"}
+reminder_template = {"subject": "Don't Forget to Pick Your {{bracket_name}} Bracket! ({{compname}} {{year}})",
+                     "body": "<html>\
+                               <head>\
+                               </head>\
+                               <body>\
+                                 <p>Hi {{pname}},</p>\
+                                 <p>A friendly reminder that time is running out to make your latest round of picks! The next round starts at <strong>{{deadline}}</strong>, so get your picks in before then!</p>\
+                                 <p>Click <a href='{{pick_url}}'>HERE</a> to make your picks.</p>\
+                                 <p>Your Friend,<br>The BLR Commissioner</p>\
+                               </body>\
+                             </html>"}
 
 templates = {"welcome": welcome_template,
              "newround": newround_template,

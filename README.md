@@ -9,7 +9,6 @@ Work in progress
 - Reset max-age in S3 sync to 21600
 - Populate missing picks script
 - Button on picks page to reset bracket
-- Email reminders
 - Load page once all formatting is ready to avoid jump from unformatted
 - Show completed rounds on scoreboard
 - Show pick round, bracket round on pages
