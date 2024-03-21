@@ -2,7 +2,6 @@
 Work in progress
 
 ## Now TODO
-- Bracket page shows bracket as soon as it is submitted. Needs to respect completed_rounds in the same way results does
 
 ## Later TODO
 - Set up historicals

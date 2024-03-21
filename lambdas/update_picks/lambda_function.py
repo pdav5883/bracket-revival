@@ -13,7 +13,9 @@ def lambda_handler(event, context):
     cid = body.get("cid").replace(" ", "").lower()
     pid = body.get("pid").replace(" ", "").lower()
     secret = body.get("secret", None)
-    new_picks = body.get("picks", None)
+    new_picks = body.get("picks", [])
+
+    print("Event Body:", body)
 
     # TODO: assert arguments exist
     # TODO: check that pid exists
@@ -27,24 +29,32 @@ def lambda_handler(event, context):
     games_remaining = trn.NUMGAMES - sum(trn.GAMES_PER_ROUND[0:rnd])
     
     if games_remaining != len(new_picks):
+        err_msg = f"Submitted picks are incorrect length. Expected length: {games_remaining}. Submitted length: {len(new_picks)}"
+        print(err_msg)
         return {"statusCode": 400,
-                "body": f"Submitted picks are incorrect length. Expected length: {games_remaining}. Submitted length: {len(new_picks)}"}
+                "body": err_msg}
 
     # check that this submission is allowed
     competition_key = year + "/" + cid + "/competition.json"
     competition = utils.read_file(competition_key)
 
     if not competition["open_picks"]:
+        err_msg = f"Picks for {cid} are currently locked"
+        print(err_msg)
         return {"statusCode": 400,
-                "body": f"Picks for {cid} are currently locked"}
+                "body": err_msg}
 
     if competition["require_secret"] and secret != player["secret"]:
+        err_msg = f"Pick submission secret is incorrect. Make sure to use your email link for picks."
+        print(err_msg)
         return {"statusCode": 400,
-                "body": f"Pick submission secret is incorrect. Make sure to use your email link for picks."}
+                "body": err_msg}
 
     if rnd > competition["completed_rounds"]:
+        err_msg = f"{cid} is not accepting picks for Round {rnd}. Try again later."
+        print(err_msg)
         return {"statusCode": 400,
-                "body": f"{cid} is not accepting picks for Round {rnd}. Try again later."}
+                "body": err_msg}
 
     player["picks"].append(new_picks)
     
@@ -53,6 +63,7 @@ def lambda_handler(event, context):
     # sync scoreboard
     utils.trigger_sync(year, cid)
     
-    return {"body": f"Successfully added new picks for round {rnd} to player {pid} in {cid}"}
-
+    msg = f"Successfully added new picks for round {rnd} to player {pid} in {cid}"
+    print(msg)
+    return {"body": msg}
 
