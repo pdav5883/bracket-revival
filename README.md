@@ -1,21 +1,15 @@
 # bracket-revival
-Work in progress
+A March Madness bracket picking game where you get to re-pick your bracket after every round. Hosted at https://bracket.bearloves.rocks
 
-## Now TODO
-
-## Later TODO
-- Set up historicals
-- License and ref to bracketry, attribut bracket image
+## Next TODO
+- About page
+- Add github to nav
+- License and ref to bracketry, attribute bracket image
 - Reset max-age in S3 sync to 21600
 - Populate missing picks script
-- Button on picks page to reset bracket
 - Load page once all formatting is ready to avoid jump from unformatted
-- Show completed rounds on scoreboard
-- Show pick round, bracket round on pages
-- New player throws error at submit when query params are incorrect
 
 ## Maybe TODO
-- About page
 - Refactor js into shared utils
 - Error handling
 	- Admin auth failure
@@ -26,6 +20,9 @@ Work in progress
 - picks query params only works if you use cid=compname rather than cid=cid since it looks into index file
 - webpack into production
 - Restricted endpoint to grab emails and pick links for players
+- New player throws error at submit when query params are incorrect
+- Show completed rounds on scoreboard
+- Show pick round, bracket round on pages
 
 ### Real-time game flow
 - Year is created
