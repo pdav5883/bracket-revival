@@ -28,8 +28,8 @@ module.exports = {
       import: "./src/scripts/index.js",
       dependOn: "shared"
     },
-    rules: {
-      import: "./src/scripts/rules.js",
+    navonly: {
+      import: "./src/scripts/navonly.js",
       dependOn: "shared"
     },
     shared: "./src/scripts/shared.js"
@@ -45,6 +45,12 @@ module.exports = {
       filename: "admin.html",
       template: "./src/admin.html",
       chunks: ["shared", "admin"]
+    }),
+    new HtmlWebpack({
+      title: "About",
+      filename: "about.html",
+      template: "./src/about.html",
+      chunks: ["shared", "navonly"]
     }),
     new HtmlWebpack({
       title: "Bracket",
@@ -74,7 +80,7 @@ module.exports = {
       title: "Rules",
       filename: "rules.html",
       template: "./src/rules.html",
-      chunks: ["shared", "rules"]
+      chunks: ["shared", "navonly"]
     }),
     new HtmlWebpack({
       title: "Bracket Revival",

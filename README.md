@@ -1,10 +1,8 @@
 # bracket-revival
-A March Madness bracket picking game where you get to re-pick your bracket after every round. Hosted at https://bracket.bearloves.rocks
+A March Madness bracket picking game where you get to re-pick your bracket after every round. 
 
 ## Next TODO
-- About page
-- Add github to nav
-- License and ref to bracketry, attribute bracket image
+- Fill out about.html stubs 
 - Reset max-age in S3 sync to 21600
 
 ## Maybe TODO
