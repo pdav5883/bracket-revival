@@ -191,6 +191,12 @@ function populateCompetitionTable(year, cid) {
         input = makeCheckboxInput("email_" + i, "Email")
         cell.appendChild(input[0]) // checkbox
         cell.appendChild(input[1]) // label
+        
+        // autopick
+        cell = row.insertCell()
+        input = makeCheckboxInput("pick_" + i, "Autopick")
+        cell.appendChild(input[0]) // checkbox
+        cell.appendChild(input[1]) // label
       })
     }
   })
@@ -391,6 +397,7 @@ function submitCompetitionEdits() {
   const numPlayers = $("[id^=old_").length
   let players = {}
   let emailNames = []
+  let autopickNames = []
 
   for (let i = 0; i < numPlayers; i++) {
     players[$("#old_" + i).text()] = $("#new_" + i).val()
@@ -403,6 +410,10 @@ function submitCompetitionEdits() {
     if ($("#email_" + i).is(":checked")) {
       emailNames.push($("#old_" + i).text())
     }
+    
+    if ($("#pick_" + i).is(":checked")) {
+      autopickNames.push($("#old_" + i).text())
+    }
   }
 
   const data = {
@@ -414,6 +425,7 @@ function submitCompetitionEdits() {
     "open_players": $("#selplayers").val(),
     "require_secret": $("#selsecret").val(),
     "email_individual": emailNames,
+    "autopick_individual": autopickNames,
     "players": players}
 
   $.ajax({

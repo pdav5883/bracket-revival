@@ -6,13 +6,9 @@ A March Madness bracket picking game where you get to re-pick your bracket after
 - Add github to nav
 - License and ref to bracketry, attribute bracket image
 - Reset max-age in S3 sync to 21600
-- Populate missing picks script
-- Load page once all formatting is ready to avoid jump from unformatted
 
 ## Maybe TODO
-- Refactor js into shared utils
-- Error handling
-	- Admin auth failure
+- Error handling bad params on pages
 - Test page to play smaller version to understand rules
 - Button on picks page to see previous bracket
 - Next round buttons anchored to top of screen
@@ -20,9 +16,10 @@ A March Madness bracket picking game where you get to re-pick your bracket after
 - picks query params only works if you use cid=compname rather than cid=cid since it looks into index file
 - webpack into production
 - Restricted endpoint to grab emails and pick links for players
-- New player throws error at submit when query params are incorrect
+- New player should throw error at submit when query params are incorrect
 - Show completed rounds on scoreboard
 - Show pick round, bracket round on pages
+- Refactor js into shared utils
 
 ### Real-time game flow
 - Year is created
@@ -43,7 +40,8 @@ index.json - {"yr": {"Comp Name 1": {"players": ["Name 1",...], "require_secret"
   results.json - {"results": list of 0/1/null, "score": list of [a,b]/null}
   /{cid}
     competition.json - state of competition {"cid": "lowernospaces", "name": "Actual Name" , "completed_rounds": N, "open_picks": true/false, "open_players": true/false, "require_secret": true/false, "first_deadline": datetime for email
-                                             "scoreboard": {"Actual pName": [r0, r1, ...],...}}
+                                             "scoreboard": {"Actual pName": [r0, r1, ...],...},
+					     "pick_status": {"Actual pName": True/False,...}}
     {pid}.json - {"pid": "lowernospaces", "name": "Actual Name", "picks": [[],[],..], "email": (opt), "secret": (opt) }
  
 ## Lambdas

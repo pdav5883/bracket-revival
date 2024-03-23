@@ -1,6 +1,7 @@
 import json
 
 from common import utils
+from common import tournament as trn
 
 """
 Lambda admin_edit allows direct updates to .json files from
@@ -24,6 +25,7 @@ with etype argument in request body:
                           "open_players",
                           "require_secret",
                           "email_individual", [name1, ...],
+                          "autopick_individual", [name1, ...],
                           "players": {old_name: new_name,...}} if new_name is None,  delete the player
     bracket order in teams.json
     - etype=competition TODO
@@ -203,7 +205,24 @@ def update_competition(year, cid, new_competition):
 
     # update index.json
     utils.write_file("index.json", index)
-    
+
+    # check for auto-picks
+    for pname in new_competition["autopick_individual"]:
+        player_key = year + "/" + cid.replace(" ", "").lower()  + "/" + pname.replace(" ", "").lower() + ".json"
+        player = utils.read_file(player_key)
+        picks = player["picks"]
+
+        if len(picks) <= new_data["completed_rounds"]:
+            last_picks = picks[-1]
+            games_last_round = trn.GAMES_PER_ROUND[len(picks) - 1]
+            next_picks = last_picks[games_last_round:]
+            picks.append(next_picks)
+            utils.write_file(player_key, player)
+
+            print(f"Submitted auto-picks for player {pname} in comp {cid} year {year}: {next_picks}")
+        else:
+            print("Cannot make auto-picks for player {pname} in comp {cid} year {year}. Player has made {len(picks)} picks through {new_data['completed_rounds'] rounds")
+
     # sync scoreboard
     utils.trigger_sync(year, cid)
 
