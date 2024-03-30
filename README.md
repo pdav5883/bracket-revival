@@ -1,10 +1,6 @@
 # bracket-revival
 A March Madness bracket picking game where you get to re-pick your bracket after every round. 
 
-## Next TODO
-- Fill out about.html stubs 
-- Reset max-age in S3 sync to 21600
-
 ## Maybe TODO
 - Error handling bad params on pages
 - Test page to play smaller version to understand rules
