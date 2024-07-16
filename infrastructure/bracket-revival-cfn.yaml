@@ -1,0 +1,275 @@
+Parameters:
+  AcmSSLCertificateId:
+    Type: String
+  SsmAdminSecretId:
+    Type: String
+  HostedZoneId:
+    Type: String
+  DeployedRootURL:
+    Type: String
+  LambdaReadWritePermissionName:
+    Type: String
+  LambdaReadPermissionName:
+    Type: String
+  LambdaAdminReadPermissionName:
+    Type: String
+  PublicBucketName:
+    Type: String
+  PrivateBucketName:
+    Type: String
+  LambdaAddElementName:
+    Type: String
+  LambdaAdminAuthName:
+    Type: String
+  LambdaAdminEditName:
+    Type: String
+  LambdaGetBracketName:
+    Type: String
+  LambdaGetCompetitionsName:
+    Type: String
+  LambdaGetRoundStartName:
+    Type: String
+  LambdaGetScoreboardName:
+    Type: String
+  LambdaSendEmailName:
+    Type: String
+  LambdaUpdatePicksName:
+    Type: String
+  LambdaUpdateScoreboardName:
+    Type: String
+  LayerCommonName:
+    Type: String
+  ApiName:
+    Type: String
+  PrimaryRouteName:
+    Type: String
+  AdminRouteName:
+    Type: String
+Resources:
+  LambdaBracketUpdatePicks:
+    Type: "AWS::Lambda::Function"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      FunctionName: !Ref LambdaUpdatePicksName
+      MemorySize: 128
+      Description: ""
+      TracingConfig:
+        Mode: "PassThrough"
+      Timeout: 3
+      RuntimeManagementConfig:
+        UpdateRuntimeOn: "Auto"
+      Handler: "lambda_function.lambda_handler"
+      Code:
+        S3Bucket: !Ref S3BracketPrivate
+        S3Key: !Sub "lambdas/${LambdaUpdatePicksName}.zip"
+      Layers:
+        - !Ref LayerBracketCommon
+      Role: !GetAtt RoleBracketReadWrite.Arn 
+      FileSystemConfigs: []
+      Runtime: "python3.10"
+      PackageType: "Zip"
+      LoggingConfig:
+        LogFormat: "Text"
+        LogGroup: !Ref LogBracketLambdaUpdatePicks 
+      EphemeralStorage:
+        Size: 512
+      Architectures:
+      - "x86_64"
+  LambdaBracketGetScoreboard:
+    Type: "AWS::Lambda::Function"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      FunctionName: !Ref LambdaGetScoreboardName
+      MemorySize: 128
+      Description: ""
+      TracingConfig:
+        Mode: "PassThrough"
+      Timeout: 3
+      RuntimeManagementConfig:
+        UpdateRuntimeOn: "Auto"
+      Handler: "lambda_function.lambda_handler"
+      Code:
+        S3Bucket: !Ref S3BracketPrivate
+        S3Key: !Sub "lambdas/${LambdaGetScoreboardName}.zip"
+      Layers:
+        - !Ref LayerBracketCommon
+      Role: !GetAtt RoleBracketRead.Arn 
+      FileSystemConfigs: []
+      Runtime: "python3.10"
+      PackageType: "Zip"
+      LoggingConfig:
+        LogFormat: "Text"
+        LogGroup: !Ref LogBracketLambdaGetScoreboard
+      EphemeralStorage:
+        Size: 512
+      Architectures:
+      - "x86_64"
+  LayerBracketCommon:
+    Type: "AWS::Lambda::LayerVersion"
+    Properties:
+      LayerName: !Ref LayerCommonName
+      Content:
+        S3Bucket: !Ref S3BracketPrivate
+        S3Key: !Sub lambdas/${LayerCommonName}.zip
+      CompatibleRuntimes:
+        - "python3.10"
+      CompatibleArchitectures:
+        - "x86_64"
+  RoleBracketReadWrite:
+    Type: "AWS::IAM::Role"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      Path: "/"
+      ManagedPolicyArns:
+      - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      - !GetAtt PolicyBracketReadWrite.PolicyArn
+      MaxSessionDuration: 3600
+      RoleName: !Sub "role-lambda-${LambdaReadWritePermissionName}"
+      Description: ""
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Action: "sts:AssumeRole"
+          Effect: "Allow"
+          Principal:
+            Service: "lambda.amazonaws.com"
+  RoleBracketRead:
+    Type: "AWS::IAM::Role"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      Path: "/"
+      ManagedPolicyArns:
+      - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      - !GetAtt PolicyBracketRead.PolicyArn
+      MaxSessionDuration: 3600
+      RoleName: !Sub "role-lambda-${LambdaReadPermissionName}"
+      Description: ""
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Action: "sts:AssumeRole"
+          Effect: "Allow"
+          Principal:
+            Service: "lambda.amazonaws.com"
+  PolicyBracketReadWrite:
+    Type: "AWS::IAM::ManagedPolicy"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      ManagedPolicyName: !Sub "policy-lambda-${LambdaReadWritePermissionName}"
+      Path: "/"
+      Description: ""
+      Groups: []
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Resource:
+          - !GetAtt S3BracketPublic.Arn
+          - !GetAtt S3BracketPrivate.Arn
+          - !Sub "${S3BracketPublic.Arn}/*"
+          - !Sub "${S3BracketPrivate.Arn}/*"
+          Action:
+          - "s3:PutObject"
+          - "s3:GetObject"
+          - "s3:ListBucket"
+          Effect: "Allow"
+          Sid: "VisualEditor0"
+  PolicyBracketRead:
+    Type: "AWS::IAM::ManagedPolicy"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      ManagedPolicyName: !Sub "policy-lambda-${LambdaReadPermissionName}"
+      Path: "/"
+      Description: ""
+      Groups: []
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Resource:
+          - !GetAtt S3BracketPublic.Arn
+          - !GetAtt S3BracketPrivate.Arn
+          - !Sub "${S3BracketPublic.Arn}/*"
+          - !Sub "${S3BracketPrivate.Arn}/*"
+          Action:
+          - "s3:GetObject"
+          - "s3:ListBucket"
+          Effect: "Allow"
+          Sid: "VisualEditor0"
+  S3BracketPublic:
+    Type: "AWS::S3::Bucket"
+    UpdateReplacePolicy: "Retain"
+    DeletionPolicy: "Delete"
+    Properties:
+      PublicAccessBlockConfiguration:
+        RestrictPublicBuckets: true
+        IgnorePublicAcls: true
+        BlockPublicPolicy: true
+        BlockPublicAcls: true
+      BucketName: !Ref PublicBucketName 
+      OwnershipControls:
+        Rules:
+        - ObjectOwnership: "BucketOwnerEnforced" 
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+        - BucketKeyEnabled: false
+          ServerSideEncryptionByDefault:
+            SSEAlgorithm: "AES256"
+  S3BracketPrivate:
+    Type: "AWS::S3::Bucket"
+    UpdateReplacePolicy: "Retain"
+    DeletionPolicy: "Delete"
+    Properties:
+      PublicAccessBlockConfiguration:
+        RestrictPublicBuckets: true
+        IgnorePublicAcls: true
+        BlockPublicPolicy: true
+        BlockPublicAcls: true
+      BucketName: !Ref PrivateBucketName 
+      OwnershipControls:
+        Rules:
+        - ObjectOwnership: "BucketOwnerEnforced"
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+        - BucketKeyEnabled: false
+          ServerSideEncryptionByDefault:
+            SSEAlgorithm: "AES256"
+  S3BucketPolicyBracket:
+    Type: "AWS::S3::BucketPolicy"
+    UpdateReplacePolicy: "Retain"
+    DeletionPolicy: "Delete"
+    Properties:
+      Bucket: !Ref S3BracketPublic
+      PolicyDocument:
+        Version: "2008-10-17"
+        Statement:
+        - Condition:
+            StringEquals:
+              AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/EAYYH2TLICFBU"  #SUB
+          Resource: !Sub "${S3BracketPublic.Arn}/*"
+          Action: "s3:GetObject"
+          Effect: "Allow"
+          Principal:
+            Service: "cloudfront.amazonaws.com"
+          Sid: "AllowCloudFrontServicePrincipal"
+        Id: "PolicyForCloudFrontPrivateContent"
+  LogBracketLambdaGetScoreboard:
+    Type: "AWS::Logs::LogGroup"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${LambdaGetScoreboardName}"
+      RetentionInDays: 7
+  LogBracketLambdaUpdatePicks:
+    Type: "AWS::Logs::LogGroup"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${LambdaUpdatePicksName}"
+      RetentionInDays: 7
+
+
