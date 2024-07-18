@@ -9,6 +9,8 @@ Parameters:
     Type: String
   LambdaReadWritePermissionName:
     Type: String
+  LambdaPublishPermissionName:
+    Type: String
   LambdaReadPermissionName:
     Type: String
   LambdaAdminReadPermissionName:
@@ -39,6 +41,10 @@ Parameters:
     Type: String
   LayerCommonName:
     Type: String
+  SNSTopicEmailName:
+    Type: String
+  SNSTopicSyncName:
+    Type: String
   ApiName:
     Type: String
   PrimaryRouteName:
@@ -46,12 +52,12 @@ Parameters:
   AdminRouteName:
     Type: String
 Resources:
-  LambdaBracketUpdatePicks:
+  LambdaBracketAddElement:
     Type: "AWS::Lambda::Function"
     UpdateReplacePolicy: "Delete"
     DeletionPolicy: "Delete"
     Properties:
-      FunctionName: !Ref LambdaUpdatePicksName
+      FunctionName: !Ref LambdaAddElementName
       MemorySize: 128
       Description: ""
       TracingConfig:
@@ -62,7 +68,7 @@ Resources:
       Handler: "lambda_function.lambda_handler"
       Code:
         S3Bucket: !Ref S3BracketPrivate
-        S3Key: !Sub "lambdas/${LambdaUpdatePicksName}.zip"
+        S3Key: !Sub "lambdas/${LambdaAddElementName}.zip"
       Layers:
         - !Ref LayerBracketCommon
       Role: !GetAtt RoleBracketReadWrite.Arn 
@@ -71,7 +77,157 @@ Resources:
       PackageType: "Zip"
       LoggingConfig:
         LogFormat: "Text"
-        LogGroup: !Ref LogBracketLambdaUpdatePicks 
+        LogGroup: !Ref LogBracketLambdaAddElement
+      EphemeralStorage:
+        Size: 512
+      Architectures:
+      - "x86_64"
+  LambdaBracketAdminAuth:
+    Type: "AWS::Lambda::Function"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      FunctionName: !Ref LambdaAdminAuthName
+      MemorySize: 128
+      Description: ""
+      TracingConfig:
+        Mode: "PassThrough"
+      Timeout: 3
+      RuntimeManagementConfig:
+        UpdateRuntimeOn: "Auto"
+      Handler: "lambda_function.lambda_handler"
+      Code:
+        S3Bucket: !Ref S3BracketPrivate
+        S3Key: !Sub "lambdas/${LambdaAdminAuthName}.zip"
+      Layers:
+        - !Ref LayerBracketCommon
+      Role: !GetAtt RoleBracketAdminRead.Arn 
+      FileSystemConfigs: []
+      Runtime: "python3.10"
+      PackageType: "Zip"
+      LoggingConfig:
+        LogFormat: "Text"
+        LogGroup: !Ref LogBracketLambdaAdminAuth
+      EphemeralStorage:
+        Size: 512
+      Architectures:
+      - "x86_64"
+  LambdaBracketAdminEdit:
+    Type: "AWS::Lambda::Function"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      FunctionName: !Ref LambdaAdminEditName
+      MemorySize: 128
+      Description: ""
+      TracingConfig:
+        Mode: "PassThrough"
+      Timeout: 3
+      RuntimeManagementConfig:
+        UpdateRuntimeOn: "Auto"
+      Handler: "lambda_function.lambda_handler"
+      Code:
+        S3Bucket: !Ref S3BracketPrivate
+        S3Key: !Sub "lambdas/${LambdaAdminEditName}.zip"
+      Layers:
+        - !Ref LayerBracketCommon
+      Role: !GetAtt RoleBracketReadWrite.Arn 
+      FileSystemConfigs: []
+      Runtime: "python3.10"
+      PackageType: "Zip"
+      LoggingConfig:
+        LogFormat: "Text"
+        LogGroup: !Ref LogBracketLambdaAdminEdit
+      EphemeralStorage:
+        Size: 512
+      Architectures:
+      - "x86_64"
+  LambdaBracketGetBracket:
+    Type: "AWS::Lambda::Function"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      FunctionName: !Ref LambdaGetBracketName
+      MemorySize: 128
+      Description: ""
+      TracingConfig:
+        Mode: "PassThrough"
+      Timeout: 3
+      RuntimeManagementConfig:
+        UpdateRuntimeOn: "Auto"
+      Handler: "lambda_function.lambda_handler"
+      Code:
+        S3Bucket: !Ref S3BracketPrivate
+        S3Key: !Sub "lambdas/${LambdaGetBracketName}.zip"
+      Layers:
+        - !Ref LayerBracketCommon
+      Role: !GetAtt RoleBracketRead.Arn 
+      FileSystemConfigs: []
+      Runtime: "python3.10"
+      PackageType: "Zip"
+      LoggingConfig:
+        LogFormat: "Text"
+        LogGroup: !Ref LogBracketLambdaGetBracket
+      EphemeralStorage:
+        Size: 512
+      Architectures:
+      - "x86_64"
+  LambdaBracketGetCompetitions:
+    Type: "AWS::Lambda::Function"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      FunctionName: !Ref LambdaGetCompetitionsName
+      MemorySize: 128
+      Description: ""
+      TracingConfig:
+        Mode: "PassThrough"
+      Timeout: 3
+      RuntimeManagementConfig:
+        UpdateRuntimeOn: "Auto"
+      Handler: "lambda_function.lambda_handler"
+      Code:
+        S3Bucket: !Ref S3BracketPrivate
+        S3Key: !Sub "lambdas/${LambdaGetCompetitionsName}.zip"
+      Layers:
+        - !Ref LayerBracketCommon
+      Role: !GetAtt RoleBracketRead.Arn 
+      FileSystemConfigs: []
+      Runtime: "python3.10"
+      PackageType: "Zip"
+      LoggingConfig:
+        LogFormat: "Text"
+        LogGroup: !Ref LogBracketLambdaGetCompetitions
+      EphemeralStorage:
+        Size: 512
+      Architectures:
+      - "x86_64"
+  LambdaBracketGetRoundStart:
+    Type: "AWS::Lambda::Function"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      FunctionName: !Ref LambdaGetRoundStartName
+      MemorySize: 128
+      Description: ""
+      TracingConfig:
+        Mode: "PassThrough"
+      Timeout: 3
+      RuntimeManagementConfig:
+        UpdateRuntimeOn: "Auto"
+      Handler: "lambda_function.lambda_handler"
+      Code:
+        S3Bucket: !Ref S3BracketPrivate
+        S3Key: !Sub "lambdas/${LambdaGetRoundStartName}.zip"
+      Layers:
+        - !Ref LayerBracketCommon
+      Role: !GetAtt RoleBracketRead.Arn 
+      FileSystemConfigs: []
+      Runtime: "python3.10"
+      PackageType: "Zip"
+      LoggingConfig:
+        LogFormat: "Text"
+        LogGroup: !Ref LogBracketLambdaGetRoundStart
       EphemeralStorage:
         Size: 512
       Architectures:
@@ -106,6 +262,96 @@ Resources:
         Size: 512
       Architectures:
       - "x86_64"
+  LambdaBracketSendEmail:
+    Type: "AWS::Lambda::Function"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      FunctionName: !Ref LambdaSendEmailName
+      MemorySize: 128
+      Description: ""
+      TracingConfig:
+        Mode: "PassThrough"
+      Timeout: 3
+      RuntimeManagementConfig:
+        UpdateRuntimeOn: "Auto"
+      Handler: "lambda_function.lambda_handler"
+      Code:
+        S3Bucket: !Ref S3BracketPrivate
+        S3Key: !Sub "lambdas/${LambdaSendEmailName}.zip"
+      Layers:
+        - !Ref LayerBracketCommon
+      Role: !GetAtt RoleBracketRead.Arn
+      FileSystemConfigs: []
+      Runtime: "python3.10"
+      PackageType: "Zip"
+      LoggingConfig:
+        LogFormat: "Text"
+        LogGroup: !Ref LogBracketLambdaSendEmail
+      EphemeralStorage:
+        Size: 512
+      Architectures:
+      - "x86_64"
+  LambdaBracketUpdatePicks:
+    Type: "AWS::Lambda::Function"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      FunctionName: !Ref LambdaUpdatePicksName
+      MemorySize: 128
+      Description: ""
+      TracingConfig:
+        Mode: "PassThrough"
+      Timeout: 3
+      RuntimeManagementConfig:
+        UpdateRuntimeOn: "Auto"
+      Handler: "lambda_function.lambda_handler"
+      Code:
+        S3Bucket: !Ref S3BracketPrivate
+        S3Key: !Sub "lambdas/${LambdaUpdatePicksName}.zip"
+      Layers:
+        - !Ref LayerBracketCommon
+      Role: !GetAtt RoleBracketReadWrite.Arn 
+      FileSystemConfigs: []
+      Runtime: "python3.10"
+      PackageType: "Zip"
+      LoggingConfig:
+        LogFormat: "Text"
+        LogGroup: !Ref LogBracketLambdaUpdatePicks 
+      EphemeralStorage:
+        Size: 512
+      Architectures:
+      - "x86_64"
+  LambdaBracketUpdateScoreboard:
+    Type: "AWS::Lambda::Function"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      FunctionName: !Ref LambdaUpdateScoreboardName
+      MemorySize: 128
+      Description: ""
+      TracingConfig:
+        Mode: "PassThrough"
+      Timeout: 3
+      RuntimeManagementConfig:
+        UpdateRuntimeOn: "Auto"
+      Handler: "lambda_function.lambda_handler"
+      Code:
+        S3Bucket: !Ref S3BracketPrivate
+        S3Key: !Sub "lambdas/${LambdaUpdateScoreboardName}.zip"
+      Layers:
+        - !Ref LayerBracketCommon
+      Role: !GetAtt RoleBracketReadWrite.Arn 
+      FileSystemConfigs: []
+      Runtime: "python3.10"
+      PackageType: "Zip"
+      LoggingConfig:
+        LogFormat: "Text"
+        LogGroup: !Ref LogBracketLambdaUpdateScoreboard
+      EphemeralStorage:
+        Size: 512
+      Architectures:
+      - "x86_64"
   LayerBracketCommon:
     Type: "AWS::Lambda::LayerVersion"
     Properties:
@@ -117,6 +363,52 @@ Resources:
         - "python3.10"
       CompatibleArchitectures:
         - "x86_64"
+  SNSTopicBracketEmail:
+    Type: "AWS::SNS::Topic"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      TopicName: !Ref SNSTopicEmailName
+  SNSSubscriptionBracketEmail:
+    Type: "AWS::SNS::Subscription"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      Protocol: "lambda"
+      TopicArn: !GetAtt SNSTopicBracketEmail.TopicArn
+      Endpoint: !GetAtt LambdaBracketSendEmail.Arn
+  SNSTriggerPermissionBracketEmail:
+    Type: "AWS::Lambda::Permission"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      FunctionName: !GetAtt LambdaBracketSendEmail.Arn
+      Action: "lambda:InvokeFunction"
+      SourceArn: !GetAtt SNSTopicBracketEmail.TopicArn
+      Principal: "sns.amazonaws.com"
+  SNSTopicBracketSync:
+    Type: "AWS::SNS::Topic"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      TopicName: !Ref SNSTopicSyncName
+  SNSSubscriptionBracketSync:
+    Type: "AWS::SNS::Subscription"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      Protocol: "lambda"
+      TopicArn: !GetAtt SNSTopicBracketSync.TopicArn
+      Endpoint: !GetAtt LambdaBracketUpdateScoreboard.Arn
+  SNSTriggerPermissionBracketSync:
+    Type: "AWS::Lambda::Permission"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      FunctionName: !GetAtt LambdaBracketUpdateScoreboard.Arn
+      Action: "lambda:InvokeFunction"
+      SourceArn: !GetAtt SNSTopicBracketSync.TopicArn
+      Principal: "sns.amazonaws.com"
   RoleBracketReadWrite:
     Type: "AWS::IAM::Role"
     UpdateReplacePolicy: "Delete"
@@ -126,6 +418,7 @@ Resources:
       ManagedPolicyArns:
       - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
       - !GetAtt PolicyBracketReadWrite.PolicyArn
+      - !GetAtt PolicyBracketPublish.PolicyArn
       MaxSessionDuration: 3600
       RoleName: !Sub "role-lambda-${LambdaReadWritePermissionName}"
       Description: ""
@@ -155,6 +448,25 @@ Resources:
           Effect: "Allow"
           Principal:
             Service: "lambda.amazonaws.com"
+  RoleBracketAdminRead:
+    Type: "AWS::IAM::Role"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      Path: "/"
+      ManagedPolicyArns:
+      - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      - !GetAtt PolicyBracketAdminRead.PolicyArn
+      MaxSessionDuration: 3600
+      RoleName: !Sub "role-lambda-${LambdaAdminReadPermissionName}"
+      Description: "Allows admin auth function to read ssm secret"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Action: "sts:AssumeRole"
+          Effect: "Allow"
+          Principal:
+            Service: "lambda.amazonaws.com"
   PolicyBracketReadWrite:
     Type: "AWS::IAM::ManagedPolicy"
     UpdateReplacePolicy: "Delete"
@@ -168,14 +480,32 @@ Resources:
         Version: "2012-10-17"
         Statement:
         - Resource:
-          - !GetAtt S3BracketPublic.Arn
           - !GetAtt S3BracketPrivate.Arn
-          - !Sub "${S3BracketPublic.Arn}/*"
           - !Sub "${S3BracketPrivate.Arn}/*"
           Action:
           - "s3:PutObject"
           - "s3:GetObject"
+          - "s3:DeleteObject"
           - "s3:ListBucket"
+          Effect: "Allow"
+          Sid: "VisualEditor0"
+  PolicyBracketPublish:
+    Type: "AWS::IAM::ManagedPolicy"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      ManagedPolicyName: !Sub "policy-lambda-${LambdaPublishPermissionName}"
+      Path: "/"
+      Description: ""
+      Groups: []
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Resource:
+          - !GetAtt SNSTopicBracketEmail.TopicArn
+          - !GetAtt SNSTopicBracketSync.TopicArn
+          Action:
+          - "sns:Publish"
           Effect: "Allow"
           Sid: "VisualEditor0"
   PolicyBracketRead:
@@ -191,13 +521,27 @@ Resources:
         Version: "2012-10-17"
         Statement:
         - Resource:
-          - !GetAtt S3BracketPublic.Arn
           - !GetAtt S3BracketPrivate.Arn
-          - !Sub "${S3BracketPublic.Arn}/*"
           - !Sub "${S3BracketPrivate.Arn}/*"
           Action:
           - "s3:GetObject"
           - "s3:ListBucket"
+          Effect: "Allow"
+          Sid: "VisualEditor0"
+  PolicyBracketAdminRead:
+    Type: "AWS::IAM::ManagedPolicy"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      ManagedPolicyName: !Sub "policy-lambda-${LambdaAdminReadPermissionName}"
+      Path: "/"
+      Description: ""
+      Groups: []
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${SsmAdminSecretId}"
+          Action: "ssm:GetParameter"
           Effect: "Allow"
           Sid: "VisualEditor0"
   S3BracketPublic:
@@ -257,6 +601,48 @@ Resources:
             Service: "cloudfront.amazonaws.com"
           Sid: "AllowCloudFrontServicePrincipal"
         Id: "PolicyForCloudFrontPrivateContent"
+  LogBracketLambdaAddElement:
+    Type: "AWS::Logs::LogGroup"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${LambdaAddElementName}"
+      RetentionInDays: 7
+  LogBracketLambdaAdminAuth:
+    Type: "AWS::Logs::LogGroup"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${LambdaAdminAuthName}"
+      RetentionInDays: 7
+  LogBracketLambdaAdminEdit:
+    Type: "AWS::Logs::LogGroup"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${LambdaAdminEditName}"
+      RetentionInDays: 7
+  LogBracketLambdaGetBracket:
+    Type: "AWS::Logs::LogGroup"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${LambdaGetBracketName}"
+      RetentionInDays: 7
+  LogBracketLambdaGetCompetitions:
+    Type: "AWS::Logs::LogGroup"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${LambdaGetCompetitionsName}"
+      RetentionInDays: 7
+  LogBracketLambdaGetRoundStart:
+    Type: "AWS::Logs::LogGroup"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${LambdaGetRoundStartName}"
+      RetentionInDays: 7
   LogBracketLambdaGetScoreboard:
     Type: "AWS::Logs::LogGroup"
     UpdateReplacePolicy: "Delete"
@@ -264,12 +650,26 @@ Resources:
     Properties:
       LogGroupName: !Sub "/aws/lambda/${LambdaGetScoreboardName}"
       RetentionInDays: 7
+  LogBracketLambdaSendEmail:
+    Type: "AWS::Logs::LogGroup"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${LambdaSendEmailName}"
+      RetentionInDays: 7
   LogBracketLambdaUpdatePicks:
     Type: "AWS::Logs::LogGroup"
     UpdateReplacePolicy: "Delete"
     DeletionPolicy: "Delete"
     Properties:
       LogGroupName: !Sub "/aws/lambda/${LambdaUpdatePicksName}"
+      RetentionInDays: 7
+  LogBracketLambdaUpdateScoreboard:
+    Type: "AWS::Logs::LogGroup"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${LambdaUpdateScoreboardName}"
       RetentionInDays: 7
 
 

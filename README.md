@@ -1,6 +1,10 @@
 # bracket-revival
 A March Madness bracket picking game where you get to re-pick your bracket after every round. 
 
+## Infrastructure TODO
+- Send email permission/policy
+- In lambda deploy, add step to update lambda zip in S3 to make sure it's updated in next build
+
 ## Maybe TODO
 - Error handling bad params on pages
 - Test page to play smaller version to understand rules
