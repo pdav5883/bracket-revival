@@ -47,10 +47,6 @@ Parameters:
     Type: String
   ApiName:
     Type: String
-  PrimaryRouteName:
-    Type: String
-  AdminRouteName:
-    Type: String
 Resources:
   LambdaBracketAddElement:
     Type: "AWS::Lambda::Function"
@@ -601,6 +597,265 @@ Resources:
             Service: "cloudfront.amazonaws.com"
           Sid: "AllowCloudFrontServicePrincipal"
         Id: "PolicyForCloudFrontPrivateContent"
+  ApiGatewayBracket:
+    Type: "AWS::ApiGatewayV2::Api"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      Name: !Ref ApiName
+      RouteSelectionExpression: "$request.method $request.path"
+      DisableExecuteApiEndpoint: false
+      CorsConfiguration:
+        MaxAge: 1
+        AllowOrigins:
+        - "*"
+        AllowCredentials: false
+        ExposeHeaders: []
+        AllowMethods:
+        - "*"
+        AllowHeaders:
+        - "*"
+      ProtocolType: "HTTP"
+      Tags: {}
+  ApiStageBracket:
+    Type: "AWS::ApiGatewayV2::Stage"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      ApiId: !Ref ApiGatewayBracket
+      StageName: "$default"
+      AutoDeploy: true
+  ApiRouteBracketAddElement:
+    Type: "AWS::ApiGatewayV2::Route"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      ApiId: !Ref ApiGatewayBracket
+      RouteKey: !Sub "PUT /add"
+      Target: !Join ["/", ["integrations", !Ref ApiIntegrationBracketAddElement]]
+  ApiIntegrationBracketAddElement:
+    Type: "AWS::ApiGatewayV2::Integration"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      ApiId: !Ref ApiGatewayBracket
+      IntegrationType: AWS_PROXY
+      IntegrationMethod: POST
+      IntegrationUri: !Sub  "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaBracketAddElement.Arn}/invocations"
+      PayloadFormatVersion: "2.0"
+  ApiTriggerPermissionBracketAddElement:
+    Type: "AWS::Lambda::Permission"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      FunctionName: !GetAtt LambdaBracketAddElement.Arn
+      Action: "lambda:InvokeFunction"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayBracket}/*/*/add"
+      Principal: "apigateway.amazonaws.com"
+  ApiRouteBracketGetBracket:
+    Type: "AWS::ApiGatewayV2::Route"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      ApiId: !Ref ApiGatewayBracket
+      RouteKey: !Sub "GET /bracket"
+      Target: !Join ["/", ["integrations", !Ref ApiIntegrationBracketGetBracket]]
+  ApiIntegrationBracketGetBracket:
+    Type: "AWS::ApiGatewayV2::Integration"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      ApiId: !Ref ApiGatewayBracket
+      IntegrationType: AWS_PROXY
+      IntegrationMethod: POST
+      IntegrationUri: !Sub  "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaBracketGetBracket.Arn}/invocations"
+      PayloadFormatVersion: "2.0"
+  ApiTriggerPermissionBracketGetBracket:
+    Type: "AWS::Lambda::Permission"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      FunctionName: !GetAtt LambdaBracketGetBracket.Arn
+      Action: "lambda:InvokeFunction"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayBracket}/*/*/bracket"
+      Principal: "apigateway.amazonaws.com"
+  ApiRouteBracketGetCompetitions:
+    Type: "AWS::ApiGatewayV2::Route"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      ApiId: !Ref ApiGatewayBracket
+      RouteKey: !Sub "GET /competitions"
+      Target: !Join ["/", ["integrations", !Ref ApiIntegrationBracketGetCompetitions]]
+  ApiIntegrationBracketGetCompetitions:
+    Type: "AWS::ApiGatewayV2::Integration"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      ApiId: !Ref ApiGatewayBracket
+      IntegrationType: AWS_PROXY
+      IntegrationMethod: POST
+      IntegrationUri: !Sub  "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaBracketGetCompetitions.Arn}/invocations"
+      PayloadFormatVersion: "2.0"
+  ApiTriggerPermissionBracketGetCompetitions:
+    Type: "AWS::Lambda::Permission"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      FunctionName: !GetAtt LambdaBracketGetCompetitions.Arn
+      Action: "lambda:InvokeFunction"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayBracket}/*/*/competitions"
+      Principal: "apigateway.amazonaws.com"
+  ApiRouteBracketGetRoundStart:
+    Type: "AWS::ApiGatewayV2::Route"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      ApiId: !Ref ApiGatewayBracket
+      RouteKey: !Sub "GET /start"
+      Target: !Join ["/", ["integrations", !Ref ApiIntegrationBracketGetRoundStart]]
+  ApiIntegrationBracketGetRoundStart:
+    Type: "AWS::ApiGatewayV2::Integration"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      ApiId: !Ref ApiGatewayBracket
+      IntegrationType: AWS_PROXY
+      IntegrationMethod: POST
+      IntegrationUri: !Sub  "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaBracketGetRoundStart.Arn}/invocations"
+      PayloadFormatVersion: "2.0"
+  ApiTriggerPermissionBracketGetRoundStart:
+    Type: "AWS::Lambda::Permission"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      FunctionName: !GetAtt LambdaBracketGetRoundStart.Arn
+      Action: "lambda:InvokeFunction"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayBracket}/*/*/start"
+      Principal: "apigateway.amazonaws.com"
+  ApiRouteBracketGetScoreboard:
+    Type: "AWS::ApiGatewayV2::Route"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      ApiId: !Ref ApiGatewayBracket
+      RouteKey: !Sub "GET /scoreboard"
+      Target: !Join ["/", ["integrations", !Ref ApiIntegrationBracketGetScoreboard]]
+  ApiIntegrationBracketGetScoreboard:
+    Type: "AWS::ApiGatewayV2::Integration"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      ApiId: !Ref ApiGatewayBracket
+      IntegrationType: AWS_PROXY
+      IntegrationMethod: POST
+      IntegrationUri: !Sub  "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaBracketGetScoreboard.Arn}/invocations"
+      PayloadFormatVersion: "2.0"
+  ApiTriggerPermissionBracketGetScoreboard:
+    Type: "AWS::Lambda::Permission"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      FunctionName: !GetAtt LambdaBracketGetScoreboard.Arn
+      Action: "lambda:InvokeFunction"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayBracket}/*/*/scoreboard"
+      Principal: "apigateway.amazonaws.com"
+  ApiRouteBracketUpdatePicks:
+    Type: "AWS::ApiGatewayV2::Route"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      ApiId: !Ref ApiGatewayBracket
+      RouteKey: !Sub "POST /picks"
+      Target: !Join ["/", ["integrations", !Ref ApiIntegrationBracketUpdatePicks]]
+  ApiIntegrationBracketUpdatePicks:
+    Type: "AWS::ApiGatewayV2::Integration"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      ApiId: !Ref ApiGatewayBracket
+      IntegrationType: AWS_PROXY
+      IntegrationMethod: POST
+      IntegrationUri: !Sub  "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaBracketUpdatePicks.Arn}/invocations"
+      PayloadFormatVersion: "2.0"
+  ApiTriggerPermissionBracketUpdatePicks:
+    Type: "AWS::Lambda::Permission"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      FunctionName: !GetAtt LambdaBracketUpdatePicks.Arn
+      Action: "lambda:InvokeFunction"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayBracket}/*/*/picks"
+      Principal: "apigateway.amazonaws.com"
+  ApiRouteBracketUpdateScoreboard:
+    Type: "AWS::ApiGatewayV2::Route"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      ApiId: !Ref ApiGatewayBracket
+      RouteKey: !Sub "GET /sync"
+      Target: !Join ["/", ["integrations", !Ref ApiIntegrationBracketUpdateScoreboard]]
+  ApiIntegrationBracketUpdateScoreboard:
+    Type: "AWS::ApiGatewayV2::Integration"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      ApiId: !Ref ApiGatewayBracket
+      IntegrationType: AWS_PROXY
+      IntegrationMethod: POST
+      IntegrationUri: !Sub  "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaBracketUpdateScoreboard.Arn}/invocations"
+      PayloadFormatVersion: "2.0"
+  ApiTriggerPermissionBracketUpdateScoreboard:
+    Type: "AWS::Lambda::Permission"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      FunctionName: !GetAtt LambdaBracketUpdateScoreboard.Arn
+      Action: "lambda:InvokeFunction"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayBracket}/*/*/sync"
+      Principal: "apigateway.amazonaws.com"
+  ApiRouteBracketAdminEdit:
+    Type: "AWS::ApiGatewayV2::Route"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      ApiId: !Ref ApiGatewayBracket
+      RouteKey: !Sub "POST /admin"
+      Target: !Join ["/", ["integrations", !Ref ApiIntegrationBracketAdminEdit]]
+      AuthorizationType: "CUSTOM"
+      AuthorizerId: !Ref ApiAuthorizerBracketAdminAuth
+  ApiIntegrationBracketAdminEdit:
+    Type: "AWS::ApiGatewayV2::Integration"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      ApiId: !Ref ApiGatewayBracket
+      IntegrationType: AWS_PROXY
+      IntegrationMethod: POST
+      IntegrationUri: !Sub  "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaBracketAdminEdit.Arn}/invocations"
+      PayloadFormatVersion: "2.0"
+  ApiTriggerPermissionBracketAdminEdit:
+    Type: "AWS::Lambda::Permission"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      FunctionName: !GetAtt LambdaBracketAdminEdit.Arn
+      Action: "lambda:InvokeFunction"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayBracket}/*/*/admin"
+      Principal: "apigateway.amazonaws.com"
+  ApiAuthorizerBracketAdminAuth:
+    Type: "AWS::ApiGatewayV2::Authorizer"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      ApiId: !Ref ApiGatewayBracket
+      Name: !Ref LambdaBracketAdminAuth
+      AuthorizerType: "REQUEST"
+      AuthorizerUri: !Sub  "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaBracketAdminAuth.Arn}/invocations"
+      AuthorizerPayloadFormatVersion: "2.0"
+      EnableSimpleResponses: true
+      IdentitySource: 
+      - "$request.header.Authorization"
   LogBracketLambdaAddElement:
     Type: "AWS::Logs::LogGroup"
     UpdateReplacePolicy: "Delete"
