@@ -49,9 +49,9 @@ def lambda_handler(event, context):
             player_key = year + "/" + cid + "/" + pid + ".json"
             player = utils.read_file(player_key)
             
-            content["scoreboard_url"] = f"https://bracket.bearloves.rocks/scoreboard.html?year={year}&cid={compname}"
-            content["bracket_url"] = f"https://bracket.bearloves.rocks/bracket.html?year={year}&cid={compname}&pid={pname}"
-            content["pick_url"] = f"https://bracket.bearloves.rocks/picks.html?year={year}&cid={compname}&pid={pname}&secret={player['secret']}"
+            content["scoreboard_url"] = f"https://t-bracket.bearloves.rocks/scoreboard.html?year={year}&cid={compname}"
+            content["bracket_url"] = f"https://t-bracket.bearloves.rocks/bracket.html?year={year}&cid={compname}&pid={pname}"
+            content["pick_url"] = f"https://t-bracket.bearloves.rocks/picks.html?year={year}&cid={compname}&pid={pname}&secret={player['secret']}"
             content["pname"] = pname
 
             subject = templates[email_type]["subject"]

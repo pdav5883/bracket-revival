@@ -15,6 +15,10 @@ Parameters:
     Type: String
   LambdaAdminReadPermissionName:
     Type: String
+  LambdaReadSendPermissionName:
+    Type: String
+  LambdaSendPermissionName:
+    Type: String
   PublicBucketName:
     Type: String
   PrivateBucketName:
@@ -47,7 +51,17 @@ Parameters:
     Type: String
   ApiName:
     Type: String
+  SesIdentity:
+    Type: String
+Outputs:
+  CloudFrontDistroId:
+    Value: !Ref CloudFrontDistroBracket
+  ApiId:
+    Value: !Ref ApiGatewayBracket
 Resources:
+############################
+#### Lambda 
+############################
   LambdaBracketAddElement:
     Type: "AWS::Lambda::Function"
     UpdateReplacePolicy: "Delete"
@@ -277,7 +291,7 @@ Resources:
         S3Key: !Sub "lambdas/${LambdaSendEmailName}.zip"
       Layers:
         - !Ref LayerBracketCommon
-      Role: !GetAtt RoleBracketRead.Arn
+      Role: !GetAtt RoleBracketReadSend.Arn
       FileSystemConfigs: []
       Runtime: "python3.10"
       PackageType: "Zip"
@@ -359,6 +373,9 @@ Resources:
         - "python3.10"
       CompatibleArchitectures:
         - "x86_64"
+############################
+#### SNS
+############################
   SNSTopicBracketEmail:
     Type: "AWS::SNS::Topic"
     UpdateReplacePolicy: "Delete"
@@ -405,6 +422,9 @@ Resources:
       Action: "lambda:InvokeFunction"
       SourceArn: !GetAtt SNSTopicBracketSync.TopicArn
       Principal: "sns.amazonaws.com"
+############################
+#### IAM
+############################
   RoleBracketReadWrite:
     Type: "AWS::IAM::Role"
     UpdateReplacePolicy: "Delete"
@@ -456,6 +476,26 @@ Resources:
       MaxSessionDuration: 3600
       RoleName: !Sub "role-lambda-${LambdaAdminReadPermissionName}"
       Description: "Allows admin auth function to read ssm secret"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Action: "sts:AssumeRole"
+          Effect: "Allow"
+          Principal:
+            Service: "lambda.amazonaws.com"
+  RoleBracketReadSend:
+    Type: "AWS::IAM::Role"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      Path: "/"
+      ManagedPolicyArns:
+      - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      - !GetAtt PolicyBracketRead.PolicyArn
+      - !GetAtt PolicyBracketSend.PolicyArn
+      MaxSessionDuration: 3600
+      RoleName: !Sub "role-lambda-${LambdaReadSendPermissionName}"
+      Description: ""
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -540,6 +580,25 @@ Resources:
           Action: "ssm:GetParameter"
           Effect: "Allow"
           Sid: "VisualEditor0"
+  PolicyBracketSend:
+    Type: "AWS::IAM::ManagedPolicy"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      ManagedPolicyName: !Sub "policy-lambda-${LambdaSendPermissionName}"
+      Path: "/"
+      Description: ""
+      Groups: []
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Resource: !Sub "arn:aws:ses:${AWS::Region}:${AWS::AccountId}:identity/${SesIdentity}"
+          Action: "ses:SendEmail"
+          Effect: "Allow"
+          Sid: "VisualEditor0"
+############################
+#### S3
+############################
   S3BracketPublic:
     Type: "AWS::S3::Bucket"
     UpdateReplacePolicy: "Retain"
@@ -578,25 +637,9 @@ Resources:
         - BucketKeyEnabled: false
           ServerSideEncryptionByDefault:
             SSEAlgorithm: "AES256"
-  S3BucketPolicyBracket:
-    Type: "AWS::S3::BucketPolicy"
-    UpdateReplacePolicy: "Retain"
-    DeletionPolicy: "Delete"
-    Properties:
-      Bucket: !Ref S3BracketPublic
-      PolicyDocument:
-        Version: "2008-10-17"
-        Statement:
-        - Condition:
-            StringEquals:
-              AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/EAYYH2TLICFBU"  #SUB
-          Resource: !Sub "${S3BracketPublic.Arn}/*"
-          Action: "s3:GetObject"
-          Effect: "Allow"
-          Principal:
-            Service: "cloudfront.amazonaws.com"
-          Sid: "AllowCloudFrontServicePrincipal"
-        Id: "PolicyForCloudFrontPrivateContent"
+############################
+#### API
+############################
   ApiGatewayBracket:
     Type: "AWS::ApiGatewayV2::Api"
     UpdateReplacePolicy: "Delete"
@@ -856,6 +899,111 @@ Resources:
       EnableSimpleResponses: true
       IdentitySource: 
       - "$request.header.Authorization"
+  ApiTriggerPermissionBracketAdminAuth:
+    Type: "AWS::Lambda::Permission"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      FunctionName: !GetAtt LambdaBracketAdminAuth.Arn
+      Action: "lambda:InvokeFunction"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayBracket}/authorizers/${ApiAuthorizerBracketAdminAuth}"
+      Principal: "apigateway.amazonaws.com"
+############################
+#### CloudFront 
+############################
+  CloudFrontDistroBracket:
+    Type: "AWS::CloudFront::Distribution"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      DistributionConfig:
+        DefaultRootObject: "index.html"
+        Origins:
+          #- OriginAccessControlId: !Ref CloudFrontOACBracket
+        - OriginAccessControlId: "EWO8FEYV4CJHK" # TODO 
+          DomainName: !GetAtt S3BracketPublic.RegionalDomainName
+          S3OriginConfig:
+            OriginAccessIdentity: ""
+          Id: !GetAtt S3BracketPublic.RegionalDomainName
+        ViewerCertificate:
+          MinimumProtocolVersion: "TLSv1.2_2021"
+          SslSupportMethod: "sni-only"
+          AcmCertificateArn: !Sub "arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/${AcmSSLCertificateId}"
+        DefaultCacheBehavior:
+          Compress: true
+          AllowedMethods:
+          - "HEAD"
+          - "GET"
+          CachedMethods:
+          - "HEAD"
+          - "GET"
+          TargetOriginId: !GetAtt S3BracketPublic.RegionalDomainName 
+          ViewerProtocolPolicy: "redirect-to-https"
+          CachePolicyId: "658327ea-f89d-4fab-a63d-7e88639e58f6"
+        Staging: false
+        Enabled: true
+        Aliases:
+        - !Ref DeployedRootURL 
+        IPV6Enabled: true
+        HttpVersion: "http2"
+        #  CloudFrontOACBracket:
+        #Type: "AWS::CloudFront::OriginAccessControl"
+        #UpdateReplacePolicy: "Delete"
+        #DeletionPolicy: "Delete"
+        #Properties:
+        #OriginAccessControlConfig:
+        #SigningBehavior: "always"
+        #Description: ""
+        #SigningProtocol: "sigv4"
+        #OriginAccessControlOriginType: "s3"
+        #Name: !GetAtt S3BracketPublic.RegionalDomainName
+  S3BucketPolicyBracket:
+    Type: "AWS::S3::BucketPolicy"
+    UpdateReplacePolicy: "Retain"
+    DeletionPolicy: "Delete"
+    Properties:
+      Bucket: !Ref S3BracketPublic
+      PolicyDocument:
+        Version: "2008-10-17"
+        Statement:
+        - Condition:
+            StringEquals:
+              AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistroBracket.Id}" 
+          Resource: !Sub "${S3BracketPublic.Arn}/*"
+          Action: "s3:GetObject"
+          Effect: "Allow"
+          Principal:
+            Service: "cloudfront.amazonaws.com"
+          Sid: "AllowCloudFrontServicePrincipal"
+        Id: "PolicyForCloudFrontPrivateContent"
+############################
+#### Route53 
+############################
+  Route53ARecordBracket:
+    Type: "AWS::Route53::RecordSet"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      Type: "A"
+      Name: !Ref DeployedRootURL
+      HostedZoneId: !Ref HostedZoneId
+      AliasTarget:
+        DNSName: !GetAtt CloudFrontDistroBracket.DomainName
+        HostedZoneId: "Z2FDTNDATAQYW2"
+  Route53AAAARecordBracket:
+    Type: "AWS::Route53::RecordSet"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      Type: "AAAA"
+      Name: !Ref DeployedRootURL 
+      HostedZoneId: !Ref HostedZoneId
+      AliasTarget:
+        DNSName: !GetAtt CloudFrontDistroBracket.DomainName
+        HostedZoneId: "Z2FDTNDATAQYW2"
+############################
+#### Logs 
+############################
   LogBracketLambdaAddElement:
     Type: "AWS::Logs::LogGroup"
     UpdateReplacePolicy: "Delete"

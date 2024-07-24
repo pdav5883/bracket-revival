@@ -119,8 +119,8 @@ if "BRACKET_REVIVAL_LOCAL_PREFIX" in os.environ:
 
 else:
     bucket = "bracket-revival-private"
-    sync_topic_arn = "arn:aws:sns:us-east-1:014374244911:bracket-revival-sync-topic"
-    email_topic_arn = "arn:aws:sns:us-east-1:014374244911:bracket-revival-email-topic"
+    sync_topic_arn = "arn:aws:sns:us-east-1:014374244911:bracket-sync-topic"
+    email_topic_arn = "arn:aws:sns:us-east-1:014374244911:bracket-email-topic"
     s3 = boto3.client("s3")
     ssm = boto3.client("ssm")
     sns = boto3.client("sns")
