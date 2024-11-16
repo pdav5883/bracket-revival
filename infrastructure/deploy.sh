@@ -3,7 +3,7 @@
 # The input to the script is the name of the JSON parameters file used to define
 # parameter values in the CFN stack.
 #
-# When the CFN stack is deployed, the lambda functions are populated with placeholder
+# When the CFN stack is deployed, any lambda functions that are created/updated are populated with placeholder
 # code, so this scripts also calls the deploy scripts for each lambda to upload code.
 ################
 
@@ -15,6 +15,8 @@ aws cloudformation deploy \
   --parameter-overrides file://${1} \
   --capabilities CAPABILITY_NAMED_IAM \
   # --no-execute-changeset
+
+python update_cfn_lambdas.py
 
 #cd ../lambdas
 

@@ -58,9 +58,11 @@ Outputs:
     Value: !Ref CloudFrontDistroBracket
   ApiId:
     Value: !Ref ApiGatewayBracket
+  RValue:
+    Value: !Ref S3BracketPrivate
 Resources:
 ############################
-#### Lambda 
+##### Lambda 
 ############################
   LambdaBracketAddElement:
     Type: "AWS::Lambda::Function"
@@ -77,8 +79,10 @@ Resources:
         UpdateRuntimeOn: "Auto"
       Handler: "lambda_function.lambda_handler"
       Code:
-        S3Bucket: !Ref S3BracketPrivate
-        S3Key: !Sub "lambdas/${LambdaAddElementName}.zip"
+        ZipFile: |
+          def lambda_handler(event, context):
+                # upload code via lambda deploy script
+                return False
       Layers:
         - !Ref LayerBracketCommon
       Role: !GetAtt RoleBracketReadWrite.Arn 
@@ -107,8 +111,10 @@ Resources:
         UpdateRuntimeOn: "Auto"
       Handler: "lambda_function.lambda_handler"
       Code:
-        S3Bucket: !Ref S3BracketPrivate
-        S3Key: !Sub "lambdas/${LambdaAdminAuthName}.zip"
+        ZipFile: |
+          def lambda_handler(event, context):
+                # upload code via lambda deploy script
+                return False
       Layers:
         - !Ref LayerBracketCommon
       Role: !GetAtt RoleBracketAdminRead.Arn 
@@ -137,8 +143,10 @@ Resources:
         UpdateRuntimeOn: "Auto"
       Handler: "lambda_function.lambda_handler"
       Code:
-        S3Bucket: !Ref S3BracketPrivate
-        S3Key: !Sub "lambdas/${LambdaAdminEditName}.zip"
+        ZipFile: |
+          def lambda_handler(event, context):
+                # upload code via lambda deploy script
+                return False
       Layers:
         - !Ref LayerBracketCommon
       Role: !GetAtt RoleBracketReadWrite.Arn 
@@ -167,8 +175,10 @@ Resources:
         UpdateRuntimeOn: "Auto"
       Handler: "lambda_function.lambda_handler"
       Code:
-        S3Bucket: !Ref S3BracketPrivate
-        S3Key: !Sub "lambdas/${LambdaGetBracketName}.zip"
+        ZipFile: |
+          def lambda_handler(event, context):
+                # upload code via lambda deploy script
+                return False
       Layers:
         - !Ref LayerBracketCommon
       Role: !GetAtt RoleBracketRead.Arn 
@@ -197,8 +207,10 @@ Resources:
         UpdateRuntimeOn: "Auto"
       Handler: "lambda_function.lambda_handler"
       Code:
-        S3Bucket: !Ref S3BracketPrivate
-        S3Key: !Sub "lambdas/${LambdaGetCompetitionsName}.zip"
+        ZipFile: |
+          def lambda_handler(event, context):
+                # upload code via lambda deploy script
+                return False
       Layers:
         - !Ref LayerBracketCommon
       Role: !GetAtt RoleBracketRead.Arn 
@@ -227,8 +239,10 @@ Resources:
         UpdateRuntimeOn: "Auto"
       Handler: "lambda_function.lambda_handler"
       Code:
-        S3Bucket: !Ref S3BracketPrivate
-        S3Key: !Sub "lambdas/${LambdaGetRoundStartName}.zip"
+        ZipFile: |
+          def lambda_handler(event, context):
+                # upload code via lambda deploy script
+                return False
       Layers:
         - !Ref LayerBracketCommon
       Role: !GetAtt RoleBracketRead.Arn 
@@ -257,8 +271,10 @@ Resources:
         UpdateRuntimeOn: "Auto"
       Handler: "lambda_function.lambda_handler"
       Code:
-        S3Bucket: !Ref S3BracketPrivate
-        S3Key: !Sub "lambdas/${LambdaGetScoreboardName}.zip"
+        ZipFile: |
+          def lambda_handler(event, context):
+                # upload code via lambda deploy script
+                return False
       Layers:
         - !Ref LayerBracketCommon
       Role: !GetAtt RoleBracketRead.Arn 
@@ -287,8 +303,10 @@ Resources:
         UpdateRuntimeOn: "Auto"
       Handler: "lambda_function.lambda_handler"
       Code:
-        S3Bucket: !Ref S3BracketPrivate
-        S3Key: !Sub "lambdas/${LambdaSendEmailName}.zip"
+        ZipFile: |
+          def lambda_handler(event, context):
+                # upload code via lambda deploy script
+                return False
       Layers:
         - !Ref LayerBracketCommon
       Role: !GetAtt RoleBracketReadSend.Arn
@@ -317,8 +335,10 @@ Resources:
         UpdateRuntimeOn: "Auto"
       Handler: "lambda_function.lambda_handler"
       Code:
-        S3Bucket: !Ref S3BracketPrivate
-        S3Key: !Sub "lambdas/${LambdaUpdatePicksName}.zip"
+        ZipFile: |
+          def lambda_handler(event, context):
+                # upload code via lambda deploy script
+                return False
       Layers:
         - !Ref LayerBracketCommon
       Role: !GetAtt RoleBracketReadWrite.Arn 
@@ -347,8 +367,10 @@ Resources:
         UpdateRuntimeOn: "Auto"
       Handler: "lambda_function.lambda_handler"
       Code:
-        S3Bucket: !Ref S3BracketPrivate
-        S3Key: !Sub "lambdas/${LambdaUpdateScoreboardName}.zip"
+        ZipFile: |
+          def lambda_handler(event, context):
+                # upload code via lambda deploy script
+                return False
       Layers:
         - !Ref LayerBracketCommon
       Role: !GetAtt RoleBracketReadWrite.Arn 
