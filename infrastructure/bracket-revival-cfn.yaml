@@ -60,6 +60,10 @@ Outputs:
     Value: !Ref ApiGatewayBracket
   RValue:
     Value: !Ref S3BracketPrivate
+  SyncTopicArn:
+    Value: !GetAtt SNSTopicBracketSync.TopicArn
+  EmailTopicArn:
+    Value: !GetAtt SNSTopicBracketEmail.TopicArn
 Resources:
 ############################
 ##### Lambda 
@@ -87,7 +91,7 @@ Resources:
         - !Ref LayerBracketCommon
       Role: !GetAtt RoleBracketReadWrite.Arn 
       FileSystemConfigs: []
-      Runtime: "python3.10"
+      Runtime: "python3.12"
       PackageType: "Zip"
       LoggingConfig:
         LogFormat: "Text"
@@ -119,7 +123,7 @@ Resources:
         - !Ref LayerBracketCommon
       Role: !GetAtt RoleBracketAdminRead.Arn 
       FileSystemConfigs: []
-      Runtime: "python3.10"
+      Runtime: "python3.12"
       PackageType: "Zip"
       LoggingConfig:
         LogFormat: "Text"
@@ -151,7 +155,7 @@ Resources:
         - !Ref LayerBracketCommon
       Role: !GetAtt RoleBracketReadWrite.Arn 
       FileSystemConfigs: []
-      Runtime: "python3.10"
+      Runtime: "python3.12"
       PackageType: "Zip"
       LoggingConfig:
         LogFormat: "Text"
@@ -183,7 +187,7 @@ Resources:
         - !Ref LayerBracketCommon
       Role: !GetAtt RoleBracketRead.Arn 
       FileSystemConfigs: []
-      Runtime: "python3.10"
+      Runtime: "python3.12"
       PackageType: "Zip"
       LoggingConfig:
         LogFormat: "Text"
@@ -215,7 +219,7 @@ Resources:
         - !Ref LayerBracketCommon
       Role: !GetAtt RoleBracketRead.Arn 
       FileSystemConfigs: []
-      Runtime: "python3.10"
+      Runtime: "python3.12"
       PackageType: "Zip"
       LoggingConfig:
         LogFormat: "Text"
@@ -247,7 +251,7 @@ Resources:
         - !Ref LayerBracketCommon
       Role: !GetAtt RoleBracketRead.Arn 
       FileSystemConfigs: []
-      Runtime: "python3.10"
+      Runtime: "python3.12"
       PackageType: "Zip"
       LoggingConfig:
         LogFormat: "Text"
@@ -279,7 +283,7 @@ Resources:
         - !Ref LayerBracketCommon
       Role: !GetAtt RoleBracketRead.Arn 
       FileSystemConfigs: []
-      Runtime: "python3.10"
+      Runtime: "python3.12"
       PackageType: "Zip"
       LoggingConfig:
         LogFormat: "Text"
@@ -311,7 +315,7 @@ Resources:
         - !Ref LayerBracketCommon
       Role: !GetAtt RoleBracketReadSend.Arn
       FileSystemConfigs: []
-      Runtime: "python3.10"
+      Runtime: "python3.12"
       PackageType: "Zip"
       LoggingConfig:
         LogFormat: "Text"
@@ -343,7 +347,7 @@ Resources:
         - !Ref LayerBracketCommon
       Role: !GetAtt RoleBracketReadWrite.Arn 
       FileSystemConfigs: []
-      Runtime: "python3.10"
+      Runtime: "python3.12"
       PackageType: "Zip"
       LoggingConfig:
         LogFormat: "Text"
@@ -375,7 +379,7 @@ Resources:
         - !Ref LayerBracketCommon
       Role: !GetAtt RoleBracketReadWrite.Arn 
       FileSystemConfigs: []
-      Runtime: "python3.10"
+      Runtime: "python3.12"
       PackageType: "Zip"
       LoggingConfig:
         LogFormat: "Text"
@@ -392,7 +396,7 @@ Resources:
         S3Bucket: !Ref S3BracketPrivate
         S3Key: !Sub lambdas/${LayerCommonName}.zip
       CompatibleRuntimes:
-        - "python3.10"
+        - "python3.12"
       CompatibleArchitectures:
         - "x86_64"
 ############################

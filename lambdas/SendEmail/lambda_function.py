@@ -12,6 +12,9 @@ emailbatch: {"typ": t , "content": {}, "recipients": [pname1, pname2,...]}
     newround: year, compname, pick_round
 """
 
+root_url = SUB_DeployedRootURL
+ses_identity = SUB_SesIdentity
+
 ses = boto3.client("ses")
 
 def lambda_handler(event, context):
@@ -49,9 +52,9 @@ def lambda_handler(event, context):
             player_key = year + "/" + cid + "/" + pid + ".json"
             player = utils.read_file(player_key)
             
-            content["scoreboard_url"] = f"https://t-bracket.bearloves.rocks/scoreboard.html?year={year}&cid={compname}"
-            content["bracket_url"] = f"https://t-bracket.bearloves.rocks/bracket.html?year={year}&cid={compname}&pid={pname}"
-            content["pick_url"] = f"https://t-bracket.bearloves.rocks/picks.html?year={year}&cid={compname}&pid={pname}&secret={player['secret']}"
+            content["scoreboard_url"] = f"https://{root_url}/scoreboard.html?year={year}&cid={compname}"
+            content["bracket_url"] = f"https://{root_url}/bracket.html?year={year}&cid={compname}&pid={pname}"
+            content["pick_url"] = f"https://{root_url}/picks.html?year={year}&cid={compname}&pid={pname}&secret={player['secret']}"
             content["pname"] = pname
 
             subject = templates[email_type]["subject"]
@@ -61,7 +64,7 @@ def lambda_handler(event, context):
                 subject = subject.replace("{{" + key + "}}", val)
                 body = body.replace("{{" + key + "}}", val)
 
-            ses.send_email(Source="bracket@bearloves.rocks",
+            ses.send_email(Source=f"bracket@{ses_identity}",
                            Destination={"ToAddresses": [player["email"]]},
                            Message={"Subject": {"Data": subject},
                                     "Body": {"Html": {"Data": body}}

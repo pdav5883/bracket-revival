@@ -1,14 +1,14 @@
 import json
 
-from update_picks import lambda_function as update_picks
-from get_bracket import lambda_function as get_bracket
-from get_round_start import lambda_function as get_round_start
-from update_scoreboard import lambda_function as update_scoreboard
-from get_scoreboard import lambda_function as get_scoreboard
-from get_competitions import lambda_function as get_competitions
-from add_element import lambda_function as add_element
-from admin_edit import lambda_function as admin_edit
-from admin_auth import lambda_function as admin_auth
+from UpdatePicks import lambda_function as update_picks
+from GetBracket import lambda_function as get_bracket
+from GetRoundStart import lambda_function as get_round_start
+from UpdateScoreboard import lambda_function as update_scoreboard
+from GetScoreboard import lambda_function as get_scoreboard
+from GetCompetitions import lambda_function as get_competitions
+from AddElement import lambda_function as add_element
+from AdminEdit import lambda_function as admin_edit
+from AdminAuth import lambda_function as admin_auth
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS

@@ -7,24 +7,18 @@
 # code, so this scripts also calls the deploy scripts for each lambda to upload code.
 ################
 
-echo "Deploying bracket-revival cloudformation with params from ${1}"
+STACK_NAME="bracket-revival"
+
+echo "Deploying $STACK_NAME cloudformation with params from ${1}"
 
 aws cloudformation deploy \
   --template-file ./bracket-revival-cfn.yaml \
-  --stack-name bracket-revival \
+  --stack-name $STACK_NAME \
   --parameter-overrides file://${1} \
   --capabilities CAPABILITY_NAMED_IAM \
   # --no-execute-changeset
 
-python update_cfn_lambdas.py
-
-#cd ../lambdas
-
-#for d in */
-#do
-#  echo "Deploying lambda update from ${d}"
-#  cd $d
-#  sh deploy.sh
-#  cd ..
-#done
+cd ../lambdas
+bash deploy_lambdas.sh
+cd ../infrastructure
 
