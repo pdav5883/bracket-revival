@@ -394,7 +394,7 @@ Resources:
       LayerName: !Ref LayerCommonName
       Content:
         S3Bucket: !Ref S3BracketPrivate
-        S3Key: !Sub lambdas/${LayerCommonName}.zip
+        S3Key: !Sub lambdas/empty_layer.zip
       CompatibleRuntimes:
         - "python3.12"
       CompatibleArchitectures:

@@ -13,7 +13,7 @@ TEMPLATE_NAME="bracket-revival-cfn.yaml"
 echo "Deploying $STACK_NAME cloudformation with params from ${1}"
 
 aws cloudformation deploy \
-  --template-file $TEMPLATE_NAME
+  --template-file $TEMPLATE_NAME \
   --stack-name $STACK_NAME \
   --parameter-overrides file://${1} \
   --capabilities CAPABILITY_NAMED_IAM \
