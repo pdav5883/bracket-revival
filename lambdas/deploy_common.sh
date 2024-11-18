@@ -91,14 +91,13 @@ zip_file_epoch=$(date -r "$ZIP_FILE" +%s)
 # Compare the modification times
 if [[ "$FORCE_UPDATE" = true || "$zip_file_epoch" -gt "$layer_modified_epoch" ]]; then
   echo "Uploading $zip_file to AWS Lambda Layer $layer_name..."
-  layer_version_arn=$(aws lambda publish-layer-version --layer-name $layer_name --zip-file fileb://$ZIP_FILE --compatible-runtimes "python3.12" --no-cli-pager --query 'LayerVersionArn' --output text)
+  aws lambda publish-layer-version --layer-name $layer_name --zip-file fileb://$ZIP_FILE --compatible-runtimes "python3.12" --no-cli-pager --query 'LayerVersionArn' --output text > /dev/null
 
   if [ $? -ne 0 ]; then
     echo "Error: Failed to update AWS Lambda Layer $layer_name."
     exit 1
   else
     echo "Lambda layer $layer_name was updated"
-    echo $layer_version_arn
   fi
 
 else

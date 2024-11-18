@@ -2,13 +2,14 @@
 
 # Constants
 STACK_NAME="bracket-revival"
+LAYER_NAME_KEY="LayerCommonName"
 PREFIX="Lambda"
 SUFFIX="Name"
 
 # Initialize force flag
 FORCE_UPDATE=fals
 
-if [[ $1 == "--force" ]]; then
+if [ "$1" == "--force" ]; then
   FORCE_UPDATE=true
 fi
 
@@ -25,6 +26,14 @@ while IFS= read -r line; do
     value=$(echo $line | awk '{print $2}')
     CF_PARAMS["$key"]="$value"
 done < <(aws cloudformation describe-stacks --stack-name "$STACK_NAME" --query "Stacks[0].Outputs[]" --output text | awk '{print $1, $2}')
+
+# name of the common layer that all lambdas reference and mod time
+layer_name="${CF_PARAMS[$LAYER_NAME_KEY]}"
+layer_version=$(aws lambda list-layer-versions --layer-name "$layer_name" --query 'LayerVersions[0].Version' --output text)
+layer_arn=$(aws lambda get-layer-version --layer-name "$layer_name" --version-number "$layer_version" --query 'LayerVersionArn' --output text)
+layer_modified=$(aws lambda get-layer-version --layer-name "$layer_name" --version-number "$layer_version" --query 'CreatedDate' --output text)
+layer_modified_epoch=$(date -d "$layer_modified" +%s)
+
 
 # Loop through all directories in the current directory except for 'common'
 for dir in */; do
@@ -84,7 +93,7 @@ for dir in */; do
     lambda_modified_epoch=$(date -d "$lambda_modified" +%s)
     zip_file_epoch=$(date -r "$zip_file" +%s)
 
-    # Compare the modification times
+    # Compare the modification times to update lambda
     if [[ "$FORCE_UPDATE" = true || "$zip_file_epoch" -gt "$lambda_modified_epoch" ]]; then
         echo "Uploading $zip_file to AWS Lambda function $lambda_name..."
         aws lambda update-function-code --function-name "$lambda_name" --zip-file fileb://"$zip_file" --no-cli-pager > /dev/null 2>&1
@@ -94,6 +103,15 @@ for dir in */; do
 	fi
     else
         echo "Lambda $lambda_name is already up-to-date."
+    fi
+
+    if [[ "$FORCE_UPDATE" = true || $layer_modified_epoch -gt $lambda_modified_epoch ]]; then
+      echo "Updating $lambda_name layer version to $layer_arn"
+      # wait to make sure that the code update completes before trying layer version update
+      aws lambda wait function-updated --function-name $lambda_name
+      aws lambda update-function-configuration --function-name $lambda_name --layers $layer_arn > /dev/null
+    else
+      echo "Lambda layer $layer_name for lambda $lambda_name is already up-to-date."
     fi
 
     echo ""
