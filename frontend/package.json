@@ -14,7 +14,9 @@
     "style-loader": "^3.3.4",
     "webpack": "^5.90.3",
     "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^5.0.2"
+    "webpack-dev-server": "^5.0.2",
+    "webpack-shell-plugin-next": "^2.3.1",
+    "string-replace-loader": "^3.1.0"
   },
   "scripts": {
     "build": "webpack",
