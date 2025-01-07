@@ -1,10 +1,6 @@
 # bracket-revival
 A March Madness bracket picking game where you get to re-pick your bracket after every round. 
 
-## Infrastructure TODO
-- In lambda deploy, add step to update lambda zip in S3 to make sure it's updated in next build
-- Note: the lambda common layer creates a "create from scratch" problem, since the S3 bucket with the layer zip file needs to exist in order create the Lambda layer, but there can't be anything in the bucket if we create it in the CFN. Solution is to create the bucket alone first, then put the zip file there, then update the stack with the common layer lambda
-
 ## Maybe TODO
 - Use admin_auth to authorize /add endpoint for year and game
 - Error handling bad params on pages
