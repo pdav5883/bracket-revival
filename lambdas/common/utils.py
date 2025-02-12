@@ -118,9 +118,9 @@ if "BRACKET_REVIVAL_LOCAL_PREFIX" in os.environ:
     tirgger_email = trigger_email_local
 
 else:
-    bucket = SUB_PrivateBucketName
-    sync_topic_arn = SUB_SyncTopicArn
-    email_topic_arn = SUB_EmailTopicArn
+    bucket = SUB_PrivateBucketName # type: ignore
+    sync_topic_arn = SUB_SyncTopicArn # type: ignore
+    email_topic_arn = SUB_EmailTopicArn # type: ignore
     s3 = boto3.client("s3")
     ssm = boto3.client("ssm")
     sns = boto3.client("sns")

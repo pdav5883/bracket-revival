@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+        .success {
+            color: green;
+            margin-top: 10px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sign Up Form -->
+    <div id="signupForm">
+        <h2>Sign Up</h2>
+        <form id="signup">
+            <div class="form-group">
+                <label for="signupEmail">Email:</label>
+                <input type="email" id="signupEmail" required>
+            </div>
+            <div class="form-group">
+                <label for="signupFirstName">First Name:</label>
+                <input type="text" id="signupFirstName" required>
+            </div>
+            <div class="form-group">
+                <label for="signupLastName">Last Name:</label>
+                <input type="text" id="signupLastName" required>
+            </div>
+            <button type="submit">Sign Up</button>
+        </form>
+        <p>Already have an account? <a href="#" id="showSignin">Sign In</a></p>
+        <div id="signupMessage" class="hidden"></div>
+    </div>
+
+    <!-- Sign In Form -->
+    <div id="signinForm" class="hidden">
+        <h2>Sign In</h2>
+        <form id="signin">
+            <div class="form-group">
+                <label for="signinEmail">Email:</label>
+                <input type="email" id="signinEmail" required>
+            </div>
+            <button type="submit">Sign In</button>
+        </form>
+        <p>Need an account? <a href="#" id="showSignup">Sign Up</a></p>
+        <div id="signinMessage" class="hidden"></div>
+    </div>
+
+    <!-- Protected Content -->
+    <div id="protectedContent" class="hidden">
+        <h2>Welcome!</h2>
+        <p>You are now signed in.</p>
+        <button id="signout">Sign Out</button>
+    </div>
+
+</body>
+</html>

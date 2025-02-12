@@ -12,8 +12,8 @@ emailbatch: {"typ": t , "content": {}, "recipients": [pname1, pname2,...]}
     newround: year, compname, pick_round
 """
 
-root_url = SUB_DeployedRootURL
-ses_identity = SUB_SesIdentity
+root_url = SUB_DeployedRootURL # type: ignore
+ses_identity = SUB_SesIdentity # type: ignore
 
 ses = boto3.client("ses")
 
