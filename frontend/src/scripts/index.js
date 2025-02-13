@@ -1,13 +1,11 @@
 import $ from "jquery"
 import { API_URL } from "./constants.js" 
-import { initIndexYears, populateCompetitions } from "./shared.js"
+import { initIndexYears, populateCompetitions, initCommon } from "./shared.js"
 
 let index
 
-$(document).ready(function() {
-  $.get("assets/nav.html", navbar => {
-    $("#nav-placeholder").replaceWith(navbar)
-  })
+$(function() {
+  initCommon()
   
   $("#gobutton").on("click", goToScoreboard)
   $("#yearsel").on("change", populateCompetitionsWrapper)

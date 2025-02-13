@@ -4,6 +4,19 @@ import $ from "jquery"
 import "bootstrap/dist/css/bootstrap.min.css"
 import "bootstrap"
 
+// Common init of navbar
+export function initCommon() {
+  $(function() {
+    $.get("assets/nav.html", navbar => {
+      $("#nav-placeholder").replaceWith(navbar);
+      
+      // Add click handlers after navbar is loaded
+      $("#signin-button").on("click", () => {
+        window.location.href = '/login.html';
+      });
+    });
+  });
+}
 
 export function initIndexOnly(setIndexCallback) {
   // need the setIndexCallback argument to allow calling script to set index,

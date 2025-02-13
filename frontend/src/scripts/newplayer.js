@@ -1,13 +1,11 @@
 import { API_URL } from "./constants.js" 
-import { initIndexOnly, initIndexYears, populateCompetitions } from "./shared.js"
+import { initIndexOnly, initIndexYears, populateCompetitions, initCommon } from "./shared.js"
 import $ from "jquery"
 
 let index
 
-$(document).ready(function() {
-  $.get("assets/nav.html", navbar => {
-    $("#nav-placeholder").replaceWith(navbar)
-  })
+$(function() { 
+  initCommon()
  
   $("#successdiv").hide()
   $("#submitbutton").on("click", submitNewPlayer)

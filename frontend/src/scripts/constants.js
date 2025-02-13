@@ -1,6 +1,6 @@
 // const BASE_URL_LOCAL = "http://0.0.0.0:5000"
 //const BASE_URL_AWS = "https://3en8z5ljfi.execute-api.us-east-1.amazonaws.com"
-const BASE_URL_AWS = "https://4m9ecvr2k7.execute-api.us-east-1.amazonaws.com"
+const BASE_URL_AWS = "https://4m9ecvr2k7.execute-api.us-east-1.amazonaws.com" // TODO: move to substitution
 
 //const BASE_URL = window.location.host.includes("localhost") ? BASE_URL_LOCAL : BASE_URL_AWS
 const BASE_URL = BASE_URL_AWS

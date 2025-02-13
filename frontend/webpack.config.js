@@ -44,8 +44,8 @@ module.exports = {
       import: "./src/scripts/navonly.js",
       dependOn: "shared"
     },
-    verify: {
-      import: "./src/scripts/verify.js",
+    login: {
+      import: "./src/scripts/login.js",
       dependOn: "shared"
     },
     shared: "./src/scripts/shared.js"
@@ -105,10 +105,10 @@ module.exports = {
       chunks: ["shared", "index"]
     }),
     new HtmlWebpack({
-      title: "Verify",
-      filename: "verify.html",
-      template: "./src/verify.html",
-      chunks: ["shared", "verify"]
+      title: "Login",
+      filename: "login.html",
+      template: "./src/login.html",
+      chunks: ["shared", "login"]
     }),
     new CopyWebpack({
       patterns: [

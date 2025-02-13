@@ -1,5 +1,5 @@
 import { API_URL } from "./constants.js" 
-import { initIndexOnly, initIndexYears, populateCompetitions, populatePlayerNames } from "./shared.js"
+import { initIndexOnly, initIndexYears, populateCompetitions, populatePlayerNames, initCommon } from "./shared.js"
 import { createBracket } from "bracketry"
 import $ from "jquery"
 
@@ -11,10 +11,8 @@ let cidSubmit  // used to populate round start
 let pidSubmit
 let secretSubmit
 
-$(document).ready(function() {
-  $.get("assets/nav.html", navbar => {
-    $("#nav-placeholder").replaceWith(navbar)
-  })
+$(function() { 
+  initCommon()
   
   $("#gobutton").on("click", changeRoundStart)
   $("#submitbutton").on("click", submitPicks)

@@ -1,7 +1,7 @@
 // API_URL is in global namespace from constants.js
 
 import { API_URL, ROUND_NAMES } from "./constants.js" 
-import { initIndexYears, populateCompetitions, populatePlayerNames } from "./shared.js"
+import { initIndexYears, populateCompetitions, populatePlayerNames, initCommon } from "./shared.js"
 import { createBracket } from "bracketry"
 import { Modal } from "bootstrap"
 import $ from "jquery"
@@ -11,10 +11,8 @@ let matches // keep track of matches at top scope to help with playerHTML
 let index
 
 
-$(document).ready(function() {
-  $.get("assets/nav.html", navbar => {
-    $("#nav-placeholder").replaceWith(navbar)
-  })
+$(function() { 
+  initCommon()
   
   $("#gobutton").on("click", changeBracket)
   $("#yearsel").on("change", populateCompetitionsWrapper)

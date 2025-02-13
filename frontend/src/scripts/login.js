@@ -6,6 +6,9 @@ import {
     RespondToAuthChallengeCommand 
 } from "@aws-sdk/client-cognito-identity-provider";
 
+import { initCommon } from "./shared.js"
+import $ from "jquery"
+
 const poolData = {
     UserPoolId: 'us-east-1_7j2Ragbz6', // Replace with your User Pool ID
     ClientId: 'oe8k6bdnfaalq92ti8if2rcjp' // Replace with your Client ID
@@ -16,29 +19,21 @@ const client = new CognitoIdentityProviderClient({
     region: "us-east-1" // Your region
 });
 
-// UI Elements
-const signupForm = document.getElementById('signupForm');
-const signinForm = document.getElementById('signinForm');
-const protectedContent = document.getElementById('protectedContent');
-const showSigninLink = document.getElementById('showSignin');
-const showSignupLink = document.getElementById('showSignup');
-const signupMessage = document.getElementById('signupMessage');
-const signinMessage = document.getElementById('signinMessage');
-
 // Move all UI initialization into a DOMContentLoaded event listener
-document.addEventListener('DOMContentLoaded', () => {
+$(function() {
+    initCommon()
     // Show/Hide Forms
-    showSigninLink.addEventListener('click', (e) => {
+    $("#showSignin").on('click', (e) => {
         e.preventDefault();
-        signupForm.classList.add('hidden');
-        signinForm.classList.remove('hidden');
+        $("#signupForm").addClass('hidden');
+        $("#signinForm").removeClass('hidden');
         clearMessages();
     });
 
-    showSignupLink.addEventListener('click', (e) => {
+    $("#showSignup").on('click', (e) => {
         e.preventDefault();
-        signinForm.classList.add('hidden');
-        signupForm.classList.remove('hidden');
+        $("#signinForm").addClass('hidden');
+        $("#signupForm").removeClass('hidden');
         clearMessages();
     });
 
@@ -48,18 +43,18 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function clearMessages() {
-    signupMessage.classList.add('hidden');
-    signinMessage.classList.add('hidden');
-    signupMessage.textContent = '';
-    signinMessage.textContent = '';
+    $("#signupMessage").addClass('hidden');
+    $("#signinMessage").addClass('hidden');
+    $("#signupMessage").text('');
+    $("#signinMessage").text('');
 }
 
 // Sign Up
-document.getElementById('signup').addEventListener('submit', async (e) => {
+$("#signup").on("click", async (e) => {
     e.preventDefault();
-    const email = document.getElementById('signupEmail').value;
-    const firstName = document.getElementById('signupFirstName').value;
-    const lastName = document.getElementById('signupLastName').value;
+    const email = $("#signupEmail").val();
+    const firstName = $("#signupFirstName").val();
+    const lastName = $("#signupLastName").val();
 
     const userAttributes = [
         {
@@ -86,22 +81,22 @@ document.getElementById('signup').addEventListener('submit', async (e) => {
 
         const response = await client.send(command);
         
-        signupMessage.textContent = 'Success! Check your email for verification link.';
-        signupMessage.classList.remove('error');
-        signupMessage.classList.add('success');
-        signupMessage.classList.remove('hidden');
+        $("#signupMessage").text('Success! Check your email for verification link.');
+        $("#signupMessage").removeClass('error');
+        $("#signupMessage").addClass('success');
+        $("#signupMessage").removeClass('hidden');
     } catch (error) {
-        signupMessage.textContent = error.message;
-        signupMessage.classList.add('error');
-        signupMessage.classList.remove('success');
-        signupMessage.classList.remove('hidden');
+        $("#signupMessage").text(error.message);
+        $("#signupMessage").addClass('error');
+        $("#signupMessage").removeClass('success');
+        $("#signupMessage").removeClass('hidden');
     }
 });
 
 // Sign In
-document.getElementById('signin').addEventListener('submit', async (e) => {
+$("#signin").on("click", async (e) => {
     e.preventDefault();
-    const email = document.getElementById('signinEmail').value;
+    const email = $("#signinEmail").val();
 
     try {
         const command = new InitiateAuthCommand({
@@ -117,19 +112,19 @@ document.getElementById('signin').addEventListener('submit', async (e) => {
         if (response.ChallengeName === 'CUSTOM_CHALLENGE') {
             // Store the session for later use
             localStorage.setItem('cognitoSession', response.Session);
-            signinMessage.textContent = 'Check your email for verification link.';
-            signinMessage.classList.remove('error');
-            signinMessage.classList.add('success');
-            signinMessage.classList.remove('hidden');
+            $("#signinMessage").text('Check your email for verification link.');
+            $("#signinMessage").removeClass('error');
+            $("#signinMessage").addClass('success');
+            $("#signinMessage").removeClass('hidden');
         } else if (response.AuthenticationResult) {
             // User is fully authenticated
             showProtectedContent();
         }
     } catch (error) {
-        signinMessage.textContent = error.message;
-        signinMessage.classList.add('error');
-        signinMessage.classList.remove('success');
-        signinMessage.classList.remove('hidden');
+        $("#signinMessage").text(error.message);
+        $("#signinMessage").addClass('error');
+        $("#signinMessage").removeClass('success');
+        $("#signinMessage").removeClass('hidden');
     }
 });
 
@@ -165,10 +160,10 @@ async function handleVerification() {
                 showProtectedContent();
             }
         } catch (error) {
-            signinMessage.textContent = 'Verification failed: ' + error.message;
-            signinMessage.classList.add('error');
-            signinMessage.classList.remove('hidden');
-            signinForm.classList.remove('hidden');
+            $("#signinMessage").text('Verification failed: ' + error.message);
+            $("#signinMessage").addClass('error');
+            $("#signinMessage").removeClass('hidden');
+            $("#signinForm").removeClass('hidden');
         }
     }
 }
@@ -180,7 +175,7 @@ function isAuthenticated() {
 }
 
 // Update Sign Out
-document.getElementById('signout').addEventListener('click', () => {
+$("#signout").on("click", () => {
     localStorage.removeItem('accessToken');
     showSignInForm();
 });
@@ -196,13 +191,13 @@ function checkAuthStatus() {
 
 // UI Helpers
 function showProtectedContent() {
-    signupForm.classList.add('hidden');
-    signinForm.classList.add('hidden');
-    protectedContent.classList.remove('hidden');
+    $("#signupForm").addClass('hidden');
+    $("#signinForm").addClass('hidden');
+    $("#protectedContent").removeClass('hidden');
 }
 
 function showSignInForm() {
-    protectedContent.classList.add('hidden');
-    signupForm.classList.add('hidden');
-    signinForm.classList.remove('hidden');
+    $("#protectedContent").addClass('hidden');
+    $("#signupForm").addClass('hidden');
+    $("#signinForm").removeClass('hidden');
 }
