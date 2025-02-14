@@ -4,14 +4,16 @@ import random
 import boto3
 from botocore.exceptions import ClientError
 
+DOMAIN = "localhost:8000"
+
 cognito = boto3.client('cognito-idp')
 ses = boto3.client('ses')
 
 def lambda_handler(event, context):
-    print("=====================================")
-    print(f"Trigger Source: {event['triggerSource']}")
-    print(event)
-    print(context)
+    # print("=====================================")
+    # print(f"Trigger Source: {event['triggerSource']}")
+    # print(event)
+    # print(context)
 
     if event['triggerSource'] == 'PreSignUp_SignUp':
         return pre_sign_up(event, context)
@@ -32,7 +34,6 @@ def pre_sign_up(event, context):
     event['response']['autoVerifyEmail'] = False
     
     # Return the entire event object
-    print(event)
     return event
 
 def define_auth_challenge(event, context):
@@ -55,7 +56,6 @@ def define_auth_challenge(event, context):
         event['response']['failAuthentication'] = True
         event['response']['issueTokens'] = False
     
-    print(event)
     return event
 
 def create_auth_challenge(event, context):
@@ -70,8 +70,7 @@ def create_auth_challenge(event, context):
         
         # Get user email
         email = event['request']['userAttributes']['email']
-        domain = "localhost:8000"
-        verify_link = f"http://{domain}/verify?code={code}&email={email}"
+        verify_link = f"http://{DOMAIN}/login.html?code={code}&email={email}"
         
         # Prepare email content
         email_html = f"""
@@ -106,7 +105,6 @@ def create_auth_challenge(event, context):
         event['response']['publicChallengeParameters'] = {
             'email': email
         }
-    print(event)
     return event
 
 def verify_auth_challenge(event, context):
@@ -119,7 +117,6 @@ def verify_auth_challenge(event, context):
     
     event['response']['answerCorrect'] = (expected_code == actual_code)
     
-    print(event)
     return event
 
 def post_authentication(event, context):
@@ -139,5 +136,4 @@ def post_authentication(event, context):
         print(f"Error updating user attributes: {str(e)}")
         raise e
     
-    print(event)
     return event

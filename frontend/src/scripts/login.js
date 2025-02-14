@@ -1,9 +1,9 @@
 // auth.js
-import { 
+import {
     CognitoIdentityProviderClient,
     SignUpCommand,
     InitiateAuthCommand,
-    RespondToAuthChallengeCommand 
+    RespondToAuthChallengeCommand
 } from "@aws-sdk/client-cognito-identity-provider";
 
 import { initCommon } from "./shared.js"
@@ -15,42 +15,49 @@ const poolData = {
 };
 
 // Initialize the Cognito client
-const client = new CognitoIdentityProviderClient({ 
+const client = new CognitoIdentityProviderClient({
     region: "us-east-1" // Your region
 });
 
 // Move all UI initialization into a DOMContentLoaded event listener
-$(function() {
+$(async function () {
     initCommon()
     // Show/Hide Forms
+    $("#closeButton").hide()
+    $("#signupForm").hide();
+    $("#signinForm").hide();
+    
+    $("#closeButton").on('click', (e) => {
+        e.preventDefault();
+        window.close();
+    });
+
     $("#showSignin").on('click', (e) => {
         e.preventDefault();
-        $("#signupForm").addClass('hidden');
-        $("#signinForm").removeClass('hidden');
-        clearMessages();
+        $("#signupForm").hide();
+        $("#signinForm").show();
+        clearMessage();
     });
 
     $("#showSignup").on('click', (e) => {
         e.preventDefault();
-        $("#signinForm").addClass('hidden');
-        $("#signupForm").removeClass('hidden');
-        clearMessages();
+        $("#signinForm").hide();
+        $("#signupForm").show();
+        clearMessage();
     });
 
     // Initialize
-    handleVerification();
+    await handleVerification();
     checkAuthStatus();
 });
 
-function clearMessages() {
-    $("#signupMessage").addClass('hidden');
-    $("#signinMessage").addClass('hidden');
-    $("#signupMessage").text('');
-    $("#signinMessage").text('');
+function clearMessage() {
+    $("#loginMessage").hide();
+    $("#loginMessage").text('');
 }
 
 // Sign Up
-$("#signup").on("click", async (e) => {
+$("#signupButton").on("click", async (e) => {
     e.preventDefault();
     const email = $("#signupEmail").val();
     const firstName = $("#signupFirstName").val();
@@ -79,24 +86,31 @@ $("#signup").on("click", async (e) => {
             UserAttributes: userAttributes
         });
 
-        const response = await client.send(command);
-        
-        $("#signupMessage").text('Success! Check your email for verification link.');
-        $("#signupMessage").removeClass('error');
-        $("#signupMessage").addClass('success');
-        $("#signupMessage").removeClass('hidden');
+        await client.send(command);
+
+        await startAuthFlow(email);
+
+        $("#closeButton").show();
+        $("#signinForm").hide()
+        $("#loginMessage").text('Check your email for verification link.');
+        $("#loginMessage").removeClass('error');
+        $("#loginMessage").show();
     } catch (error) {
-        $("#signupMessage").text(error.message);
-        $("#signupMessage").addClass('error');
-        $("#signupMessage").removeClass('success');
-        $("#signupMessage").removeClass('hidden');
+        $("#loginMessage").text(error.message);
+        $("#loginMessage").addClass('error');
+        $("#loginMessage").show();
     }
 });
 
 // Sign In
-$("#signin").on("click", async (e) => {
+$("#signinButton").on("click", async (e) => {
     e.preventDefault();
+
     const email = $("#signinEmail").val();
+    await startAuthFlow(email);
+});
+
+async function startAuthFlow(email) {
 
     try {
         const command = new InitiateAuthCommand({
@@ -108,25 +122,28 @@ $("#signin").on("click", async (e) => {
         });
 
         const response = await client.send(command);
-        
+
         if (response.ChallengeName === 'CUSTOM_CHALLENGE') {
             // Store the session for later use
             localStorage.setItem('cognitoSession', response.Session);
-            $("#signinMessage").text('Check your email for verification link.');
-            $("#signinMessage").removeClass('error');
-            $("#signinMessage").addClass('success');
-            $("#signinMessage").removeClass('hidden');
+            $("#closeButton").show();
+            $("#signinForm").hide()
+            $("#signupForm").hide()
+            $("#loginMessage").text('Check your email for verification link.');
+            $("#loginMessage").removeClass('error');
+            $("#loginMessage").show();
         } else if (response.AuthenticationResult) {
             // User is fully authenticated
-            showProtectedContent();
+            localStorage.setItem('accessToken', response.AuthenticationResult.AccessToken);
+            localStorage.removeItem('cognitoSession'); // Clean up the session
+            goHome()
         }
     } catch (error) {
-        $("#signinMessage").text(error.message);
-        $("#signinMessage").addClass('error');
-        $("#signinMessage").removeClass('success');
-        $("#signinMessage").removeClass('hidden');
+        $("#loginMessage").text(error.message);
+        $("#loginMessage").addClass('error');
+        $("#loginMessage").show();
     }
-});
+}
 
 // Handle verification from email link
 async function handleVerification() {
@@ -153,17 +170,17 @@ async function handleVerification() {
             });
 
             const response = await client.send(command);
-            
+
             if (response.AuthenticationResult) {
                 localStorage.setItem('accessToken', response.AuthenticationResult.AccessToken);
                 localStorage.removeItem('cognitoSession'); // Clean up the session
-                showProtectedContent();
+                goHome()
             }
         } catch (error) {
-            $("#signinMessage").text('Verification failed: ' + error.message);
-            $("#signinMessage").addClass('error');
-            $("#signinMessage").removeClass('hidden');
-            $("#signinForm").removeClass('hidden');
+            $("#loginMessage").text('Verification failed: ' + error.message);
+            $("#loginMessage").addClass('error');
+            $("#loginMessage").show();
+            $("#signinForm").show();
         }
     }
 }
@@ -183,21 +200,22 @@ $("#signout").on("click", () => {
 // Update Check Auth Status
 function checkAuthStatus() {
     if (isAuthenticated()) {
-        showProtectedContent();
+        goHome()
     } else {
-        showSignInForm();
+        showSignUpForm();
     }
 }
 
-// UI Helpers
-function showProtectedContent() {
-    $("#signupForm").addClass('hidden');
-    $("#signinForm").addClass('hidden');
-    $("#protectedContent").removeClass('hidden');
+function showSignInForm() {
+    $("#signupForm").hide();
+    $("#signinForm").show();
 }
 
-function showSignInForm() {
-    $("#protectedContent").addClass('hidden');
-    $("#signupForm").addClass('hidden');
-    $("#signinForm").removeClass('hidden');
+function showSignUpForm() {
+    $("#signupForm").show();
+    $("#signinForm").hide();
+}
+
+function goHome() {
+    window.location.href = '/';
 }
