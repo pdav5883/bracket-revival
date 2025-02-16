@@ -19,13 +19,13 @@ Parameters:
     Type: String
   LambdaSendPermissionName:
     Type: String
+  LambdaUserAuthPermissionName:
+    Type: String
   PublicBucketName:
     Type: String
   PrivateBucketName:
     Type: String
   LambdaAddElementName:
-    Type: String
-  LambdaAdminAuthName:
     Type: String
   LambdaAdminEditName:
     Type: String
@@ -43,6 +43,8 @@ Parameters:
     Type: String
   LambdaUpdateScoreboardName:
     Type: String
+  LambdaUserAuthName:
+    Type: String
   LayerCommonName:
     Type: String
   SNSTopicEmailName:
@@ -52,6 +54,8 @@ Parameters:
   ApiName:
     Type: String
   SesIdentity:
+    Type: String
+  CognitoUserPoolId:
     Type: String
 Outputs:
   CloudFrontDistroId:
@@ -96,38 +100,6 @@ Resources:
       LoggingConfig:
         LogFormat: "Text"
         LogGroup: !Ref LogBracketLambdaAddElement
-      EphemeralStorage:
-        Size: 512
-      Architectures:
-      - "x86_64"
-  LambdaBracketAdminAuth:
-    Type: "AWS::Lambda::Function"
-    UpdateReplacePolicy: "Delete"
-    DeletionPolicy: "Delete"
-    Properties:
-      FunctionName: !Ref LambdaAdminAuthName
-      MemorySize: 128
-      Description: ""
-      TracingConfig:
-        Mode: "PassThrough"
-      Timeout: 3
-      RuntimeManagementConfig:
-        UpdateRuntimeOn: "Auto"
-      Handler: "lambda_function.lambda_handler"
-      Code:
-        ZipFile: |
-          def lambda_handler(event, context):
-                # upload code via lambda deploy script
-                return False
-      Layers:
-        - !Ref LayerBracketCommon
-      Role: !GetAtt RoleBracketAdminRead.Arn 
-      FileSystemConfigs: []
-      Runtime: "python3.12"
-      PackageType: "Zip"
-      LoggingConfig:
-        LogFormat: "Text"
-        LogGroup: !Ref LogBracketLambdaAdminAuth
       EphemeralStorage:
         Size: 512
       Architectures:
@@ -388,6 +360,38 @@ Resources:
         Size: 512
       Architectures:
       - "x86_64"
+  LambdaBracketUserAuth:
+    Type: "AWS::Lambda::Function"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      FunctionName: !Ref LambdaUserAuthName 
+      MemorySize: 128
+      Description: ""
+      TracingConfig:
+        Mode: "PassThrough"
+      Timeout: 3
+      RuntimeManagementConfig:
+        UpdateRuntimeOn: "Auto"
+      Handler: "lambda_function.lambda_handler"
+      Code:
+        ZipFile: |
+          def lambda_handler(event, context):
+                # upload code via lambda deploy script
+                return False
+      Layers:
+        - !Ref LayerBracketCommon
+      Role: !GetAtt RoleBracketUserAuth.Arn 
+      FileSystemConfigs: []
+      Runtime: "python3.12"
+      PackageType: "Zip"
+      LoggingConfig:
+        LogFormat: "Text"
+        LogGroup: !Ref LogBracketLambdaUserAuth
+      EphemeralStorage:
+        Size: 512
+      Architectures:
+      - "x86_64"
   LayerBracketCommon:
     Type: "AWS::Lambda::LayerVersion"
     Properties:
@@ -529,6 +533,26 @@ Resources:
           Effect: "Allow"
           Principal:
             Service: "lambda.amazonaws.com"
+  RoleBracketUserAuth:
+    Type: "AWS::IAM::Role"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      Path: "/"
+      ManagedPolicyArns:
+      - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      - !GetAtt PolicyBracketUserAuth.PolicyArn
+      - !GetAtt PolicyBracketSend.PolicyArn
+      MaxSessionDuration: 3600
+      RoleName: !Sub "role-lambda-${LambdaUserAuthPermissionName}"
+      Description: ""
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Action: "sts:AssumeRole"
+          Effect: "Allow"
+          Principal:
+            Service: "lambda.amazonaws.com"
   PolicyBracketReadWrite:
     Type: "AWS::IAM::ManagedPolicy"
     UpdateReplacePolicy: "Delete"
@@ -620,6 +644,26 @@ Resources:
         Statement:
           Resource: !Sub "arn:aws:ses:${AWS::Region}:${AWS::AccountId}:identity/${SesIdentity}"
           Action: "ses:SendEmail"
+          Effect: "Allow"
+          Sid: "VisualEditor0"
+  PolicyBracketUserAuth:
+    Type: "AWS::IAM::ManagedPolicy"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      ManagedPolicyName: !Sub "policy-lambda-${LambdaUserAuthPermissionName}"
+      Path: "/"
+      Description: ""
+      Groups: []
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Resource: !Sub "arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${CognitoUserPoolId}"
+          Action:
+          - "cognito-idp:AdminGetUser"
+          - "cognito-idp:AdminUpdateUserAttributes"
+          - "cognito-idp:ListUsers"
+          - "cognito-idp:GetUser"
           Effect: "Allow"
           Sid: "VisualEditor0"
 ############################
@@ -783,6 +827,8 @@ Resources:
       ApiId: !Ref ApiGatewayBracket
       RouteKey: !Sub "GET /start"
       Target: !Join ["/", ["integrations", !Ref ApiIntegrationBracketGetRoundStart]]
+      AuthorizationType: "CUSTOM"
+      AuthorizerId: !Ref ApiAuthorizerBracketUserAuth
   ApiIntegrationBracketGetRoundStart:
     Type: "AWS::ApiGatewayV2::Integration"
     UpdateReplacePolicy: "Delete"
@@ -837,6 +883,8 @@ Resources:
       ApiId: !Ref ApiGatewayBracket
       RouteKey: !Sub "POST /picks"
       Target: !Join ["/", ["integrations", !Ref ApiIntegrationBracketUpdatePicks]]
+      AuthorizationType: "CUSTOM"
+      AuthorizerId: !Ref ApiAuthorizerBracketUserAuth
   ApiIntegrationBracketUpdatePicks:
     Type: "AWS::ApiGatewayV2::Integration"
     UpdateReplacePolicy: "Delete"
@@ -892,7 +940,7 @@ Resources:
       RouteKey: !Sub "POST /admin"
       Target: !Join ["/", ["integrations", !Ref ApiIntegrationBracketAdminEdit]]
       AuthorizationType: "CUSTOM"
-      AuthorizerId: !Ref ApiAuthorizerBracketAdminAuth
+      AuthorizerId: !Ref ApiAuthorizerBracketUserAuth
   ApiIntegrationBracketAdminEdit:
     Type: "AWS::ApiGatewayV2::Integration"
     UpdateReplacePolicy: "Delete"
@@ -912,27 +960,27 @@ Resources:
       Action: "lambda:InvokeFunction"
       SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayBracket}/*/*/admin"
       Principal: "apigateway.amazonaws.com"
-  ApiAuthorizerBracketAdminAuth:
+  ApiAuthorizerBracketUserAuth:
     Type: "AWS::ApiGatewayV2::Authorizer"
     UpdateReplacePolicy: "Delete"
     DeletionPolicy: "Delete"
     Properties:
       ApiId: !Ref ApiGatewayBracket
-      Name: !Ref LambdaBracketAdminAuth
+      Name: !Ref LambdaBracketUserAuth
       AuthorizerType: "REQUEST"
-      AuthorizerUri: !Sub  "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaBracketAdminAuth.Arn}/invocations"
+      AuthorizerUri: !Sub  "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaBracketUserAuth.Arn}/invocations"
       AuthorizerPayloadFormatVersion: "2.0"
       EnableSimpleResponses: true
       IdentitySource: 
       - "$request.header.Authorization"
-  ApiTriggerPermissionBracketAdminAuth:
+  ApiTriggerPermissionBracketUserAuth:
     Type: "AWS::Lambda::Permission"
     UpdateReplacePolicy: "Delete"
     DeletionPolicy: "Delete"
     Properties:
-      FunctionName: !GetAtt LambdaBracketAdminAuth.Arn
+      FunctionName: !GetAtt LambdaBracketUserAuth.Arn
       Action: "lambda:InvokeFunction"
-      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayBracket}/authorizers/${ApiAuthorizerBracketAdminAuth}"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayBracket}/authorizers/${ApiAuthorizerBracketUserAuth}"
       Principal: "apigateway.amazonaws.com"
 ############################
 #### CloudFront 
@@ -1037,13 +1085,6 @@ Resources:
     Properties:
       LogGroupName: !Sub "/aws/lambda/${LambdaAddElementName}"
       RetentionInDays: 7
-  LogBracketLambdaAdminAuth:
-    Type: "AWS::Logs::LogGroup"
-    UpdateReplacePolicy: "Delete"
-    DeletionPolicy: "Delete"
-    Properties:
-      LogGroupName: !Sub "/aws/lambda/${LambdaAdminAuthName}"
-      RetentionInDays: 7
   LogBracketLambdaAdminEdit:
     Type: "AWS::Logs::LogGroup"
     UpdateReplacePolicy: "Delete"
@@ -1100,5 +1141,11 @@ Resources:
     Properties:
       LogGroupName: !Sub "/aws/lambda/${LambdaUpdateScoreboardName}"
       RetentionInDays: 7
-
+  LogBracketLambdaUserAuth:
+    Type: "AWS::Logs::LogGroup"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${LambdaUserAuthName}"
+      RetentionInDays: 7
 

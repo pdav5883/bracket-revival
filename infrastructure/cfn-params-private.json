@@ -9,10 +9,10 @@
   "LambdaAdminReadPermissionName=bracket-admin-read",
   "LambdaReadSendPermissionName=bracket-read-sent",
   "LambdaSendPermissionName=bracket-send",
+  "LambdaUserAuthPermissionName=bracket-user-auth",
   "PublicBucketName=bracket-revival-public",
   "PrivateBucketName=bracket-revival-private",
   "LambdaAddElementName=BracketAddElement",
-  "LambdaAdminAuthName=BracketAdminAuth",
   "LambdaAdminEditName=BracketAdminEdit",
   "LambdaGetBracketName=BracketGetBracket",
   "LambdaGetCompetitionsName=BracketGetCompetitions",
@@ -21,9 +21,11 @@
   "LambdaSendEmailName=BracketSendEmail",
   "LambdaUpdatePicksName=BracketUpdatePicks",
   "LambdaUpdateScoreboardName=BracketUpdateScoreboard",
+  "LambdaUserAuthName=BracketUserAuth",
   "LayerCommonName=BracketCommon",
   "SNSTopicEmailName=bracket-email-topic",
   "SNSTopicSyncName=bracket-sync-topic",
   "ApiName=bracket-revival",
-  "SesIdentity=bearloves.rocks"
+  "SesIdentity=bearloves.rocks",
+  "CognitoUserPoolId=us-east-1_7j2Ragbz6"
 ]

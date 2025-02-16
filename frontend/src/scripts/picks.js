@@ -159,6 +159,7 @@ function populateRoundStart(args) {
     method: "GET",
     url: API_URL.start,
     data: queryData,
+    headers: {"authorization": localStorage.getItem("blr-accessToken")},
     crossDomain: true,
     success: function(result) {
       // game: {teams: [], seeds: [], score: [], result: 0/1}

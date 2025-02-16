@@ -4,19 +4,62 @@ import random
 import boto3
 from botocore.exceptions import ClientError
 
+from common import utils
+
 DOMAIN = "localhost:8000"
+user_pool_id = "us-east-1_7j2Ragbz6"
 
 cognito = boto3.client('cognito-idp')
 ses = boto3.client('ses')
 
 def lambda_handler(event, context):
     # print("=====================================")
+    print("NEW AUTH EVENT")
     # print(f"Trigger Source: {event['triggerSource']}")
-    # print(event)
-    # print(context)
+    print(event)
+    print(context)
 
+    if "triggerSource" in event:
+        return handle_auth_flow(event, context)
+    elif "rawPath" in event:
+        return handle_endpoint_auth(event, context)
+    else:
+        raise Exception("Invalid event")
+    
+def handle_endpoint_auth(event, context):
+    if event["rawPath"] == "/start":
+        # grab the competition
+        year = event['queryStringParameters']['year']   
+        cid = event['queryStringParameters']['cid']
+        pid = event['queryStringParameters']['pid']
+
+        competition_key = f"{year}/{cid}/competition.json"
+        competition = utils.read_file(competition_key)
+        require_secret = competition['require_secret']
+        
+        if not require_secret:
+            return {"isAuthorized": True}
+
+        # confirm that pid matches cognito user name
+        access_token = event['headers'].get('authorization', '').replace('Bearer ', '')
+        user = cognito.get_user(AccessToken=access_token)
+        
+        name = None
+        for attr in user['UserAttributes']:
+            if attr['Name'] == 'name':
+                name = attr['Value']
+                break
+        
+        if name == pid.lower():
+            return {"isAuthorized": True}
+        else:
+            return {"isAuthorized": False}
+        # TODO: START HERE -- HASN'T BEEN TESTED
+
+        
+def handle_auth_flow(event, context):
     if event['triggerSource'] == 'PreSignUp_SignUp':
-        return pre_sign_up(event, context)
+            return pre_sign_up(event, context)
     elif event['triggerSource'] == 'DefineAuthChallenge_Authentication':
         return define_auth_challenge(event, context)
     elif event['triggerSource'] == 'CreateAuthChallenge_Authentication':
@@ -26,14 +69,27 @@ def lambda_handler(event, context):
     elif event['triggerSource'] == 'PostAuthentication_Authentication':
         return post_authentication(event, context)
     
-
-
 def pre_sign_up(event, context):
-    """Auto-confirm user but leave email unverified"""
+    """Auto-confirm user and set username as concatenation of given and family names"""
+    # Get user attributes
+    user_attrs = event['request']['userAttributes']
+    given_name = user_attrs.get('given_name', '')
+    family_name = user_attrs.get('family_name', '')
+    name = user_attrs.get('name', '')
+    email = user_attrs.get('email', '')
+
+    existing_email = cognito.list_users(UserPoolId=event['userPoolId'],Filter=f'email = "{email}"')['Users']
+    if len(existing_email) > 0:
+        raise Exception("Email already in use")
+    
+    existing_name = cognito.list_users(UserPoolId=event['userPoolId'],Filter=f'name = "{name}"')['Users']
+    if len(existing_name) > 0:
+        raise Exception("Name already in use")
+    
+    # Auto-confirm but don't verify email
     event['response']['autoConfirmUser'] = True
     event['response']['autoVerifyEmail'] = False
     
-    # Return the entire event object
     return event
 
 def define_auth_challenge(event, context):
@@ -81,6 +137,7 @@ def create_auth_challenge(event, context):
         
         try:
             # Send email using SES
+            # TODO: change to SNS publish
             ses.send_email(
                 Source="bracket@bearloves.rocks",
                 Destination={

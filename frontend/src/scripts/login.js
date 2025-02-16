@@ -3,10 +3,11 @@ import {
     CognitoIdentityProviderClient,
     SignUpCommand,
     InitiateAuthCommand,
-    RespondToAuthChallengeCommand
+    RespondToAuthChallengeCommand,
+    GetUserCommand
 } from "@aws-sdk/client-cognito-identity-provider";
 
-import { initCommon } from "./shared.js"
+import { initCommon, isAuthenticated } from "./shared.js"
 import $ from "jquery"
 
 const poolData = {
@@ -26,7 +27,7 @@ $(async function () {
     $("#closeButton").hide()
     $("#signupForm").hide();
     $("#signinForm").hide();
-    
+
     $("#closeButton").on('click', (e) => {
         e.preventDefault();
         window.close();
@@ -75,6 +76,10 @@ $("#signupButton").on("click", async (e) => {
         {
             Name: 'family_name',
             Value: lastName
+        },
+        {
+            Name: "name",
+            Value: `${firstName}-${lastName}`.toLowerCase().replace(' ', '')
         }
     ];
 
@@ -134,8 +139,11 @@ async function startAuthFlow(email) {
             $("#loginMessage").show();
         } else if (response.AuthenticationResult) {
             // User is fully authenticated
-            localStorage.setItem('accessToken', response.AuthenticationResult.AccessToken);
+            localStorage.setItem('blr-accessToken', response.AuthenticationResult.AccessToken);
             localStorage.removeItem('cognitoSession'); // Clean up the session
+            const attributes = await getUserAttributes();
+            localStorage.setItem('blr-userFirstName', attributes.given_name);
+            localStorage.setItem('blr-userLastName', attributes.family_name);
             goHome()
         }
     } catch (error) {
@@ -172,8 +180,11 @@ async function handleVerification() {
             const response = await client.send(command);
 
             if (response.AuthenticationResult) {
-                localStorage.setItem('accessToken', response.AuthenticationResult.AccessToken);
+                localStorage.setItem('blr-accessToken', response.AuthenticationResult.AccessToken);
                 localStorage.removeItem('cognitoSession'); // Clean up the session
+                const attributes = await getUserAttributes();
+                localStorage.setItem('blr-userFirstName', attributes.given_name);
+                localStorage.setItem('blr-userLastName', attributes.family_name);
                 goHome()
             }
         } catch (error) {
@@ -185,17 +196,34 @@ async function handleVerification() {
     }
 }
 
-// Replace userPool.getCurrentUser() with token-based auth
-function isAuthenticated() {
-    const accessToken = localStorage.getItem('accessToken');
-    return !!accessToken;
+
+async function getUserAttributes() {
+    try {
+        const accessToken = localStorage.getItem('blr-accessToken');
+        if (!accessToken) {
+            throw new Error('Not authenticated');
+        }
+
+        const command = new GetUserCommand({
+            AccessToken: accessToken
+        });
+
+        const response = await client.send(command);
+        
+        // Convert attributes array to an easy-to-use object
+        const attributes = {};
+        response.UserAttributes.forEach(attr => {
+            attributes[attr.Name] = attr.Value;
+        });
+
+        // Now you can access attributes.given_name, attributes.family_name, etc.
+        return attributes;
+    } catch (error) {
+        console.error('Error getting user attributes:', error);
+        throw error;
+    }
 }
 
-// Update Sign Out
-$("#signout").on("click", () => {
-    localStorage.removeItem('accessToken');
-    showSignInForm();
-});
 
 // Update Check Auth Status
 function checkAuthStatus() {
