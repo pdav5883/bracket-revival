@@ -1,4 +1,4 @@
-import { API_URL } from "./constants.js" 
+import { API_URL } from "./constants.js"
 import { initIndexYears, populateCompetitions, initCommon } from "./shared.js"
 import $ from "jquery"
 
@@ -8,9 +8,9 @@ let typeArg
 let yearArg
 let compArg
 
-$(function() { 
+$(function () {
   initCommon()
-  
+
   $("#yearsel").on("change", populateCompetitionsWrapper)
   $("#subbutton").on("click", submitEdits)
   $("#gobutton").on("click", changeAdminPage)
@@ -20,7 +20,7 @@ $(function() {
 
 function initAdminPage() {
   $("#statustext").text("")
-  initIndexYears(function(ind) {
+  initIndexYears(function (ind) {
     index = ind
   })
 }
@@ -35,9 +35,9 @@ function populateResultsTable(year) {
   $.ajax({
     method: "GET",
     url: API_URL.bracket,
-    data: {"year": year},
+    data: { "year": year },
     crossDomain: true,
-    success: function(gamesNested) {
+    success: function (gamesNested) {
 
       let table = document.getElementById("admintable")
       table.innerHTML = ""
@@ -61,9 +61,9 @@ function populateTeamsTable(year) {
   $.ajax({
     method: "GET",
     url: API_URL.bracket,
-    data: {"year": year},
+    data: { "year": year },
     crossDomain: true,
-    success: function(gamesNested) {
+    success: function (gamesNested) {
       let gamesStart = gamesNested[0]
 
       let table = document.getElementById("admintable")
@@ -72,28 +72,28 @@ function populateTeamsTable(year) {
       let i = 0
       gamesStart.forEach(game => {
         let tableRow = table.insertRow()
-	
+
         let tableCell = tableRow.insertCell()
         tableCell.textContent = game.seeds[0]
-	
+
         tableCell = tableRow.insertCell()
         let inp = makeTextInput("name_" + i, 10, game.teams[0])
         tableCell.appendChild(inp)
-	
+
         tableCell = tableRow.insertCell()
         inp = makeTextInput("short_" + i, 4, game.shorts[0])
         tableCell.appendChild(inp)
         i++
 
         tableRow = table.insertRow()
-	
+
         tableCell = tableRow.insertCell()
         tableCell.textContent = game.seeds[1]
-	
+
         tableCell = tableRow.insertCell()
         inp = makeTextInput("name_" + i, 10, game.teams[1])
         tableCell.appendChild(inp)
-	
+
         tableCell = tableRow.insertCell()
         inp = makeTextInput("short_" + i, 4, game.shorts[1])
         tableCell.appendChild(inp)
@@ -108,9 +108,9 @@ function populateCompetitionTable(year, cid) {
   $.ajax({
     method: "GET",
     url: API_URL.competitions,
-    data: {"year": year, "cid": cid},
+    data: { "year": year, "cid": cid },
     crossDomain: true,
-    success: function(result) {
+    success: function (result) {
       let table = document.getElementById("admintable")
       table.innerHTML = ""
 
@@ -140,7 +140,7 @@ function populateCompetitionTable(year, cid) {
       cell = row.insertCell()
       input = makeBooleanSelect("selsecret", result.require_secret)
       cell.appendChild(input)
-      
+
       // open players
       row = table.insertRow()
       cell = row.insertCell()
@@ -189,7 +189,7 @@ function populateCompetitionTable(year, cid) {
         input = makeCheckboxInput("email_" + i, "Email")
         cell.appendChild(input[0]) // checkbox
         cell.appendChild(input[1]) // label
-        
+
         // autopick
         cell = row.insertCell()
         input = makeCheckboxInput("pick_" + i, "Autopick")
@@ -274,7 +274,7 @@ function makeBooleanSelect(id, current) {
   return select
 }
 
-function makeTextInput(id, numchar=2, current="") {
+function makeTextInput(id, numchar = 2, current = "") {
   let input = document.createElement("input")
   input.setAttribute("type", "text")
   input.setAttribute("id", id)
@@ -292,7 +292,7 @@ function makeCheckboxInput(id, labelStr) {
   let label = document.createElement("label")
   label.textContent = labelStr
   label.setAttribute("for", id)
-  
+
   return [input, label]
 }
 
@@ -328,28 +328,21 @@ function submitResultsEdits() {
     }
   }
 
-  const data = {"results": results, "scores": scores}
+  const data = { "results": results, "scores": scores }
 
   $.ajax({
     type: "POST",
     url: API_URL.admin,
-    headers: {"authorization": localStorage.getItem('blr-accessToken')},
+    headers: { "authorization": localStorage.getItem('blr-accessToken') },
     crossDomain: true,
     contentType: "application/json; charset=utf-8",
-    data: JSON.stringify({"etype": "results", "year": yearArg, "data": data}),
+    data: JSON.stringify({ "etype": "results", "year": yearArg, "data": data }),
 
-    success: function() {
+    success: function () {
       $("#statustext").text("Success!")
     },
 
-    error: function(err) {
-      if (err.status == 403) {
-        $("#statustext").text("Error: incorrect password")
-      }
-      else {
-        $("#statustext").text("Error: unknown submission error")
-      }
-    }
+    error: adminSubmitError
   })
 }
 
@@ -368,23 +361,16 @@ function submitTeamsEdits() {
   $.ajax({
     type: "POST",
     url: API_URL.admin,
-    headers: {"authorization": $("#pwdtext").val()},
+    headers: { "authorization": localStorage.getItem('blr-accessToken') },
     crossDomain: true,
     contentType: "application/json; charset=utf-8",
-    data: JSON.stringify({"etype": "teams", "year": yearArg, "data": names_shorts}),
+    data: JSON.stringify({ "etype": "teams", "year": yearArg, "data": names_shorts }),
 
-    success: function() {
+    success: function () {
       $("#statustext").text("Success!")
     },
 
-    error: function(err) {
-      if (err.status == 403) {
-        $("#statustext").text("Error: incorrect password")
-      }
-      else {
-        $("#statustext").text("Error: unknown submission error")
-      }
-    }
+    error: adminSubmitError
   })
 }
 
@@ -408,7 +394,7 @@ function submitCompetitionEdits() {
     if ($("#email_" + i).is(":checked")) {
       emailNames.push($("#old_" + i).text())
     }
-    
+
     if ($("#pick_" + i).is(":checked")) {
       autopickNames.push($("#old_" + i).text())
     }
@@ -424,28 +410,22 @@ function submitCompetitionEdits() {
     "require_secret": $("#selsecret").val(),
     "email_individual": emailNames,
     "autopick_individual": autopickNames,
-    "players": players}
+    "players": players
+  }
 
   $.ajax({
     type: "POST",
     url: API_URL.admin,
-    headers: {"authorization": $("#pwdtext").val()},
+    headers: { "authorization": localStorage.getItem('blr-accessToken') },
     crossDomain: true,
     contentType: "application/json; charset=utf-8",
-    data: JSON.stringify({"etype": "competition", "year": yearArg, "cid": compArg, "data": data}),
+    data: JSON.stringify({ "etype": "competition", "year": yearArg, "cid": compArg, "data": data }),
 
-    success: function() {
+    success: function () {
       $("#statustext").text("Success!")
     },
 
-    error: function(err) {
-      if (err.status == 403) {
-        $("#statustext").text("Error: incorrect password")
-      }
-      else {
-        $("#statustext").text("Error: unknown submission error")
-      }
-    }
+    error: adminSubmitError
   })
 }
 
@@ -454,7 +434,7 @@ function changeAdminPage() {
   typeArg = $("#typesel").val()
   yearArg = $("#yearsel").val()
   compArg = $("#compsel").val()
-  
+
   $("#statustext").text("")
 
   if (typeArg === "results") {
@@ -465,5 +445,14 @@ function changeAdminPage() {
   }
   else if (typeArg === "competition") {
     populateCompetitionTable(yearArg, compArg)
+  }
+}
+
+function adminSubmitError(err) {
+  if (err.status == 403) {
+    $("#statustext").text("Error: you must be an admin to submit changes")
+  }
+  else {
+    $("#statustext").text("Error: " + err.responseJSON.message)
   }
 }

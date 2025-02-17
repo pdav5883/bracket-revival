@@ -1,33 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <!-- Basic Page Needs -->
   <meta charset="utf-8">
   <!-- Mobile Specific Metas -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title><%= htmlWebpackPlugin.options.title %></title>
+  <title>
+    <%= htmlWebpackPlugin.options.title %>
+  </title>
   <link rel="icon" type="image/x-icon" href="./assets/favicon.ico">
 </head>
+
 <body>
   <div id="nav-placeholder"></div>
+  <div class="ps-3">
   <h2>Admin Dashboard</h2>
-  <label for="typesel">Edit</label>
-  <select id="typesel">
-    <option value="results">Results</option>
-    <option value="teams">Teams</option>
-    <option value="competition">Competition</option>
-  </select>
-  <label id="yearlab" for="yearsel">Year</label>
-  <select id="yearsel">
-  </select>
-  <label id="complab" for="compsel">Comp</label>
-  <select id="compsel">
-  </select>
-  <button id="gobutton" type="button" class="go-button">Go</button>
-  <label id="pwdlab" for="pwdtext">Submission Password</label>
-  <input id="pwdtext" type="password">
-  <button id="subbutton" type="button" class="submit-button">Submit</button>
-  <span id="statustext"></span>
+  <form class="col-xl-6 col-lg-8 col-md-10 pb-3">
+    <div class="row">
+      <div class="col-md-3 col-4">
+        <label for="typesel">Edit</label>
+        <select id="typesel" class="form-select">
+          <option value="results">Results</option>
+          <option value="teams">Teams</option>
+          <option value="competition">Competition</option>
+        </select>
+      </div>
+      <div class="col-md-3 col-4">
+        <label id="yearlab" for="yearsel">Year</label>
+        <select id="yearsel" class="form-select">
+        </select>
+      </div>
+      <div class="col-md-6 col-6">
+        <label id="complab" for="compsel">Comp</label>
+        <select id="compsel" class="form-select">
+        </select>
+      </div>
+    </div>
+  </form>
+  <div class="pb-3">
+  <button id="gobutton" type="button" class="btn btn-secondary go-button">Go</button>
+  <button id="subbutton" type="button" class="btn btn-danger submit-button ms-1">Submit</button>
+  <span id="statustext" class="ps-3"></span>
+  </div>
   <table id="admintable" class="admin-table"></table>
+  </div>
 </body>
+
 </html>
