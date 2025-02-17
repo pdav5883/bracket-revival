@@ -28,35 +28,80 @@ def lambda_handler(event, context):
     
 def handle_endpoint_auth(event, context):
     if event["rawPath"] == "/start":
-        # grab the competition
-        year = event['queryStringParameters']['year']   
-        cid = event['queryStringParameters']['cid']
-        pid = event['queryStringParameters']['pid']
+        return start_or_picks_endpoint_auth(event, context)
+    elif event["rawPath"] == "/picks":
+        return start_or_picks_endpoint_auth(event, context)
+    elif event["rawPath"] == "/admin":
+        return admin_endpoint(event, context)
+    else:
+        return {"isAuthorized": False,
+                "context": {
+                    "message": f"Invalid endpoint {event['rawPath']}"
+                    }
+                }
+    
+def start_or_picks_endpoint_auth(event, context):
+    # grab the competition
+    year = event['queryStringParameters']['year']   
+    cid = event['queryStringParameters']['cid']
+    pid = event['queryStringParameters']['pid']
 
-        competition_key = f"{year}/{cid}/competition.json"
-        competition = utils.read_file(competition_key)
-        require_secret = competition['require_secret']
-        
-        if not require_secret:
-            return {"isAuthorized": True}
+    competition_key = f"{year}/{cid}/competition.json"
+    competition = utils.read_file(competition_key)
+    require_secret = competition['require_secret']
+    
+    if not require_secret:
+        return {"isAuthorized": True}
 
-        # confirm that pid matches cognito user name
-        access_token = event['headers'].get('authorization', '').replace('Bearer ', '')
-        user = cognito.get_user(AccessToken=access_token)
-        
-        name = None
-        for attr in user['UserAttributes']:
-            if attr['Name'] == 'name':
-                name = attr['Value']
-                break
-        
-        if name == pid.lower():
-            return {"isAuthorized": True}
-        else:
-            return {"isAuthorized": False}
-        # TODO: START HERE -- HASN'T BEEN TESTED
+    # confirm that pid matches cognito user name
+    access_token = event['headers'].get('authorization', '').replace('Bearer ', '')
+    
+    if not access_token:
+        return {"isAuthorized": False,
+                "context": {
+                    "message": f"You must be signed in as {pid.lower()} to access this page"
+                    }
+                }
 
-        
+    user = cognito.get_user(AccessToken=access_token)
+    
+    # TODO: catch error here if accessToken is not valid
+    name = None
+    for attr in user['UserAttributes']:
+        if attr['Name'] == 'name':
+            name = attr['Value']
+            break
+    
+    if name == pid.lower():
+        return {"isAuthorized": True}
+    else:
+        return {"isAuthorized": False,
+                "context": {
+                    "message": f"You must be signed in as {pid.lower()} to access this page"
+                    }
+                }
+    
+def admin_endpoint(event, context):
+    access_token = event['headers'].get('authorization', '').replace('Bearer ', '')
+    
+    if not access_token:
+        return {"isAuthorized": False,
+                "context": {
+                    "message": f"You must be signed in as an admin to submit changes"
+                    }
+                }
+
+    user = cognito.get_user(AccessToken=access_token)
+
+    if user_is_admin(user['Username']):
+        return {"isAuthorized": True}
+    else:
+        return {"isAuthorized": False,
+                "context": {
+                    "message": f"You must be signed in as an admin to submit changes"
+                    }
+                }
+
 def handle_auth_flow(event, context):
     if event['triggerSource'] == 'PreSignUp_SignUp':
             return pre_sign_up(event, context)
@@ -177,8 +222,12 @@ def verify_auth_challenge(event, context):
     return event
 
 def post_authentication(event, context):
-    """Mark email as verified after successful authentication"""
+    """Mark email as verified and add admin status after successful authentication"""
     try:
+        # Check if user is admin
+        is_admin = user_is_admin(event['userName'])
+        
+        # Update user attributes
         cognito.admin_update_user_attributes(
             UserPoolId=event['userPoolId'],
             Username=event['userName'],
@@ -186,6 +235,11 @@ def post_authentication(event, context):
                 {
                     'Name': 'email_verified',
                     'Value': 'true'
+                },
+                {
+                    # this field controls whether admin links are visible in UI, authentication for admin happens backend
+                    'Name': 'custom:is_admin',
+                    'Value': str(is_admin).lower()
                 }
             ]
         )
@@ -194,3 +248,10 @@ def post_authentication(event, context):
         raise e
     
     return event
+
+def user_is_admin(user_name):
+    response = cognito.admin_list_groups_for_user(
+        UserPoolId=user_pool_id,
+        Username=user_name
+    )
+    return 'admin' in [group['GroupName'] for group in response['Groups']]

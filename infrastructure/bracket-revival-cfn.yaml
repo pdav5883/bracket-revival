@@ -662,6 +662,7 @@ Resources:
           Action:
           - "cognito-idp:AdminGetUser"
           - "cognito-idp:AdminUpdateUserAttributes"
+          - "cognito-idp:AdminListGroupsForUser"
           - "cognito-idp:ListUsers"
           - "cognito-idp:GetUser"
           Effect: "Allow"

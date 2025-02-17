@@ -144,6 +144,7 @@ async function startAuthFlow(email) {
             const attributes = await getUserAttributes();
             localStorage.setItem('blr-userFirstName', attributes.given_name);
             localStorage.setItem('blr-userLastName', attributes.family_name);
+            localStorage.setItem('blr-isAdmin', attributes['custom:is_admin'] === 'true');
             goHome()
         }
     } catch (error) {
@@ -185,6 +186,7 @@ async function handleVerification() {
                 const attributes = await getUserAttributes();
                 localStorage.setItem('blr-userFirstName', attributes.given_name);
                 localStorage.setItem('blr-userLastName', attributes.family_name);
+                localStorage.setItem('blr-isAdmin', attributes['custom:is_admin'] === 'true');
                 goHome()
             }
         } catch (error) {

@@ -16,7 +16,14 @@ export function initCommon() {
         $("#user-menu").show();
         const userFirstName = localStorage.getItem('blr-userFirstName');
         const userLastName = localStorage.getItem('blr-userLastName');
+        const isAdmin = localStorage.getItem('blr-isAdmin') === 'true';
         $("#user-menu").text(`${userFirstName} ${userLastName[0]}`);
+
+        if (isAdmin) {
+          $("#admin-button").show();
+        } else {
+          $("#admin-button").hide();
+        }
       }
 
       else {
@@ -33,6 +40,10 @@ export function initCommon() {
       $("#signin-button").on("click", () => {
         window.location.href = '/login.html';
       });
+
+      $("#admin-button").on("click", () => {
+        window.location.href = '/admin.html';
+      });
     });
   });
 }
@@ -42,6 +53,7 @@ export function signOut() {
   localStorage.removeItem('blr-accessToken');
   localStorage.removeItem('blr-userFirstName');
   localStorage.removeItem('blr-userLastName');
+  localStorage.removeItem('blr-isAdmin');
 }
 
 export function isAuthenticated() {

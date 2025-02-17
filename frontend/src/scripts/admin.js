@@ -333,7 +333,7 @@ function submitResultsEdits() {
   $.ajax({
     type: "POST",
     url: API_URL.admin,
-    headers: {"authorization": $("#pwdtext").val()},
+    headers: {"authorization": localStorage.getItem('blr-accessToken')},
     crossDomain: true,
     contentType: "application/json; charset=utf-8",
     data: JSON.stringify({"etype": "results", "year": yearArg, "data": data}),
