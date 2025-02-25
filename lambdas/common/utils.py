@@ -92,6 +92,34 @@ def trigger_email_sns(emailbatch):
     return None
 
 
+def get_user_cognito(access_token):
+    return cognito.get_user(AccessToken=access_token)
+
+
+def get_user_attribute_cognito(access_token, attribute):
+    # Handle single attribute case
+    if isinstance(attribute, str):
+        user = get_user_cognito(access_token)
+        for attr in user['UserAttributes']:
+            if attr['Name'] == attribute:
+                return attr['Value']
+        return None
+    
+    # Handle multiple attributes case
+    if isinstance(attribute, (list, tuple)):
+        user = get_user_cognito(access_token)
+        attr_values = [None] * len(attribute)
+        for i, attr_name in enumerate(attribute):
+            for attr in user['UserAttributes']:
+                if attr['Name'] == attr_name:
+                    attr_values[i] = attr['Value']
+                    break
+                
+        return tuple(attr_values)
+    
+    return None
+
+
 def trigger_sync_local(year, cid):
     cid = cid.replace(" ", "").lower()
 
@@ -103,6 +131,15 @@ def trigger_email_local(emailbatch):
     print(f"Cannot perform local email trigger")
     return None
 
+
+def get_user_local(access_token):
+    print("Cannot perform local user retrieval")
+    return None
+
+
+def get_user_attribute_local(access_token, attribute):
+    print("Cannot perform local user attribute retrieval")
+    return None
 
 # allow switch to local testing with env variables
 if "BRACKET_REVIVAL_LOCAL_PREFIX" in os.environ:
@@ -116,6 +153,8 @@ if "BRACKET_REVIVAL_LOCAL_PREFIX" in os.environ:
     read_parameter = read_parameter_local
     trigger_sync = trigger_sync_local
     tirgger_email = trigger_email_local
+    get_user = get_user_local
+    get_user_attribute = get_user_attribute_local
 
 else:
     bucket = SUB_PrivateBucketName # type: ignore
@@ -124,6 +163,7 @@ else:
     s3 = boto3.client("s3")
     ssm = boto3.client("ssm")
     sns = boto3.client("sns")
+    cognito = boto3.client("cognito-idp")
 
     key_exists = key_exists_s3
     read_file = read_file_s3
@@ -133,3 +173,5 @@ else:
     read_parameter = read_parameter_ssm
     trigger_sync = trigger_sync_sns
     trigger_email = trigger_email_sns
+    get_user = get_user_cognito
+    get_user_attribute = get_user_attribute_cognito

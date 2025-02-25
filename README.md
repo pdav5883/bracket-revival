@@ -1,6 +1,16 @@
 # bracket-revival
 A March Madness bracket picking game where you get to re-pick your bracket after every round. 
 
+## New Game Flow
+- Each competition has flag for allow_guests, remove require_secret
+- When user goes to join a game, they get option to sign in or create as guest if allow_guests is true. If not they have to sign in.
+  - If /newplayer.html includes year, cid arguments, then go straight to page, other provide dropdown with GO selector
+  - Upon GO, check to see if game can be joined (accepting players, and guest)
+  - Provide option/requirement to Sign In
+  - Create player, checking for access key if needed 
+- If they are signed in, their info autopopulates for name, TODO add option for nickname for the game, then a json file is created using first-last.json in S3 to hold their picks.
+- If they are guest, they fill in name and a json is created with guest-first-last (should make sure users can't sign in with first name guest)
+
 ## Maybe TODO
 - Use admin_auth to authorize /add endpoint for year and game
 - Error handling bad params on pages

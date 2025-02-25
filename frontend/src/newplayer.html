@@ -1,50 +1,58 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <!-- Meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><%= htmlWebpackPlugin.options.title %></title>
-    <link rel="icon" type="image/x-icon" href="./assets/favicon.ico">
-  </head>
-  <body>
-    <div id="nav-placeholder"></div>
-    <div class="col-10 col-8-md mx-auto p-3 py-md-5">
-      <h1>Create New Player</h1>
-      <div class="col-8 col-sm-12 row">
-	<div class="col-sm-3 gy-4">
-	  <label for="yearsel" class="form-label">Tournament Year</label>
-	  <select class="form-select" id="yearsel">
-	  </select>
-	</div>
-	<div class="col-sm-5 gy-4">
-	  <label for="compsel" class="form-label">Competition</label>
-	  <select class="form-select" id="compsel">
-	  </select>
-	</div>
 
+<head>
+  <!-- Meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+    <%= htmlWebpackPlugin.options.title %>
+  </title>
+  <link rel="icon" type="image/x-icon" href="./assets/favicon.ico">
+</head>
+
+<body>
+  <div id="nav-placeholder"></div>
+  <div class="col-10 col-8-md mx-auto p-3 py-md-5">
+    <h1>Create New Player</h1>
+    <div class="col-8 col-sm-12 row">
+      <div class="col-sm-3 gy-4">
+        <label for="yearsel" class="form-label">Tournament Year</label>
+        <select class="form-select" id="yearsel">
+        </select>
       </div>
-      <div class="row mb-3">
-	<div class="col-6 col-sm-4 col-lg-3 gy-4">
-	  <label for="nameinput" class="form-label">Name</label>
-	  <input type="text" class="form-control" id="nameinput" placeholder="John">
-	  <div class="form-text">Your name as it will appear on the scoreboard</div>
-	</div>
-	<div id="emaildiv" class="col-sm-8 col-lg-5 gy-4">
-	  <label for="emailinput" class="form-label">Email</label>
-	  <input type="text" class="form-control" id="emailinput" placeholder="john.doe@gmail.com">
-	  <div class="form-text">Where to send your links to make picks before each round.<br>No spam, I promise!</div>
-	</div>
+      <div class="col-sm-5 gy-4">
+        <label for="compsel" class="form-label">Competition</label>
+        <select class="form-select" id="compsel">
+        </select>
       </div>
-      <div id="submitdiv" class="pt-3">
-	<button type="button" id="submitbutton" class="btn btn-primary">Submit</button>
-      </div>
-      <div class="pt-3">
-        <p id="statustext"></p>
-      </div>
-      <div id="successdiv" class="pt-3">
-	<a id="successbutton" class="btn btn-dark" href="#"></a>
+      <button type="button" id="gobutton" class="btn btn-primary">Go</button>
+    </div>
+    <div id="signedindiv" class="row mb-3">
+      <span><em>Sign out</em> to change your name</span>
+    </div>
+    <div id="notsignedindiv" class="row mb-3">
+      <span>This game is accepting new players!</span>
+      <button type="button" id="guestbutton" class="btn btn-primary">Play as Guest</button>
+      <button type="button" id="signinbutton" class="btn btn-primary">Sign In</button>
+    </div>
+    <div id="namediv" class="row mb-3">
+      <div class="col-6 col-sm-4 col-lg-3 gy-4">
+        <label for="firstnameinput" class="form-label">First</label>
+        <input type="text" class="form-control" id="firstnameinput" placeholder="Michael">
+        <label for="lastnameinput" class="form-label">Last</label>
+        <input type="text" class="form-control" id="lastnameinput" placeholder="Jordan">
       </div>
     </div>
-  </body>
+
+    <button type="button" id="submitbutton" class="btn btn-primary">Submit</button>
+  </div>
+  <div class="pt-3">
+    <p id="statustext"></p>
+  </div>
+  <div id="successdiv" class="pt-3">
+    <a id="successbutton" class="btn btn-dark" href="#"></a>
+  </div>
+</body>
+
 </html>

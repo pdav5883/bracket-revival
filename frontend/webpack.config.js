@@ -5,7 +5,7 @@ const { execSync } = require('child_process')
 
 // Get CloudFormation parameters
 const cfParams = Object.fromEntries(
-  execSync('./get-cf-params.sh', { encoding: 'utf-8' })
+  execSync('bash get-cf-params.sh', { encoding: 'utf-8' })
     .trim()
     .split('\n')
     .map(line => {
@@ -143,5 +143,6 @@ module.exports = {
         }]
       }
     ]
-  }
+  },
+  devtool: 'source-map'
 }

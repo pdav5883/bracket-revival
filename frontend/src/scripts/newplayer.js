@@ -1,5 +1,5 @@
 import { API_URL } from "./constants.js" 
-import { initIndexOnly, initIndexYears, populateCompetitions, initCommon } from "./shared.js"
+import { initIndexOnly, initIndexYears, populateCompetitions, initCommon, isAuthenticated } from "./shared.js"
 import $ from "jquery"
 
 let index
@@ -7,8 +7,10 @@ let index
 $(function() { 
   initCommon()
  
-  $("#successdiv").hide()
   $("#submitbutton").on("click", submitNewPlayer)
+  $("#gobutton").on("click", () => {
+    initSingleYearCompetition($("#yearsel").val(), $("#compsel").val())
+  })
   $("#yearsel").on("change", populateCompetitionsWrapper)
   $("#compsel").on("change", checkHideEmailWrapper)
 
@@ -18,15 +20,28 @@ $(function() {
 
 function initNewPlayerPage() {
   const params = new URLSearchParams(window.location.search)
+
+  $("#signedindiv").hide()
+  $("#notsignedindiv").hide()
+  $("#namediv").hide()
+  $("#successdiv").hide()
+  $("#submitbutton").hide()
+  $("#gobutton").hide()
   
   if (params.has("year") && params.has("compname")) {
+    const year = params.get("year")
+    const compName = params.get("compname")
+
+    $('#gobutton').show()
     initIndexOnly(function(ind) {
       index = ind
+      
+      handleQueryParams(year, compName)
+      initSingleYearCompetition(year, compName)
     })
-
-    initSingleYearCompetition(params.get("year"), params.get("compname"))
   }
   else {
+    $('#gobutton').show()
     initIndexYears(function(ind) {
       index = ind
     })
@@ -34,42 +49,59 @@ function initNewPlayerPage() {
 }
 
 
-function initSingleYearCompetition(year, compName) {
-  let opt = document.createElement("option")
-  opt.value = year
-  opt.textContent = year
-  $("#yearsel").append(opt)
+function handleQueryParams(year, compName) {
+  // if year and compName are in params, populate dropdowns just with those if valid
+  if (!Object.hasOwn(index, year) || !Object.hasOwn(index[year], compName)) {
+    $("#statustext").text("Invalid URL with year " + year + " and competition " + compName)
+    return
+  }
+
+  // Create and append year option
+  $("<option>")
+    .val(year)
+    .text(year)
+    .appendTo("#yearsel")
   $("#yearsel").val(year)
 
-  opt = document.createElement("option")
-  opt.value = compName
-  opt.textContent = compName
-  $("#compsel").append(opt)
+  // Create and append competition option
+  $("<option>")
+    .val(compName)
+    .text(compName)
+    .appendTo("#compsel")
   $("#compsel").val(compName)
-
-  // hide email if not required
-  if (index.hasOwn(year) && index[year].hasOwn(compName)) {
-    checkHideEmail(year, compName)
-  }
-  else {
-    $("#statustext").text("Invalid url params: " + year + ", " + compName)
-  }
 }
 
-
-function checkHideEmail(year, compname) {
-  if (index[year][compname].require_secret === false) {
-    $("#emaildiv").hide()
+function initSingleYearCompetition(year, compName) {
+  
+  // check if this game is accepting players
+  if (!index[year][compName].open_players) {
+    // $("#statustext").text("This game is not accepting players")
+    return
   }
+
+  // check if user is signed in
+  if(isAuthenticated()) {
+    $('#firstnameinput').val(localStorage.getItem('blr-userFirstName')).prop("readonly", true)
+    $('#lastnameinput').val(localStorage.getItem('blr-userLastName')).prop("readonly", true)
+    $('#submitbutton').show()
+    return
+  }
+
+  // check if this game allows guests
+  if (index[year][compName].allow_guests === false) {
+    $('#submitbutton').hide()
+    $('#successdiv').hide()
+    $('#signin-button').show()
+    return
+  }
+
   else {
-    $("#emaildiv").show()
+    // play as guest
+
+
+    // sign in
   }
 
-}
-
-
-function checkHideEmailWrapper() {
-  checkHideEmail($("#yearsel").val(), $("#compsel").val())
 }
 
 
@@ -84,11 +116,7 @@ function submitNewPlayer() {
   $("#submitbutton").prop("disabled", true)
 
   // client validation
-  let validateId = ["yearsel", "compsel", "nameinput"]
-  
-  if (index[$("#yearsel").val()][$("#compsel").val()].require_secret === true) {
-    validateId.push("emailinput")
-  }
+  let validateId = ["yearsel", "compsel", "firstnameinput", "lastnameinput"]
 
   let validationErr = false
   validateId.forEach(v => {
@@ -107,18 +135,21 @@ function submitNewPlayer() {
     return
   }
 
-  const data = {"type": "player",
-    "year": $("#yearsel").val(),
-    "compname": $("#compsel").val(),
-    "playername": $("#nameinput").val(),
-    "playeremail": $("#emailinput").val()
-  }
+  const queryParams = new URLSearchParams({
+    type: "player",
+    year: $("#yearsel").val(),
+    compname: $("#compsel").val(),
+    playerfirst: $("#firstnameinput").val(),
+    playerlast: $("#lastnameinput").val()
+  }).toString()
 
   $.ajax({
     method: "PUT",
     url: API_URL.add,
-    contentType: "application/json; charset=utf-8",
-    data: JSON.stringify(data),
+    headers: {
+      "authorization": localStorage.getItem("blr-accessToken")
+    },
+    params: queryParams,
     crossDomain: true,
     success: function() {
       $("#submitbutton").prop("disabled", false)

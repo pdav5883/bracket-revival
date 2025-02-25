@@ -2,7 +2,7 @@ import json
 import os
 import random
 import boto3
-from botocore.exceptions import ClientError
+from botocore.exceptions import ClientError, UserNotFoundException
 
 from common import utils
 
@@ -32,7 +32,9 @@ def handle_endpoint_auth(event, context):
     elif event["rawPath"] == "/picks":
         return start_or_picks_endpoint_auth(event, context)
     elif event["rawPath"] == "/admin":
-        return admin_endpoint(event, context)
+        return admin_endpoint_auth(event, context)
+    elif event["rawPath"] == "/add":
+        return add_endpoint_auth(event, context)
     else:
         return {"isAuthorized": False,
                 "context": {
@@ -48,13 +50,13 @@ def start_or_picks_endpoint_auth(event, context):
 
     competition_key = f"{year}/{cid}/competition.json"
     competition = utils.read_file(competition_key)
-    require_secret = competition['require_secret']
+    allow_guests = competition['allow_guests']
     
-    if not require_secret:
+    if allow_guests:
         return {"isAuthorized": True}
 
     # confirm that pid matches cognito user name
-    access_token = event['headers'].get('authorization', '').replace('Bearer ', '')
+    access_token = event['headers'].get('authorization', '')
     
     if not access_token:
         return {"isAuthorized": False,
@@ -63,14 +65,8 @@ def start_or_picks_endpoint_auth(event, context):
                     }
                 }
 
-    user = cognito.get_user(AccessToken=access_token)
-    
-    # TODO: catch error here if accessToken is not valid
-    name = None
-    for attr in user['UserAttributes']:
-        if attr['Name'] == 'name':
-            name = attr['Value']
-            break
+    first_name, last_name    = utils.get_user_attribute(access_token, ["given_name", "family_name"])
+    name = first_name + "__" + last_name
     
     if name == pid.lower():
         return {"isAuthorized": True}
@@ -81,24 +77,75 @@ def start_or_picks_endpoint_auth(event, context):
                     }
                 }
     
-def admin_endpoint(event, context):
-    access_token = event['headers'].get('authorization', '').replace('Bearer ', '')
+def add_endpoint_auth(event, context):
+    typ = event['queryStringParameters']['type']
+
+    if typ == "year":
+        return add_year_or_competition_endpoint_auth(event, context)
+    elif typ == "competition":
+        return add_year_or_competition_endpoint_auth(event, context)
+    elif typ == "player":
+        return add_player_endpoint_auth(event, context)
+    else:
+        return {"isAuthorized": False,
+                "context": {
+                    "message": f"Invalid element type {typ}"
+                    }
+                }
+    
+def add_year_or_competition_endpoint_auth(event, context):
+    # submitting user must always be admin
+    return admin_endpoint_auth(event, context)
+
+
+def add_player_endpoint_auth(event, context):
+    # check that this user exists
+    access_token = event['headers'].get('authorization', '')
+
+    if not access_token:
+        index = utils.read_file("index.json")
+        year = event['queryStringParameters']['year']
+        cid = ['queryStringParameters']['cid']
+
+        if index[year][cid]['allow_guests']:
+            return {"isAuthorized": True}
+        else:
+            return {"isAuthorized": False,
+                    "context": {
+                        "message": "You must be signed in to perform this action"
+                        }
+                    }
+
+    try:    
+        user = utils.get_user(access_token)
+        return {"isAuthorized": True}
+    
+    except UserNotFoundException:
+        return {"isAuthorized": False,
+                "context": {
+                    "message": "Access key does not match any user"
+                    }
+                }
+    
+
+def admin_endpoint_auth(event, context):
+    access_token = event['headers'].get('authorization', '')
     
     if not access_token:
         return {"isAuthorized": False,
                 "context": {
-                    "message": f"You must be signed in as an admin to submit changes"
+                    "message": f"You must be signed in as an admin for this action"
                     }
                 }
 
-    user = cognito.get_user(AccessToken=access_token)
+    user = utils.get_user(access_token)
 
     if user_is_admin(user['Username']):
         return {"isAuthorized": True}
     else:
         return {"isAuthorized": False,
                 "context": {
-                    "message": f"You must be signed in as an admin to submit changes"
+                    "message": f"You must be signed in as an admin for this action"
                     }
                 }
 

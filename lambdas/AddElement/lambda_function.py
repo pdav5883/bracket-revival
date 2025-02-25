@@ -11,37 +11,37 @@ from common import tournament as trn
 
 def lambda_handler(event, context):
     """
-    PUT request
+    PUT request with all input in query params
+
+    The /add endpoint that calls this lambda uses the UserAuth authorizer. year and competition adds
+    require admin user. player requires signed in user or guest info if allowed.
 
     Input: - type: year/competition/player
            - year
            - compname (for competition, player)
-           - playername (for player)
+           - playerfirst (for guest player)
+           - playerlast (for guest player)
+           - access_token (contained in header))
     Output: None
     """
-    # allow GET requests for testing
-    if len(event.get("queryStringParameters", {})) > 0:
-        typ = event["queryStringParameters"].get("type")
-        year = event["queryStringParameters"].get("year", None)
-        cname = event["queryStringParameters"].get("compname", None)
-        pname = event["queryStringParameters"].get("playername", None)
-        pemail = event["queryStringParameters"].get("playeremail", None)
-
-    else:
-        body = json.loads(event["body"])
-        typ = body.get("type")
-        year = body.get("year", None)
-        cname = body.get("compname", None)
-        pname = body.get("playername", None)
-        pemail = body.get("playeremail", None)
-
+    # both GET and PUT requests alllowed, but all data is stored in query params
+    typ = event["queryStringParameters"].get("type")
+    year = event["queryStringParameters"].get("year", None)
+    cname = event["queryStringParameters"].get("compname", None)
+    pfirst = event["queryStringParameters"].get("playerfirst", None)
+    plast = event["queryStringParameters"].get("playerlast", None)
+    
+    access_token = event['headers'].get('authorization', '')
 
     if typ == "year":
+        # admin has already been verified
         return add_year(year)
     elif typ == "competition":
+        # admin has already been verified
         return add_competition(year, cname)
     elif typ == "player":
-        return add_player(year, cname, pname, pemail)
+        # need access token to grab name for signed in user
+        return add_player(year, cname, pfirst, plast, access_token)
     else:
         return {"statusCode": 400,
                 "body": f"Invalid element type {typ}"}
@@ -119,22 +119,22 @@ def add_competition(year, compname):
                    "completed_rounds": 0,
                    "open_picks": False,
                    "open_players": False,
-                   "require_secret": False,
+                   "allow_guests": False,
                    "first_deadline": "Thursday, March 21st at Noon (EST)"}
 
     utils.write_file(competition_key, competition)
 
     # update index file
     index = utils.read_file("index.json")
-    index[year][compname] = {"players": [], "require_secret": False}
+    index[year][compname] = {"players": [], "allow_guests": False, "open_players": False}
     utils.write_file("index.json", index)
 
     return {"body": f"Successfully created new competition {compname} in year {year}"}
 
 
-def add_player(year, compname, playername, playeremail=None):
+def add_player(year, compname, pfirst, plast, access_token):
     """
-    Adds pid.json. Competition must already exist
+    Adds pid.json. Competition must already exist. If pfirst/plast are provided, adds guest player.
     """
     if year is None:
         return {"statusCode": 400,
@@ -142,41 +142,41 @@ def add_player(year, compname, playername, playeremail=None):
     if compname is None:
         return {"statusCode": 400,
                 "body": "Request requires compname parameter"}
-    if playername is None:
+    if (pfirst is None or plast is None) and (access_token is None):
         return {"statusCode": 400,
-                "body": "Request requires playername parameter"}
-        
+                "body": "Request requires either playerfirst + playerlast, or access_token"}
+    
     cid = compname.replace(" ", "").lower()
-    pid = playername.replace(" ", "").lower()
-
     competition_key = year + "/" + cid + "/competition.json"
     competition = utils.read_file(competition_key)
+
+    if competition is None:
+        return {"statusCode": 400,
+                "body": f"Competition {compname} in year {year} does not exist"}
 
     if not competition["open_players"]:
         return {"statusCode": 400,
                 "body": f"Competiton {compname} is not accepting new players"}
+
+    if access_token is not None:
+        pfirst, plast = utils.get_user_attribute(access_token, ["given_name", "family_name"])
+        pid = pfirst.lower() + "__" + plast.lower()
+    elif competition["allow_guests"]:
+        pid = pfirst.lower() + "__" + plast.lower() + "__guest"
+    else:
+        return {"statusCode": 400,
+                "body": f"Competition {compname} does not allow guests"}
     
     player_key = year + "/" + cid + "/" + pid + ".json"
-
-    if not utils.key_exists(competition_key):
-        return {"statusCode": 400,
-                "body": f"Competition {compname} does not yet exist"}
 
     if utils.key_exists(player_key):
         return {"statusCode": 400,
                 "body": f"Player pid {pid} already exists"}
 
+    playername = pfirst + " " + plast
     player = {"pid": pid,
               "name": playername,
               "picks": []}
-
-    if competition["require_secret"]:
-        if playeremail is None:
-            return {"statusCode": 400,
-                    "body": "Request requires playeremail parameter"}
-
-        player["email"] = playeremail
-        player["secret"] = "".join(random.choices(string.ascii_lowercase, k=6))
 
     utils.write_file(player_key, player)
 
@@ -194,9 +194,9 @@ def add_player(year, compname, playername, playeremail=None):
     utils.trigger_sync(year, cid)
 
     # send welcome email
-    if competition["require_secret"]:
+    if not competition["allow_guests"]:
         email = {"typ": "welcome", "content": {"year": year, "compname": compname, "deadline": competition["first_deadline"]}, "recipients": [playername]}
-        utils.trigger_email(email)
+        utils.trigger_email(email) # TODO: update email trigger to use email from cognito
 
     return {"body": f"Successfully created new player {playername} in competition {compname} in year {year}"}
 
