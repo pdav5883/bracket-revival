@@ -1,5 +1,5 @@
 import { API_URL } from "./constants.js" 
-import { initIndexOnly, initIndexYears, populateCompetitions, initCommon, isAuthenticated } from "./shared.js"
+import { initIndexOnly, initIndexYears, populateCompetitions, initCommon, isAuthenticated, signOut } from "./shared.js"
 import $ from "jquery"
 
 let index
@@ -8,11 +8,27 @@ $(function() {
   initCommon()
  
   $("#submitbutton").on("click", submitNewPlayer)
+
   $("#gobutton").on("click", () => {
     initSingleYearCompetition($("#yearsel").val(), $("#compsel").val())
   })
+
+  $("#guestbutton").on("click", () => {
+    $("#namediv").show()
+    $("#notsignedindiv").hide()
+    $("#submitbutton").show()
+  })
+
+  $("#newplayer-signinbutton").on("click", () => {
+    window.location.href = '/login.html' // TODO: add post-signin redirect to this page
+  })
+
+  $("#signoutlink").on("click", () => {
+    signOut()
+    initSingleYearCompetition($("#yearsel").val(), $("#compsel").val())
+  })
+
   $("#yearsel").on("change", populateCompetitionsWrapper)
-  $("#compsel").on("change", checkHideEmailWrapper)
 
   initNewPlayerPage()
 })
@@ -72,10 +88,20 @@ function handleQueryParams(year, compName) {
 }
 
 function initSingleYearCompetition(year, compName) {
+
+  $("#signedindiv").hide()
+  $("#notsignedindiv").hide()
+  $("#namediv").hide()
+  $("#successdiv").hide()
+  $("#submitbutton").hide()
+  $("#gobutton").hide()
+
+  $('#firstnameinput').val('').prop("readonly", false)
+  $('#lastnameinput').val('').prop("readonly", false)
   
   // check if this game is accepting players
   if (!index[year][compName].open_players) {
-    // $("#statustext").text("This game is not accepting players")
+    $("#statustext").text("This game is not accepting players")
     return
   }
 
@@ -83,25 +109,23 @@ function initSingleYearCompetition(year, compName) {
   if(isAuthenticated()) {
     $('#firstnameinput').val(localStorage.getItem('blr-userFirstName')).prop("readonly", true)
     $('#lastnameinput').val(localStorage.getItem('blr-userLastName')).prop("readonly", true)
+    $("#namediv").show()
+    $("#signedindiv").show()
     $('#submitbutton').show()
     return
   }
 
-  // check if this game allows guests
-  if (index[year][compName].allow_guests === false) {
-    $('#submitbutton').hide()
-    $('#successdiv').hide()
-    $('#signin-button').show()
+  else {
+    $("#notsignedindiv").show()
+
+    if (index[year][compName].allow_guests === false) {
+      $("#guestbutton").hide()
+    }
+    else {
+      $("#guestbutton").show()
+    }
     return
   }
-
-  else {
-    // play as guest
-
-
-    // sign in
-  }
-
 }
 
 

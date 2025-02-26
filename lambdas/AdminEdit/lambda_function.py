@@ -156,6 +156,7 @@ def update_competition(year, cid, new_competition):
     # start updating index, do write after any updates from name edit loop below
     index = utils.read_file("index.json")
     index[year][new_data["name"]]["allow_guests"] = new_data["allow_guests"]
+    index[year][new_data["name"]]["open_players"] = new_data["open_players"]
     index_player_list = index[year][new_data["name"]]["players"]
 
     # for player name edits, must update competition.json, index.json, {name}.json, and change filename

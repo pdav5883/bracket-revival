@@ -232,7 +232,7 @@ function checkAuthStatus() {
     if (isAuthenticated()) {
         goHome()
     } else {
-        showSignUpForm();
+        showSignInForm();
     }
 }
 

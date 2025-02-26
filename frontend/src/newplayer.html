@@ -15,7 +15,7 @@
   <div id="nav-placeholder"></div>
   <div class="col-10 col-8-md mx-auto p-3 py-md-5">
     <h1>Create New Player</h1>
-    <div class="col-8 col-sm-12 row">
+    <div class="col-8 col-sm-12 row align-items-end">
       <div class="col-sm-3 gy-4">
         <label for="yearsel" class="form-label">Tournament Year</label>
         <select class="form-select" id="yearsel">
@@ -26,15 +26,14 @@
         <select class="form-select" id="compsel">
         </select>
       </div>
-      <button type="button" id="gobutton" class="btn btn-primary">Go</button>
+      <div class="col-sm-2 gy-4">
+        <button type="button" id="gobutton" class="btn btn-primary">Go</button>
+      </div>
     </div>
-    <div id="signedindiv" class="row mb-3">
-      <span><em>Sign out</em> to change your name</span>
-    </div>
-    <div id="notsignedindiv" class="row mb-3">
+    <div id="notsignedindiv" class="mb-3">
       <span>This game is accepting new players!</span>
       <button type="button" id="guestbutton" class="btn btn-primary">Play as Guest</button>
-      <button type="button" id="signinbutton" class="btn btn-primary">Sign In</button>
+      <button type="button" id="newplayer-signinbutton" class="btn btn-primary">Sign In</button>
     </div>
     <div id="namediv" class="row mb-3">
       <div class="col-6 col-sm-4 col-lg-3 gy-4">
@@ -44,8 +43,11 @@
         <input type="text" class="form-control" id="lastnameinput" placeholder="Jordan">
       </div>
     </div>
+    <div id="signedindiv" class="row mb-3">
+      <span><a id="signoutlink" class="link-primary" href="#">Sign out</a> to change your name</span>
+    </div>
 
-    <button type="button" id="submitbutton" class="btn btn-primary">Submit</button>
+    <button type="button" id="submitbutton" class="btn btn-primary">Create Player</button>
   </div>
   <div class="pt-3">
     <p id="statustext"></p>

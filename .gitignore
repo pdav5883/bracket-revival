@@ -1,6 +1,7 @@
 *.zip
 */_tmp/
 */dist/
-*/node_modules
-venv
-.vscode
+*/node_modules/
+venv/
+.vscode/
+_tmp/

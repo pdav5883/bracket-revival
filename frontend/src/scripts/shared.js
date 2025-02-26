@@ -31,11 +31,7 @@ export function initCommon() {
         $("#user-menu").hide();
       }
       
-      $("#signout-button").on("click", () => {
-        signOut();
-        $("#signin-button").show();
-        $("#user-menu").hide();
-      });
+      $("#signout-button").on("click", signOut);
 
       $("#signin-button").on("click", () => {
         window.location.href = '/login.html';
@@ -54,6 +50,9 @@ export function signOut() {
   localStorage.removeItem('blr-userFirstName');
   localStorage.removeItem('blr-userLastName');
   localStorage.removeItem('blr-isAdmin');
+
+  $("#signin-button").show();
+  $("#user-menu").hide();
 }
 
 export function isAuthenticated() {
