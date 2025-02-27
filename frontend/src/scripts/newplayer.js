@@ -1,6 +1,14 @@
 import { API_URL } from "./constants.js" 
-import { initIndexOnly, initIndexYears, populateCompetitions, initCommon, isAuthenticated, signOut } from "./shared.js"
-import $ from "jquery"
+
+import { initIndexOnly,
+  initIndexYears,
+  populateCompetitions,
+  initCommon,
+  isAuthenticated,
+  signOut,
+  getValidAccessToken } from "./shared.js"
+
+  import $ from "jquery"
 
 let index
 
@@ -171,7 +179,7 @@ function submitNewPlayer() {
     method: "PUT",
     url: API_URL.add,
     headers: {
-      "authorization": localStorage.getItem("blr-accessToken")
+      "authorization": getValidAccessToken()
     },
     params: queryParams,
     crossDomain: true,

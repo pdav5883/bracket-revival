@@ -1,6 +1,13 @@
 import { API_URL } from "./constants.js" 
-import { initIndexOnly, initIndexYears, populateCompetitions, populatePlayerNames, initCommon } from "./shared.js"
-import { createBracket } from "bracketry"
+
+import { initIndexOnly,
+  initIndexYears,
+  populateCompetitions,
+  populatePlayerNames,
+  initCommon,
+  getValidAccessToken } from "./shared.js"
+
+  import { createBracket } from "bracketry"
 import $ from "jquery"
 
 let bracket
@@ -159,7 +166,7 @@ function populateRoundStart(args) {
     method: "GET",
     url: API_URL.start,
     data: queryData,
-    headers: {"authorization": localStorage.getItem("blr-accessToken")},
+    headers: {"authorization": getValidAccessToken()},
     crossDomain: true,
     success: function(result) {
       // game: {teams: [], seeds: [], score: [], result: 0/1}

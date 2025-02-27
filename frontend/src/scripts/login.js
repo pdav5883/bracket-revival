@@ -138,9 +138,10 @@ async function startAuthFlow(email) {
             $("#loginMessage").removeClass('error');
             $("#loginMessage").show();
         } else if (response.AuthenticationResult) {
-            // User is fully authenticated
             localStorage.setItem('blr-accessToken', response.AuthenticationResult.AccessToken);
-            localStorage.removeItem('cognitoSession'); // Clean up the session
+            localStorage.setItem('blr-refreshToken', response.AuthenticationResult.RefreshToken);
+            localStorage.setItem('blr-tokenExpiration', Date.now() + (response.AuthenticationResult.ExpiresIn * 1000));
+            localStorage.removeItem('cognitoSession');
             const attributes = await getUserAttributes();
             localStorage.setItem('blr-userFirstName', attributes.given_name);
             localStorage.setItem('blr-userLastName', attributes.family_name);
@@ -182,7 +183,9 @@ async function handleVerification() {
 
             if (response.AuthenticationResult) {
                 localStorage.setItem('blr-accessToken', response.AuthenticationResult.AccessToken);
-                localStorage.removeItem('cognitoSession'); // Clean up the session
+                localStorage.setItem('blr-refreshToken', response.AuthenticationResult.RefreshToken);
+                localStorage.setItem('blr-tokenExpiration', Date.now() + (response.AuthenticationResult.ExpiresIn * 1000));
+                localStorage.removeItem('cognitoSession');
                 const attributes = await getUserAttributes();
                 localStorage.setItem('blr-userFirstName', attributes.given_name);
                 localStorage.setItem('blr-userLastName', attributes.family_name);

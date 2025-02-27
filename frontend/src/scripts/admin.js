@@ -1,5 +1,5 @@
 import { API_URL } from "./constants.js"
-import { initIndexYears, populateCompetitions, initCommon } from "./shared.js"
+import { initIndexYears, populateCompetitions, initCommon, getValidAccessToken } from "./shared.js"
 import $ from "jquery"
 
 
@@ -333,7 +333,7 @@ function submitResultsEdits() {
   $.ajax({
     type: "POST",
     url: API_URL.admin,
-    headers: { "authorization": localStorage.getItem('blr-accessToken') },
+    headers: { "authorization": getValidAccessToken() },
     crossDomain: true,
     contentType: "application/json; charset=utf-8",
     data: JSON.stringify({ "etype": "results", "year": yearArg, "data": data }),
@@ -361,7 +361,7 @@ function submitTeamsEdits() {
   $.ajax({
     type: "POST",
     url: API_URL.admin,
-    headers: { "authorization": localStorage.getItem('blr-accessToken') },
+    headers: { "authorization": getValidAccessToken() },
     crossDomain: true,
     contentType: "application/json; charset=utf-8",
     data: JSON.stringify({ "etype": "teams", "year": yearArg, "data": names_shorts }),
@@ -416,7 +416,7 @@ function submitCompetitionEdits() {
   $.ajax({
     type: "POST",
     url: API_URL.admin,
-    headers: { "authorization": localStorage.getItem('blr-accessToken') },
+    headers: { "authorization": getValidAccessToken() },
     crossDomain: true,
     contentType: "application/json; charset=utf-8",
     data: JSON.stringify({ "etype": "competition", "year": yearArg, "cid": compArg, "data": data }),
