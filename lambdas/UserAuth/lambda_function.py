@@ -2,7 +2,7 @@ import json
 import os
 import random
 import boto3
-from botocore.exceptions import ClientError, UserNotFoundException
+from botocore.exceptions import ClientError
 
 from common import utils
 
@@ -120,7 +120,7 @@ def add_player_endpoint_auth(event, context):
         user = utils.get_user(access_token)
         return {"isAuthorized": True}
     
-    except UserNotFoundException:
+    except cognito.exceptions.UserNotFoundException:
         return {"isAuthorized": False,
                 "context": {
                     "message": "Access key does not match any user"
@@ -216,9 +216,13 @@ def create_auth_challenge(event, context):
         # Store the code in private challenge parameters
         event['response']['privateChallengeParameters'] = {'code': code}
         
-        # Get user email
+        # Get user email URL
         email = event['request']['userAttributes']['email']
-        verify_link = f"http://{DOMAIN}/login.html?code={code}&email={email}"
+        
+        # Build verification link with code
+        verify_params = f"code={code}&email={email}"
+            
+        verify_link = f"http://{DOMAIN}/login.html?{verify_params}"
         
         # Prepare email content
         email_html = f"""

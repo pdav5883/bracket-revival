@@ -18,6 +18,7 @@ $(function() {
   $("#submitbutton").on("click", submitNewPlayer)
 
   $("#gobutton").on("click", () => {
+    $("#statustext").text("")
     initSingleYearCompetition($("#yearsel").val(), $("#compsel").val())
   })
 
@@ -28,7 +29,10 @@ $(function() {
   })
 
   $("#newplayer-signinbutton").on("click", () => {
-    window.location.href = '/login.html' // TODO: add post-signin redirect to this page
+    const year = $("#yearsel").val();
+    const compname = $("#compsel").val();
+    const currentUrl = encodeURIComponent(window.location.pathname + `?year=${year}&compname=${compname}`);
+    window.location.href = `/login.html?redirectUrl=${currentUrl}`;
   })
 
   $("#signoutlink").on("click", () => {
@@ -38,11 +42,6 @@ $(function() {
 
   $("#yearsel").on("change", populateCompetitionsWrapper)
 
-  initNewPlayerPage()
-})
-
-
-function initNewPlayerPage() {
   const params = new URLSearchParams(window.location.search)
 
   $("#signedindiv").hide()
@@ -50,13 +49,13 @@ function initNewPlayerPage() {
   $("#namediv").hide()
   $("#successdiv").hide()
   $("#submitbutton").hide()
-  $("#gobutton").hide()
+  $('#gobutton').hide()
+  $("#statustext").text("")
   
   if (params.has("year") && params.has("compname")) {
     const year = params.get("year")
     const compName = params.get("compname")
 
-    $('#gobutton').show()
     initIndexOnly(function(ind) {
       index = ind
       
@@ -70,7 +69,7 @@ function initNewPlayerPage() {
       index = ind
     })
   }
-}
+})
 
 
 function handleQueryParams(year, compName) {
@@ -102,7 +101,6 @@ function initSingleYearCompetition(year, compName) {
   $("#namediv").hide()
   $("#successdiv").hide()
   $("#submitbutton").hide()
-  $("#gobutton").hide()
 
   $('#firstnameinput').val('').prop("readonly", false)
   $('#lastnameinput').val('').prop("readonly", false)
@@ -144,7 +142,7 @@ function populateCompetitionsWrapper() {
 
 function submitNewPlayer() {
   // disable button until response received
-  $("#statustext").text()
+  $("#statustext").text("")
   $("#submitbutton").prop("disabled", true)
 
   // client validation

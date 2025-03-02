@@ -64,6 +64,7 @@ $("#signupButton").on("click", async (e) => {
     const firstName = $("#signupFirstName").val();
     const lastName = $("#signupLastName").val();
 
+    
     const userAttributes = [
         {
             Name: 'email',
@@ -117,14 +118,21 @@ $("#signinButton").on("click", async (e) => {
 
 async function startAuthFlow(email) {
 
+    const authParams = {
+        'USERNAME': email
+    };
+
     try {
         const command = new InitiateAuthCommand({
             AuthFlow: 'CUSTOM_AUTH',
             ClientId: poolData.ClientId,
-            AuthParameters: {
-                'USERNAME': email
-            }
+            AuthParameters: authParams
         });
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('redirectUrl')) {
+            localStorage.setItem('blr-redirectUrl', urlParams.get('redirectUrl'));
+        }
 
         const response = await client.send(command);
 
@@ -146,7 +154,7 @@ async function startAuthFlow(email) {
             localStorage.setItem('blr-userFirstName', attributes.given_name);
             localStorage.setItem('blr-userLastName', attributes.family_name);
             localStorage.setItem('blr-isAdmin', attributes['custom:is_admin'] === 'true');
-            goHome()
+            leavePage()
         }
     } catch (error) {
         $("#loginMessage").text(error.message);
@@ -190,7 +198,6 @@ async function handleVerification() {
                 localStorage.setItem('blr-userFirstName', attributes.given_name);
                 localStorage.setItem('blr-userLastName', attributes.family_name);
                 localStorage.setItem('blr-isAdmin', attributes['custom:is_admin'] === 'true');
-                goHome()
             }
         } catch (error) {
             $("#loginMessage").text('Verification failed: ' + error.message);
@@ -233,7 +240,7 @@ async function getUserAttributes() {
 // Update Check Auth Status
 function checkAuthStatus() {
     if (isAuthenticated()) {
-        goHome()
+        leavePage()
     } else {
         showSignInForm();
     }
@@ -249,6 +256,14 @@ function showSignUpForm() {
     $("#signinForm").hide();
 }
 
-function goHome() {
-    window.location.href = '/';
+function leavePage() {
+    const redirectUrl = localStorage.getItem('blr-redirectUrl');
+    console.log('Attempting to redirect to:', redirectUrl); // Debug log
+
+    if (redirectUrl === null) {
+        window.location.href = '/';
+    } else {
+        localStorage.removeItem('blr-redirectUrl');
+        window.location.href = decodeURIComponent(redirectUrl);
+    }
 }
