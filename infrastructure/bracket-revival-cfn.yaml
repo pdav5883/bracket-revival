@@ -1,8 +1,6 @@
 Parameters:
   AcmSSLCertificateId:
     Type: String
-  SsmAdminSecretId:
-    Type: String
   HostedZoneId:
     Type: String
   DeployedRootURL:
@@ -12,8 +10,6 @@ Parameters:
   LambdaPublishPermissionName:
     Type: String
   LambdaReadPermissionName:
-    Type: String
-  LambdaAdminReadPermissionName:
     Type: String
   LambdaReadSendPermissionName:
     Type: String
@@ -494,25 +490,6 @@ Resources:
           Effect: "Allow"
           Principal:
             Service: "lambda.amazonaws.com"
-  RoleBracketAdminRead:
-    Type: "AWS::IAM::Role"
-    UpdateReplacePolicy: "Delete"
-    DeletionPolicy: "Delete"
-    Properties:
-      Path: "/"
-      ManagedPolicyArns:
-      - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-      - !GetAtt PolicyBracketAdminRead.PolicyArn
-      MaxSessionDuration: 3600
-      RoleName: !Sub "role-lambda-${LambdaAdminReadPermissionName}"
-      Description: "Allows admin auth function to read ssm secret"
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-        - Action: "sts:AssumeRole"
-          Effect: "Allow"
-          Principal:
-            Service: "lambda.amazonaws.com"
   RoleBracketReadSend:
     Type: "AWS::IAM::Role"
     UpdateReplacePolicy: "Delete"
@@ -542,7 +519,9 @@ Resources:
       ManagedPolicyArns:
       - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
       - !GetAtt PolicyBracketUserAuth.PolicyArn
-      - !GetAtt PolicyBracketSend.PolicyArn
+      - !GetAtt PolicyBracketSend.PolicyArn # remove once switched to SNS for email send
+      - !GetAtt PolicyBracketPublish.PolicyArn
+      - !GetAtt PolicyBracketRead.PolicyArn
       MaxSessionDuration: 3600
       RoleName: !Sub "role-lambda-${LambdaUserAuthPermissionName}"
       Description: ""
@@ -612,22 +591,6 @@ Resources:
           Action:
           - "s3:GetObject"
           - "s3:ListBucket"
-          Effect: "Allow"
-          Sid: "VisualEditor0"
-  PolicyBracketAdminRead:
-    Type: "AWS::IAM::ManagedPolicy"
-    UpdateReplacePolicy: "Delete"
-    DeletionPolicy: "Delete"
-    Properties:
-      ManagedPolicyName: !Sub "policy-lambda-${LambdaAdminReadPermissionName}"
-      Path: "/"
-      Description: ""
-      Groups: []
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${SsmAdminSecretId}"
-          Action: "ssm:GetParameter"
           Effect: "Allow"
           Sid: "VisualEditor0"
   PolicyBracketSend:

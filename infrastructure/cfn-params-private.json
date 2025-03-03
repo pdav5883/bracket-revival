@@ -1,12 +1,10 @@
 [
   "AcmSSLCertificateId=fc984629-2984-4666-8901-01ad4f48fc7f",
   "HostedZoneId=Z0361942AJYCRL79BJEU",
-  "SsmAdminSecretId=bracket-admin-secret",
   "DeployedRootURL=bracket.bearloves.rocks",
   "LambdaReadWritePermissionName=bracket-read-write",
   "LambdaPublishPermissionName=bracket-sns-publish",
   "LambdaReadPermissionName=bracket-read",
-  "LambdaAdminReadPermissionName=bracket-admin-read",
   "LambdaReadSendPermissionName=bracket-read-sent",
   "LambdaSendPermissionName=bracket-send",
   "LambdaUserAuthPermissionName=bracket-user-auth",
