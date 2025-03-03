@@ -13,6 +13,13 @@ if [ "$1" == "--force" ]; then
   FORCE_UPDATE=true
 fi
 
+# Use TARGET_DIR if provided, otherwise use all directories
+if [ -n "$1" ] && [ "$1" != "--force" ]; then
+    dirs="$1/"
+else
+    dirs="*/"
+fi
+
 # Fetch CloudFormation parameters and store them in an associative array
 declare -A CF_PARAMS
 while IFS= read -r line; do
@@ -34,9 +41,7 @@ layer_arn=$(aws lambda get-layer-version --layer-name "$layer_name" --version-nu
 layer_modified=$(aws lambda get-layer-version --layer-name "$layer_name" --version-number "$layer_version" --query 'CreatedDate' --output text)
 layer_modified_epoch=$(date -d "$layer_modified" +%s)
 
-
-# Loop through all directories in the current directory except for 'common'
-for dir in */; do
+for dir in $dirs; do
     # lambda short name is directory name
     lambda_short_name=${dir%/}
 
