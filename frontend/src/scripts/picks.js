@@ -16,43 +16,52 @@ let index
 let yearSubmit // these submit variables store the values
 let cidSubmit  // used to populate round start
 let pidSubmit
-let secretSubmit
 
-$(function() { 
+$(async function() { 
   initCommon()
   
-  $("#gobutton").on("click", changeRoundStart)
-  $("#submitbutton").on("click", submitPicks)
+  $("#gobutton").on("click", async () => await changeRoundStart())
+  $("#submitbutton").on("click", async () => await submitPicks())
   $("#scoreboardbutton").on("click", goToScoreboard)
   $("#bracketbutton").on("click", goToBracket)
-  $("#morepicksbutton").on("click", changeRoundStart)
+  $("#morepicksbutton").on("click", async () => await changeRoundStart())
 
   $("#yearsel").on("change", populateCompetitionsWrapper)
   $("#compsel").on("change", populatePlayerNamesWrapper)
 
-  initPickPage()
+  // Add test fill button if in testing mode
+  if (localStorage.getItem('blr-testing') === 'true') {
+    const testButton = $("<button>")
+      .attr("id", "testfillbutton")
+      .addClass("btn btn-warning")
+      .text("Test Fill")
+      .on("click", () => testFillBracket());
+    
+    $("#buttondiv").append(testButton);
+  }
+
+  await initPickPage()
 
   // no switch to edit mode for picks page, since this
   // isn't part of game flow
 })
 
 
-function initPickPage() {
+async function initPickPage() {
   const params = new URLSearchParams(window.location.search)
 
   // check query params first, then local storage for year/comp
   if (params.has("year") && params.has("cid") && params.has("pid")) {
     // populate function goes inside the callback because we need index to be there before populate executes
-    initIndexOnly(function(ind) {
+    initIndexOnly(async function(ind) {
       index = ind
 
       displayMode(params.get("year"), params.get("cid"), params.get("pid"))
 
       // params.get("secret") will default to null if secret not present
-      populateRoundStart({"year": params.get("year"),
+      await populateRoundStart({"year": params.get("year"),
         "cid": params.get("cid"),
-        "pid": params.get("pid"),
-        "secret": params.get("secret")
+        "pid": params.get("pid")
       })
     })
   }
@@ -128,14 +137,14 @@ function goToBracket() {
 }
 
 
-function changeRoundStart() {
+async function changeRoundStart() {
   // nests within function to avoid passing click arg to populate
   $("#submitbutton").hide()
-  populateRoundStart()
+  await populateRoundStart()
 }
 
 
-function populateRoundStart(args) {
+async function populateRoundStart(args) {
   $("#statustext").text("")
   $("#bracketdiv").html("")
   
@@ -143,21 +152,12 @@ function populateRoundStart(args) {
     yearSubmit = $("#yearsel").val()
     cidSubmit = $("#compsel").val()
     pidSubmit = $("#playersel").val()
-    secretSubmit = null
   }
 
   else {
     yearSubmit = args.year
     cidSubmit = args.cid
     pidSubmit = args.pid
-    secretSubmit = args.secret
-  }
-
-  // check whether secret is required for competition - don't show picking bracket if user won't be
-  // able to submit
-  if (index[yearSubmit][cidSubmit].require_secret === true && secretSubmit === null) {
-    $("#statustext").text("Picks for " + cidSubmit + " can only be accessed via your email link!")
-    return
   }
 
   const queryData = {"year": yearSubmit, "cid": cidSubmit, "pid": pidSubmit}
@@ -166,7 +166,7 @@ function populateRoundStart(args) {
     method: "GET",
     url: API_URL.start,
     data: queryData,
-    headers: {"authorization": getValidAccessToken()},
+    headers: {"authorization": await getValidAccessToken()},
     crossDomain: true,
     success: function(result) {
       // game: {teams: [], seeds: [], score: [], result: 0/1}
@@ -357,7 +357,7 @@ function prepopulateBracket(bracketData) {
 }
 
 
-function submitPicks() {
+async function submitPicks() {
   $("#statustext").text("")
   $("#submitbutton").prop("disabled", true)
 
@@ -402,12 +402,14 @@ function submitPicks() {
     picks.push(match.sides[0].isWinner ? 0 : 1)
   })
 
-  const data = {"year": yearSubmit, "cid": cidSubmit, "pid": pidSubmit, "picks": picks, "secret": secretSubmit}
+  const data = {"picks": picks}
+  const queryString = `?year=${yearSubmit}&cid=${cidSubmit}&pid=${pidSubmit}`
 
   $.ajax({
     method: "POST",
-    url: API_URL.picks,
+    url: API_URL.picks + queryString,
     contentType: "application/json; charset=utf-8",
+    headers: {"authorization": await getValidAccessToken()},
     data: JSON.stringify(data),
     crossDomain: true,
     success: function() {
@@ -552,4 +554,14 @@ function roundOrderToAbs(roundIndex, order, numMatches) {
 
   // reduce takes sum of sliced array
   return gamesPerRound.slice(0, roundIndex).reduce((a, b) => a + b, 0) + order
+}
+
+function testFillBracket() {
+  // Get all side-wrapper elements and click every other one (0, 2, 4, etc)
+  $(".side-wrapper").each(function(index) {
+    if (index % 2 === 0) {
+      $(this).trigger("click")
+      setTimeout(() => {}, 100)
+    }
+  })
 }

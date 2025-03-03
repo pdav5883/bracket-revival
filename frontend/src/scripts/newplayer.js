@@ -15,7 +15,9 @@ let index
 $(function() { 
   initCommon()
  
-  $("#submitbutton").on("click", submitNewPlayer)
+  $("#submitbutton").on("click", async () => {
+    await submitNewPlayer()
+  })
 
   $("#gobutton").on("click", () => {
     $("#statustext").text("")
@@ -140,7 +142,7 @@ function populateCompetitionsWrapper() {
 }
 
 
-function submitNewPlayer() {
+async function submitNewPlayer() {
   // disable button until response received
   $("#statustext").text("")
   $("#submitbutton").prop("disabled", true)
@@ -173,29 +175,30 @@ function submitNewPlayer() {
     playerlast: $("#lastnameinput").val()
   }).toString()
 
+  const authToken = await getValidAccessToken()
+
   $.ajax({
     method: "PUT",
-    url: API_URL.add,
+    url: API_URL.add + "?" + queryParams.toString(),
     headers: {
-      "authorization": getValidAccessToken()
+      "authorization": authToken
     },
-    params: queryParams,
     crossDomain: true,
     success: function() {
       $("#submitbutton").prop("disabled", false)
 
-      if (index[data.year][data.compname].require_secret === false) {
+      if (index[queryParams.year][queryParams.compname].require_secret === false) {
         $("#statustext").text("Success! Visit the picks page to pick your brackets.")
         $("#submitdiv").hide()
         $("#successdiv").show()
-        $("#successbutton").attr("href", "/picks.html?year=" + data.year + "&cid=" + data.compname + "&pid=" + data.playername)
+        $("#successbutton").attr("href", "/picks.html?year=" + queryParams.year + "&cid=" + queryParams.compname + "&pid=" + queryParams.playername)
         $("#successbutton").text("Go To Picks")
       }
       else {
         $("#statustext").text("Success! Check your email to make picks.")
         $("#submitdiv").hide()
         $("#successdiv").show()
-        $("#successbutton").attr("href", "/scoreboard.html?year=" + data.year + "&cid=" + data.compname)
+        $("#successbutton").attr("href", "/scoreboard.html?year=" + queryParams.year + "&cid=" + queryParams.compname)
         $("#successbutton").text("Go To Scoreboard")
       }
 

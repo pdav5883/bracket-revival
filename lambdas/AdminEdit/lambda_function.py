@@ -163,7 +163,7 @@ def update_competition(year, cid, new_competition):
     for old_name, new_name in new_competition["players"].items():
         if new_name is None:
             print(f"Deleting player name {old_name} from competition")
-            old_pid = old_name.replace(" ", "").lower()
+            old_pid = old_name.replace(" ", "__").lower()
             old_player_key = year + "/" + cid.replace(" ", "").lower()  + "/" + old_pid + ".json"
             utils.delete_file(old_player_key)
 
@@ -175,8 +175,8 @@ def update_competition(year, cid, new_competition):
 
         elif new_name != old_name:
             print(f"Replace player name {old_name} with {new_name}")
-            old_pid = old_name.replace(" ", "").lower()
-            new_pid = new_name.replace(" ", "").lower()
+            old_pid = old_name.replace(" ", "__").lower()
+            new_pid = new_name.replace(" ", "__").lower()
 
             old_player_key = year + "/" + cid.replace(" ", "").lower()  + "/" + old_pid + ".json"
             new_player_key = year + "/" + cid.replace(" ", "").lower()  + "/" + new_pid + ".json"

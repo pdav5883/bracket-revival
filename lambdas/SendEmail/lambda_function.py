@@ -48,7 +48,7 @@ def lambda_handler(event, context):
             content["bracket_name"] = ["First", "Second", "Third", "Fourth", "Fifth", "Sixth"][pick_round]
 
         for pname in batch["recipients"]:
-            pid = pname.replace(" ", "").lower()
+            pid = pname.replace(" ", "__").lower()
             player_key = year + "/" + cid + "/" + pid + ".json"
             player = utils.read_file(player_key)
             

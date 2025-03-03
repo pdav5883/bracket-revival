@@ -12,7 +12,7 @@ $(function () {
   initCommon()
 
   $("#yearsel").on("change", populateCompetitionsWrapper)
-  $("#subbutton").on("click", submitEdits)
+  $("#subbutton").on("click", async () => await submitEdits())
   $("#gobutton").on("click", changeAdminPage)
   initAdminPage()
 })
@@ -297,20 +297,20 @@ function makeCheckboxInput(id, labelStr) {
 }
 
 
-function submitEdits() {
+async function submitEdits() {
   if (typeArg === "results") {
-    submitResultsEdits()
+    await submitResultsEdits()
   }
   else if (typeArg === "teams") {
-    submitTeamsEdits()
+    await submitTeamsEdits()
   }
   else if (typeArg === "competition") {
-    submitCompetitionEdits()
+    await submitCompetitionEdits()
   }
 }
 
 
-function submitResultsEdits() {
+async function submitResultsEdits() {
 
   $("#statustext").text("")
 
@@ -333,7 +333,7 @@ function submitResultsEdits() {
   $.ajax({
     type: "POST",
     url: API_URL.admin,
-    headers: { "authorization": getValidAccessToken() },
+    headers: { "authorization": await getValidAccessToken() },
     crossDomain: true,
     contentType: "application/json; charset=utf-8",
     data: JSON.stringify({ "etype": "results", "year": yearArg, "data": data }),
@@ -347,7 +347,7 @@ function submitResultsEdits() {
 }
 
 
-function submitTeamsEdits() {
+async function submitTeamsEdits() {
 
   $("#statustext").text("")
 
@@ -361,7 +361,7 @@ function submitTeamsEdits() {
   $.ajax({
     type: "POST",
     url: API_URL.admin,
-    headers: { "authorization": getValidAccessToken() },
+    headers: { "authorization": await getValidAccessToken() },
     crossDomain: true,
     contentType: "application/json; charset=utf-8",
     data: JSON.stringify({ "etype": "teams", "year": yearArg, "data": names_shorts }),
@@ -375,7 +375,7 @@ function submitTeamsEdits() {
 }
 
 
-function submitCompetitionEdits() {
+async function submitCompetitionEdits() {
   $("#statustext").text("")
 
   const numPlayers = $("[id^=old_").length
@@ -416,7 +416,7 @@ function submitCompetitionEdits() {
   $.ajax({
     type: "POST",
     url: API_URL.admin,
-    headers: { "authorization": getValidAccessToken() },
+    headers: { "authorization": await getValidAccessToken() },
     crossDomain: true,
     contentType: "application/json; charset=utf-8",
     data: JSON.stringify({ "etype": "competition", "year": yearArg, "cid": compArg, "data": data }),

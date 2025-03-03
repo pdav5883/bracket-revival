@@ -8,14 +8,14 @@ def lambda_handler(event, context):
     """
     POST request
     """
-    body = json.loads(event["body"])
-    year = body.get("year")
-    cid = body.get("cid").replace(" ", "").lower()
-    pid = body.get("pid").replace(" ", "").lower()
-    secret = body.get("secret", None)
-    new_picks = body.get("picks", [])
+    
+    year = event["queryStringParameters"]["year"]
+    cid = event["queryStringParameters"]["cid"].replace(" ", "").lower()
+    pid = event["queryStringParameters"]["pid"].replace(" ", "__").lower()
+    new_picks = json.loads(event["body"]).get("picks", [])
 
-    print("Event Body:", body)
+    print("year:", year, "cid:", cid, "pid:", pid)
+    print("Picks:", new_picks)
 
     # TODO: assert arguments exist
     # TODO: check that pid exists
@@ -40,12 +40,6 @@ def lambda_handler(event, context):
 
     if not competition["open_picks"]:
         err_msg = f"Picks for {cid} are currently locked"
-        print(err_msg)
-        return {"statusCode": 400,
-                "body": err_msg}
-
-    if competition["require_secret"] and secret != player["secret"]:
-        err_msg = f"Pick submission secret is incorrect. Make sure to use your email link for picks."
         print(err_msg)
         return {"statusCode": 400,
                 "body": err_msg}

@@ -39,7 +39,7 @@ def lambda_handler(event, context):
     pick_status = {}
 
     for pname in player_names:
-        pid = pname.replace(" ", "").lower()
+        pid = pname.replace(" ", "__").lower()
         player_key = year + "/" + cid + "/" + pid + ".json"
         player = utils.read_file(player_key)
 

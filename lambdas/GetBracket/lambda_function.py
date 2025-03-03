@@ -21,8 +21,8 @@ def lambda_handler(event, context):
     "picks" tuple is picked contestants for game and 0/1 winner
     """
     year = event["queryStringParameters"].get("year")
-    cid = event["queryStringParameters"].get("cid", None)
-    pid = event["queryStringParameters"].get("pid", None)
+    cid = event["queryStringParameters"].get("cid", None).replace(" ", "").lower()
+    pid = event["queryStringParameters"].get("pid", None).replace(" ", "__").lower()
     completed_rounds_query = event["queryStringParameters"].get("completed_rounds", None)
 
     # TODO: assert arguments exist
@@ -42,7 +42,6 @@ def lambda_handler(event, context):
     if cid is None or cid == "":
         completed_rounds = trn.NUMROUNDS
     else:
-        cid = cid.replace(" ", "").lower()
         competition_key = year + "/" + cid + "/competition.json"
         competition = utils.read_file(competition_key)
         completed_rounds = competition["completed_rounds"]
@@ -51,7 +50,6 @@ def lambda_handler(event, context):
         player = None
         player_picks = []
     else:
-        pid = pid.replace(" ", "").lower()
         player_key = year + "/" + cid + "/" + pid + ".json"
         player = utils.read_file(player_key)
         player_picks = player["picks"]

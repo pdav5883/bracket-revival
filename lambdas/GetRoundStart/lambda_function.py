@@ -22,7 +22,7 @@ def lambda_handler(event, context):
     round_start = event["queryStringParameters"].get("round_start", None)
 
     if pid is not None:
-        pid = pid.replace(" ", "").lower()
+        pid = pid.replace(" ", "__").lower()
         player_key = year + "/" + cid + "/" + pid + ".json"
         player = utils.read_file(player_key)
         picks = player["picks"]

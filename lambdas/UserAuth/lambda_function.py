@@ -45,10 +45,11 @@ def handle_endpoint_auth(event, context):
 def start_or_picks_endpoint_auth(event, context):
     # grab the competition
     year = event['queryStringParameters']['year']   
-    cid = event['queryStringParameters']['cid']
-    pid = event['queryStringParameters']['pid']
+    cid = event['queryStringParameters']['cid'].replace(" ", "").lower()
+    pid = event['queryStringParameters']['pid'].replace(" ", "__").lower()
 
     competition_key = f"{year}/{cid}/competition.json"
+    print("competition_key:", competition_key)
     competition = utils.read_file(competition_key)
     allow_guests = competition['allow_guests']
     
@@ -68,12 +69,12 @@ def start_or_picks_endpoint_auth(event, context):
     first_name, last_name    = utils.get_user_attribute(access_token, ["given_name", "family_name"])
     name = first_name + "__" + last_name
     
-    if name == pid.lower():
+    if name.lower() == pid:
         return {"isAuthorized": True}
     else:
         return {"isAuthorized": False,
                 "context": {
-                    "message": f"You must be signed in as {pid.lower()} to access this page"
+                    "message": f"You must be signed in as {pid} to access this page"
                     }
                 }
     
@@ -105,7 +106,7 @@ def add_player_endpoint_auth(event, context):
     if not access_token:
         index = utils.read_file("index.json")
         year = event['queryStringParameters']['year']
-        cid = ['queryStringParameters']['cid']
+        cid = event['queryStringParameters']['cid'].replace(" ", "").lower()
 
         if index[year][cid]['allow_guests']:
             return {"isAuthorized": True}
