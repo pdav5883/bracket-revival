@@ -1,5 +1,5 @@
 import { API_URL } from "./constants.js" 
-import { initIndexYears, populateCompetitions, initCommon } from "./shared.js"
+import { initIndexYears, populateCompetitions, initCommon, getRenderNames } from "./shared.js"
 import $ from "jquery"
 
 let index
@@ -118,6 +118,8 @@ function populateScoreboard(args) {
 
       // reconfigure results to allow sorting
       let leaders = []
+
+      result.names = getRenderNames(result.names)
       result.names.forEach((name, i) => {
         leaders.push({"name": name, "total": result.total_points[i], "round": result.round_render[i]})
       })

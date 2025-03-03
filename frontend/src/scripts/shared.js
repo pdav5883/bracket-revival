@@ -135,10 +135,13 @@ export function populatePlayerNames(index, emptyLabel) {
   $("#playersel").empty()
 
   let playerOpt
-  for (const playerName of index[$("#yearsel").val()][$("#compsel").val()].players) {
+  const playerNames = index[$("#yearsel").val()][$("#compsel").val()].players
+  const renderNames = getRenderNames(playerNames)
+
+  for (let i = 0; i < playerNames.length; i++) {
     playerOpt = document.createElement("option")
-    playerOpt.value = playerName
-    playerOpt.textContent = playerName
+    playerOpt.value = playerNames[i]
+    playerOpt.textContent = renderNames[i]
     $("#playersel").append(playerOpt)
   }
 
@@ -219,4 +222,35 @@ export function signOut() {
 export function isAuthenticated() {
   const accessToken = localStorage.getItem('blr-accessToken');
   return !!accessToken;
+}
+
+export function getRenderNames(names) {
+  const renderNames = names.map(name => name.split(" ")[0]);
+  const lastNames = names.map(name => " " + name.split(" ")[1]);
+
+  for (let i = 0; i < renderNames.length; i++) {
+    let nameOk = false
+
+    while (!nameOk) {
+      nameOk = true
+      let origName = renderNames[i]
+      for (let j = 0; j < renderNames.length; j++) {
+        if (i == j) {
+          continue
+        }
+
+        if (origName == renderNames[j]) {
+          if (nameOk) {
+            renderNames[i] = origName + lastNames[i][0]
+            lastNames[i] = lastNames[i].substring(1)
+            nameOk = false
+          }
+
+          renderNames[j] = origName + lastNames[j][0]
+          lastNames[j] = lastNames[j].substring(1)
+        }
+      }
+    }
+  }
+  return renderNames;
 }
