@@ -1,76 +1,35 @@
 import { API_URL } from "./constants.js" 
-import { initIndexYears, populateCompetitions, initCommon, getRenderNames } from "./shared.js"
+import { initIndexYears, populateCompetitions, initCommon, getRenderNames, initButtons } from "./shared.js"
 import $ from "jquery"
 
 let index
 
 $(function() { 
   initCommon()
-
-  $("#gobutton").on("click", changeCompetition)
+  initButtons(["gobutton"])
+  $("#gobutton").on("click", () => {
+    changeCompetition(undefined) // undefined means no query params
+  })
   $("#yearsel").on("change", populateCompetitionsWrapper)
 
   initScoreboardPage()
-  
-  $("#editbutton").on("click", function() {
-    editMode()
-  })
 })
 
 
 function initScoreboardPage() {
-  const params = new URLSearchParams(window.location.search)
+  const queryParams = new URLSearchParams(window.location.search)
 
-  // check query params first, then local storage for year/comp
-  if (params.has("year") && params.has("cid")) {
-    displayMode(params.get("year"), params.get("cid"))
-    populateScoreboard({"year": params.get("year"),
-      "cid": params.get("cid"),
-      "completedRounds": params.has("rounds") ? params.get("rounds") : ""
-    })
-  }
-  // else if localStorage
-  else {
-    editMode()
-  }
-}
+  initIndexYears(function(ind) {
+    index = ind
 
+    if (queryParams.has("year") && queryParams.has("cid")) {
+      $("#yearsel").val(queryParams.get("year"))
+      $("#compsel").val(queryParams.get("cid"))
 
-function editMode() {
-  $("#editbutton").hide()
-  $("#yeardisplay").hide()
-  $("#compdisplay").hide()
-  $("#yearsel").show()
-  $("#compsel").show()
-  $("#yearlabel").show()
-  $("#complabel").show()
-  $("#gobutton").show()
-  $("#buttondiv").removeClass("align-items-center")
-  $("#buttondiv").addClass("align-items-end")
-
-  // first time we populate selects, call backend
-  if (index === undefined) {
-    initIndexYears(function(ind) {
-      index = ind
-    })
-  }
-}
-
-
-function displayMode(year, cid) {
-  $("#editbutton").show()
-  $("#yeardisplay").show()
-  $("#compdisplay").show()
-  $("#yearsel").hide()
-  $("#compsel").hide()
-  $("#yearlabel").hide()
-  $("#complabel").hide()
-  $("#gobutton").hide()
-  $("#buttondiv").removeClass("align-items-end")
-  $("#buttondiv").addClass("align-items-center")
-
-  $("#yearinsert").text(year)
-  $("#compinsert").text(cid)
+      changeCompetition(queryParams)
+    }
+    // TODO deal with local storage from previous visit
+  })
 }
 
 
@@ -79,39 +38,38 @@ function populateCompetitionsWrapper() {
 }
 
 
-function changeCompetition() {
-  // nests within function to avoid passing click arg to populateScoreboard
-  populateScoreboard()
+function changeCompetition(queryParams) {
+  // Hide span, show div for loading state
+  $("#gobutton span").hide()
+  $("#gobutton div").show()
+  
+  // Call populateScoreboard with callback to restore button state
+  populateScoreboard(queryParams, function() {
+    $("#gobutton span").show()
+    $("#gobutton div").hide()
+    
+  })
 }
 
 
-function populateScoreboard(args) {
-  let year
-  let cid
-  let completedRounds
-
-  if (args === undefined) {
-    year = $("#yearsel").val()
-    cid = $("#compsel").val()
-    completedRounds = $("#rndinput").val()
+function populateScoreboard(queryParams, callback) {
+  
+  let params
+  if (queryParams === undefined) {
+    params = {
+      year: $("#yearsel").val(),
+      cid: $("#compsel").val(),
+      rounds: $("#rndinput").val()
+    }
   }
-
   else {
-    year = args.year
-    cid = args.cid
-    completedRounds = args.completedRounds
-  }
-
-  const queryData = {"year": year, "cid": cid}
-
-  if (completedRounds !== "") {
-    queryData["completed_rounds"] = completedRounds
+    params = Object.fromEntries(queryParams)
   }
 
   $.ajax({
     method: "GET",
     url: API_URL.scoreboard,
-    data: queryData,
+    data: params,
     crossDomain: true,
     success: function(result) {
       // {names: [], total_points: [], round_points: []}
@@ -174,7 +132,7 @@ function populateScoreboard(args) {
         tablePlayer = document.createElement("a")
         tablePlayer.classList.add("text-decoration-none")
         tablePlayer.textContent = leader.name
-        tablePlayer.href = "/bracket.html?year=" + year + "&cid=" + cid + "&pid=" + leader.name
+        tablePlayer.href = "/bracket.html?year=" + params.year + "&cid=" + params.cid + "&pid=" + leader.name
         tableCell.append(tablePlayer)
 
         tableCell = tableRow.insertCell()
@@ -195,6 +153,12 @@ function populateScoreboard(args) {
         })
 
       })
+
+      // Call the callback if provided
+      if (callback) callback()
+    },
+    error: function(err) {
+      if (callback) callback()
     }
   })
 }

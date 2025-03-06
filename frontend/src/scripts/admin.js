@@ -1,5 +1,5 @@
 import { API_URL } from "./constants.js"
-import { initIndexYears, populateCompetitions, initCommon, getValidAccessToken } from "./shared.js"
+import { initIndexYears, populateCompetitions, initCommon, initButtons, getValidAccessToken } from "./shared.js"
 import $ from "jquery"
 
 
@@ -10,10 +10,29 @@ let compArg
 
 $(function () {
   initCommon()
+  initButtons(["gobutton", "submitbutton"])
 
   $("#yearsel").on("change", populateCompetitionsWrapper)
-  $("#subbutton").on("click", async () => await submitEdits())
-  $("#gobutton").on("click", changeAdminPage)
+  $("#submitbutton").on("click", async () => {
+    $("#submitbutton span").hide()
+    $("#submitbutton div").show()
+
+    await submitEdits(() => {
+      $("#submitbutton span").show()
+      $("#submitbutton div").hide()
+    })
+  })
+
+  $("#gobutton").on("click",() => {
+    $("#gobutton span").hide()
+    $("#gobutton div").show()
+
+    changeAdminPage(() => {
+      $("#gobutton span").show()
+      $("#gobutton div").hide()
+    })
+  })
+
   initAdminPage()
 })
 
@@ -31,7 +50,7 @@ function populateCompetitionsWrapper() {
 }
 
 
-function populateResultsTable(year) {
+function populateResultsTable(year, callback) {
   $.ajax({
     method: "GET",
     url: API_URL.bracket,
@@ -52,12 +71,17 @@ function populateResultsTable(year) {
           }
         })
       })
+      if (callback) callback()
+    },
+    error: function (err) {
+      $("#statustext").text("Error: " + err.responseJSON.message)
+      if (callback) callback()
     }
   })
 }
 
 
-function populateTeamsTable(year) {
+function populateTeamsTable(year, callback) {
   $.ajax({
     method: "GET",
     url: API_URL.bracket,
@@ -99,12 +123,17 @@ function populateTeamsTable(year) {
         tableCell.appendChild(inp)
         i++
       })
+      if (callback) callback()
+    },
+    error: function (err) {
+      $("#statustext").text("Error: " + err.responseJSON.message)
+      if (callback) callback()
     }
   })
 }
 
 
-function populateCompetitionTable(year, cid) {
+function populateCompetitionTable(year, cid, callback) {
   $.ajax({
     method: "GET",
     url: API_URL.competitions,
@@ -133,12 +162,12 @@ function populateCompetitionTable(year, cid) {
       input = makeTextInput("email_deadline", 16, "DEADLINE")
       cell.appendChild(input)
 
-      // require secret
+      // allow guests
       row = table.insertRow()
       cell = row.insertCell()
-      cell.textContent = "Require Secret"
+      cell.textContent = "Allow Guests"
       cell = row.insertCell()
-      input = makeBooleanSelect("selsecret", result.require_secret)
+      input = makeBooleanSelect("selguests", result.allow_guests)
       cell.appendChild(input)
 
       // open players
@@ -196,6 +225,11 @@ function populateCompetitionTable(year, cid) {
         cell.appendChild(input[0]) // checkbox
         cell.appendChild(input[1]) // label
       })
+      if (callback) callback()
+    },
+    error: function (err) {
+      $("#statustext").text("Error: " + err.responseJSON.message)
+      if (callback) callback()
     }
   })
 }
@@ -297,20 +331,20 @@ function makeCheckboxInput(id, labelStr) {
 }
 
 
-async function submitEdits() {
+async function submitEdits(callback) {
   if (typeArg === "results") {
-    await submitResultsEdits()
+    await submitResultsEdits(callback)
   }
   else if (typeArg === "teams") {
-    await submitTeamsEdits()
+    await submitTeamsEdits(callback)
   }
   else if (typeArg === "competition") {
-    await submitCompetitionEdits()
+    await submitCompetitionEdits(callback)
   }
 }
 
 
-async function submitResultsEdits() {
+async function submitResultsEdits(callback) {
 
   $("#statustext").text("")
 
@@ -340,14 +374,18 @@ async function submitResultsEdits() {
 
     success: function () {
       $("#statustext").text("Success!")
+      if (callback) callback()
     },
 
-    error: adminSubmitError
+    error: function(err) {
+      adminSubmitError(err)
+      if (callback) callback()
+    }
   })
 }
 
 
-async function submitTeamsEdits() {
+async function submitTeamsEdits(callback) {
 
   $("#statustext").text("")
 
@@ -368,14 +406,18 @@ async function submitTeamsEdits() {
 
     success: function () {
       $("#statustext").text("Success!")
+      if (callback) callback()
     },
 
-    error: adminSubmitError
+    error: function(err) {
+      adminSubmitError(err)
+      if (callback) callback()
+    }
   })
 }
 
 
-async function submitCompetitionEdits() {
+async function submitCompetitionEdits(callback) {
   $("#statustext").text("")
 
   const numPlayers = $("[id^=old_").length
@@ -407,7 +449,7 @@ async function submitCompetitionEdits() {
     "completed_rounds": parseInt($("#inprounds").val()),
     "open_picks": $("#selpicks").val(),
     "open_players": $("#selplayers").val(),
-    "require_secret": $("#selsecret").val(),
+    "allow_guests": $("#selguests").val(),
     "email_individual": emailNames,
     "autopick_individual": autopickNames,
     "players": players
@@ -423,14 +465,18 @@ async function submitCompetitionEdits() {
 
     success: function () {
       $("#statustext").text("Success!")
+      if (callback) callback()
     },
 
-    error: adminSubmitError
+    error: function(err) {
+      adminSubmitError(err)
+      if (callback) callback()
+    }
   })
 }
 
 
-function changeAdminPage() {
+function changeAdminPage(callback) {
   typeArg = $("#typesel").val()
   yearArg = $("#yearsel").val()
   compArg = $("#compsel").val()
@@ -438,13 +484,13 @@ function changeAdminPage() {
   $("#statustext").text("")
 
   if (typeArg === "results") {
-    populateResultsTable(yearArg)
+    populateResultsTable(yearArg, callback)
   }
   else if (typeArg === "teams") {
-    populateTeamsTable(yearArg)
+    populateTeamsTable(yearArg, callback)
   }
   else if (typeArg === "competition") {
-    populateCompetitionTable(yearArg, compArg)
+    populateCompetitionTable(yearArg, compArg, callback)
   }
 }
 

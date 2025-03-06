@@ -66,6 +66,27 @@ export function initCommon() {
   });
 }
 
+export function initButtons(buttonIdList) {
+  for (const buttonId of buttonIdList) {
+    const button = $(`#${buttonId}`);
+    const buttonText = button.text();
+    button.empty();
+    button.append($('<span>').text(buttonText));
+    button.append($('<div class="spinner-border spinner-border-sm" style="display: none;"></div>'));
+
+    // Store original dimensions
+    
+    const width = button.outerWidth();
+    // const height = button.outerHeight();
+    
+    // Set fixed dimensions to prevent resizing during loading state
+    button.css({
+      width: width + 'px',
+      // height: height + 'px'
+    });
+  }
+}
+
 export function initIndexOnly(setIndexCallback) {
   // need the setIndexCallback argument to allow calling script to set index,
   // since returning from this function will happen before ajax query completes

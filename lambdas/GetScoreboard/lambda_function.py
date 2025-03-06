@@ -12,12 +12,12 @@ def lambda_handler(event, context):
     """
     GET request
 
-    Input: year, cid, completed_rounds (opt)
+    Input: year, cid, rounds
     Output: {"names": [Full Names], "total_points": [...], "round_points": [[r0, r1, ...],...]}
     """
     year = event["queryStringParameters"].get("year")
     cid = event["queryStringParameters"].get("cid").replace(" ", "").lower()
-    completed_rounds_query = event["queryStringParameters"].get("completed_rounds", None)
+    completed_rounds_query = event["queryStringParameters"].get("rounds", None)
 
     # TODO handle bad/no inputs
 

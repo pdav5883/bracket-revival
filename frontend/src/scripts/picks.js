@@ -5,6 +5,7 @@ import { initIndexOnly,
   populateCompetitions,
   populatePlayerNames,
   initCommon,
+  initButtons,
   getValidAccessToken } from "./shared.js"
 
   import { createBracket } from "bracketry"
@@ -19,6 +20,7 @@ let pidSubmit
 
 $(async function() { 
   initCommon()
+  initButtons(["gobutton", "submitbutton"])
   
   $("#gobutton").on("click", async () => await changeRoundStart())
   $("#submitbutton").on("click", async () => await submitPicks())
@@ -140,11 +142,18 @@ function goToBracket() {
 async function changeRoundStart() {
   // nests within function to avoid passing click arg to populate
   $("#submitbutton").hide()
-  await populateRoundStart()
+
+  $("#gobutton span").hide()
+  $("#gobutton div").show()
+
+  await populateRoundStart(undefined, function() {
+    $("#gobutton span").show()
+    $("#gobutton div").hide()
+  })
 }
 
 
-async function populateRoundStart(args) {
+async function populateRoundStart(args, callback) {
   $("#statustext").text("")
   $("#bracketdiv").html("")
   
@@ -304,9 +313,11 @@ async function populateRoundStart(args) {
 
       adjust()
 
+      if (callback) callback()
     },
     error: function(err) {
       $("#statustext").text(err.responseText)
+      if (callback) callback()
     }
   })
 }
@@ -361,6 +372,10 @@ async function submitPicks() {
   $("#statustext").text("")
   $("#submitbutton").prop("disabled", true)
 
+  // spinner
+  $("#submitbutton span").hide()
+  $("#submitbutton div").show()
+
   matches = bracket.getAllData().matches
 
   // use bracketry isLive feature to highlight unpicked games
@@ -414,6 +429,8 @@ async function submitPicks() {
     crossDomain: true,
     success: function() {
       $("#submitbutton").prop("disabled", false)
+      $("#submitbutton span").show()
+      $("#submitbutton div").hide()
       $("#bracketdiv").html("") // clear the bracket so player doesn't try to edit picks
       $("#statustext").text("Submission successful!")
 
@@ -424,6 +441,8 @@ async function submitPicks() {
     },
     error: function(err) {
       $("#submitbutton").prop("disabled", false)
+      $("#submitbutton span").show()
+      $("#submitbutton div").hide()
       $("#statustext").text(err.responseText)
     }
   })

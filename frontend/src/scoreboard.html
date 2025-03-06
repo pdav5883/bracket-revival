@@ -1,39 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <!-- Basic Page Needs -->
-    <meta charset="utf-8">
-    <!-- Mobile Specific Metas -->
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><%= htmlWebpackPlugin.options.title %></title>
-    <link rel="icon" type="image/x-icon" href="./assets/favicon.ico">
-  </head>
-  <body>
-    <div id="nav-placeholder"></div>
-    <div class="col-10 col-8-md mx-auto">
-      <h1>Scoreboard</h1>
-      <div class="row">
-	<div class="col-4 col-sm-3 col-lg-2 mb-2">
-	  <label id="yearlabel" for="yearsel" class="form-label">Year</label>
-          <select class="form-select" id="yearsel"></select>
-	  <h5 class="my-0" id="yeardisplay"><strong>Year: </strong><span id="yearinsert"></span></h5>
-	</div>
-	<div class="col-8 col-sm-5 col-lg-3 mb-2">
-          <label id="complabel" for="compsel" class="form-label">Competition</label>
-          <select id="compsel" class="form-select"></select>
-	  <h5 class="my-0" id="compdisplay"><strong>Competition: </strong><span id="compinsert"></span></h5>
-	</div>
-	<div class="col-sm-3 col-lg-2 mb-2 d-flex" id="buttondiv">
-	  <button id="gobutton" class="btn btn-primary">Go</button>
-          <button id="editbutton" class="btn btn-dark btn-sm">Change</button>
-	</div>
+
+<head>
+  <!-- Basic Page Needs -->
+  <meta charset="utf-8">
+  <!-- Mobile Specific Metas -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+    <%= htmlWebpackPlugin.options.title %>
+  </title>
+  <link rel="icon" type="image/x-icon" href="./assets/favicon.ico">
+</head>
+
+<body>
+  <div id="nav-placeholder"></div>
+  <div class="col-10 col-8-md mx-auto">
+    <h1>Scoreboard</h1>
+    <div class="row">
+      <div class="col-4 col-sm-3 col-lg-2 mb-2">
+        <label id="yearlabel" for="yearsel" class="form-label">Year</label>
+        <select class="form-select" id="yearsel"></select>
       </div>
-      <p id="textstatus"></p>
-      <div class="table-responsive col-lg-6">
-        <table id="scoreboardtable" class="table table-striped"></table>
+      <div class="col-8 col-sm-5 col-lg-3 mb-2">
+        <label id="complabel" for="compsel" class="form-label">Competition</label>
+        <select id="compsel" class="form-select"></select>
+      </div>
+      <div class="col-sm-3 col-lg-2 mb-2 d-flex align-items-end" id="buttondiv">
+        <button id="gobutton" class="btn btn-primary">
+          Go
+        </button>
       </div>
     </div>
-    
+    <p id="textstatus"></p>
+    <div class="table-responsive col-lg-6">
+      <table id="scoreboardtable" class="table table-striped"></table>
+    </div>
+  </div>
 
-  </body>
+
+</body>
+
 </html>

@@ -7,7 +7,7 @@ import {
     GetUserCommand
 } from "@aws-sdk/client-cognito-identity-provider";
 
-import { initCommon, isAuthenticated } from "./shared.js"
+import { initCommon, initButtons, isAuthenticated } from "./shared.js"
 import $ from "jquery"
 
 const poolData = {
@@ -23,6 +23,7 @@ const client = new CognitoIdentityProviderClient({
 // Move all UI initialization into a DOMContentLoaded event listener
 $(async function () {
     initCommon()
+    initButtons(["signupButton", "signinButton"])
     // Show/Hide Forms
     $("#closeButton").hide()
     $("#signupForm").hide();
@@ -60,6 +61,10 @@ function clearMessage() {
 // Sign Up
 $("#signupButton").on("click", async (e) => {
     e.preventDefault();
+
+    $("#signupButton span").hide()
+    $("#signupButton div").show()
+
     const email = $("#signupEmail").val();
     const firstName = $("#signupFirstName").val();
     const lastName = $("#signupLastName").val();
@@ -101,10 +106,18 @@ $("#signupButton").on("click", async (e) => {
         $("#loginMessage").text('Check your email for verification link.');
         $("#loginMessage").removeClass('error');
         $("#loginMessage").show();
-    } catch (error) {
+
+        $("#signupButton span").show()
+        $("#signupButton div").hide()
+    }
+    
+    catch (error) {
         $("#loginMessage").text(error.message);
         $("#loginMessage").addClass('error');
         $("#loginMessage").show();
+
+        $("#signupButton span").show()
+        $("#signupButton div").hide()
     }
 });
 
@@ -112,8 +125,15 @@ $("#signupButton").on("click", async (e) => {
 $("#signinButton").on("click", async (e) => {
     e.preventDefault();
 
+    $("#signinButton span").hide()
+    $("#signinButton div").show()
+
     const email = $("#signinEmail").val();
+
     await startAuthFlow(email);
+    
+    $("#signinButton span").show()
+    $("#signinButton div").hide()
 });
 
 async function startAuthFlow(email) {

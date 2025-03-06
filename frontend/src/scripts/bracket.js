@@ -1,7 +1,7 @@
 // API_URL is in global namespace from constants.js
 
 import { API_URL, ROUND_NAMES } from "./constants.js" 
-import { initIndexYears, populateCompetitions, populatePlayerNames, initCommon } from "./shared.js"
+import { initIndexYears, populateCompetitions, populatePlayerNames, initCommon, initButtons } from "./shared.js"
 import { createBracket } from "bracketry"
 import { Modal } from "bootstrap"
 import $ from "jquery"
@@ -13,7 +13,7 @@ let index
 
 $(function() { 
   initCommon()
-  
+  initButtons(["gobutton"])
   $("#gobutton").on("click", changeBracket)
   $("#yearsel").on("change", populateCompetitionsWrapper)
   $("#compsel").on("change", populatePlayerNamesWrapper)
@@ -102,12 +102,19 @@ function populatePlayerNamesWrapper() {
 
 
 function changeBracket() {
+  // spinner
+  $("#gobutton span").hide()
+  $("#gobutton div").show()
+
   // nests within function to avoid passing click arg to populateBracket
-  populateBracket()
+  populateBracket(undefined, function() {
+    $("#gobutton span").show()
+    $("#gobutton div").hide()
+  })
 }
 
 
-function populateBracket(args) {
+function populateBracket(args, callback) {
   let year
   let cid
   let pid
@@ -288,6 +295,11 @@ function populateBracket(args) {
       for (const playerDiv of document.getElementsByClassName("player-title")) {
         playerDiv.style.opacity = "1"
       }
+
+      if (callback) callback()
+    },
+    error: function(err) {
+      if (callback) callback()
     }
   })
 }

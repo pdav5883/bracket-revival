@@ -4,23 +4,26 @@ import { initIndexOnly,
   initIndexYears,
   populateCompetitions,
   initCommon,
+  initButtons,
   isAuthenticated,
   signOut,
   getValidAccessToken } from "./shared.js"
 
-  import $ from "jquery"
+import $ from "jquery"
 
 let index
+const validateId = ["yearsel", "compsel", "firstnameinput", "lastnameinput"]
 
 $(function() { 
   initCommon()
- 
+  initButtons(["gobutton", "submitbutton"])
   $("#submitbutton").on("click", async () => {
     await submitNewPlayer()
   })
 
   $("#gobutton").on("click", () => {
     $("#statustext").text("")
+
     initSingleYearCompetition($("#yearsel").val(), $("#compsel").val())
   })
 
@@ -106,6 +109,13 @@ function initSingleYearCompetition(year, compName) {
 
   $('#firstnameinput').val('').prop("readonly", false)
   $('#lastnameinput').val('').prop("readonly", false)
+
+
+  // remove validation
+  validateId.forEach(v => {
+    $("#" + v).removeClass("is-valid")
+    $("#" + v).removeClass("is-invalid")
+  })
   
   // check if this game is accepting players
   if (!index[year][compName].open_players) {
@@ -146,10 +156,10 @@ async function submitNewPlayer() {
   // disable button until response received
   $("#statustext").text("")
   $("#submitbutton").prop("disabled", true)
+  $("#submitbutton span").hide()
+  $("#submitbutton div").show()
 
   // client validation
-  let validateId = ["yearsel", "compsel", "firstnameinput", "lastnameinput"]
-
   let validationErr = false
   validateId.forEach(v => {
     if ($("#" + v).val() == "") {
@@ -164,6 +174,8 @@ async function submitNewPlayer() {
   if (validationErr) {
     $("#statustext").text("Missing entries")
     $("#submitbutton").prop("disabled", false)
+    $("#submitbutton span").show()
+    $("#submitbutton div").hide()
     return
   }
 
@@ -173,7 +185,7 @@ async function submitNewPlayer() {
     compname: $("#compsel").val(),
     playerfirst: $("#firstnameinput").val(),
     playerlast: $("#lastnameinput").val()
-  }).toString()
+  })
 
   const authToken = await getValidAccessToken()
 
@@ -186,25 +198,23 @@ async function submitNewPlayer() {
     crossDomain: true,
     success: function() {
       $("#submitbutton").prop("disabled", false)
+      $("#submitbutton span").show()
+      $("#submitbutton div").hide()
 
-      if (index[queryParams.year][queryParams.compname].require_secret === false) {
-        $("#statustext").text("Success! Visit the picks page to pick your brackets.")
-        $("#submitdiv").hide()
-        $("#successdiv").show()
-        $("#successbutton").attr("href", "/picks.html?year=" + queryParams.year + "&cid=" + queryParams.compname + "&pid=" + queryParams.playername)
-        $("#successbutton").text("Go To Picks")
-      }
-      else {
-        $("#statustext").text("Success! Check your email to make picks.")
-        $("#submitdiv").hide()
-        $("#successdiv").show()
-        $("#successbutton").attr("href", "/scoreboard.html?year=" + queryParams.year + "&cid=" + queryParams.compname)
-        $("#successbutton").text("Go To Scoreboard")
-      }
+      $("#statustext").text("Success! Visit the picks page to pick your brackets.")
+      $("#submitdiv").hide()
+      $("#successdiv").show()
 
+      const playername = queryParams.get('playerfirst') + " " + queryParams.get('playerlast')
+      $("#successbutton").attr("href", "/picks.html?year=" + queryParams.get('year') + "&cid=" + queryParams.get('compname') + "&pid=" + playername)
+      
+      $("#successbutton").text("Go To Picks")
     },
+
     error: function(err) {
       $("#submitbutton").prop("disabled", false)
+      $("#submitbutton span").show()
+      $("#submitbutton div").hide()
       $("#statustext").text(err.responseText)
     }
   }) 
