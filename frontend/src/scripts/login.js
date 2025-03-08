@@ -61,8 +61,8 @@ $(async function () {
 });
 
 function clearMessage() {
-    $("#loginMessage").hide();
-    $("#loginMessage").text('');
+    $("#statustext").hide();
+    $("#statustext").text('');
 }
 
 // Sign Up
@@ -109,17 +109,17 @@ $("#signupButton").on("click", async (e) => {
 
         $("#closeButton").show();
         $("#signinForm").hide()
-        $("#loginMessage").text('Check your email for verification link.');
-        $("#loginMessage").removeClass('error');
-        $("#loginMessage").show();
+        $("#statustext").text('Check your email for verification link.');
+        $("#statustext").removeClass('error');
+        $("#statustext").show();
 
         spinnerOff("signupButton")
     }
     
     catch (error) {
-        $("#loginMessage").text(error.message);
-        $("#loginMessage").addClass('error');
-        $("#loginMessage").show();
+        $("#statustext").text(error.message);
+        $("#statustext").addClass('error');
+        $("#statustext").show();
 
         spinnerOff("signupButton")
     }
@@ -164,9 +164,9 @@ async function startAuthFlow(email) {
             $("#closeButton").show();
             $("#signinForm").hide()
             $("#signupForm").hide()
-            $("#loginMessage").text('Check your email for verification link.');
-            $("#loginMessage").removeClass('error');
-            $("#loginMessage").show();
+            $("#statustext").text('Check your email for verification link.');
+            $("#statustext").removeClass('error');
+            $("#statustext").show();
         } else if (response.AuthenticationResult) {
             localStorage.setItem('blr-accessToken', response.AuthenticationResult.AccessToken);
             localStorage.setItem('blr-refreshToken', response.AuthenticationResult.RefreshToken);
@@ -179,9 +179,9 @@ async function startAuthFlow(email) {
             leavePage()
         }
     } catch (error) {
-        $("#loginMessage").text(error.message);
-        $("#loginMessage").addClass('error');
-        $("#loginMessage").show();
+        $("#statustext").text(error.message);
+        $("#statustext").addClass('error');
+        $("#statustext").show();
     }
 }
 
@@ -222,9 +222,9 @@ async function handleVerification() {
                 localStorage.setItem('blr-isAdmin', attributes['custom:is_admin'] === 'true');
             }
         } catch (error) {
-            $("#loginMessage").text('Verification failed: ' + error.message);
-            $("#loginMessage").addClass('error');
-            $("#loginMessage").show();
+            $("#statustext").text('Verification failed: ' + error.message);
+            $("#statustext").addClass('error');
+            $("#statustext").show();
             $("#signinForm").show();
         }
     }
