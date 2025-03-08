@@ -77,9 +77,9 @@ function populateScoreboard(queryParams, callback) {
       // reconfigure results to allow sorting
       let leaders = []
 
-      result.names = getRenderNames(result.names)
-      result.names.forEach((name, i) => {
-        leaders.push({"name": name, "total": result.total_points[i], "round": result.round_render[i]})
+      result.rendernames = getRenderNames(result.names)
+      result.rendernames.forEach((rname, i) => {
+        leaders.push({"name": rname, "pid": result.names[i], "total": result.total_points[i], "round": result.round_render[i]})
       })
 
       leaders.sort((a, b) => ((a.total >= b.total) ? -1 : 1))
@@ -132,7 +132,7 @@ function populateScoreboard(queryParams, callback) {
         tablePlayer = document.createElement("a")
         tablePlayer.classList.add("text-decoration-none")
         tablePlayer.textContent = leader.name
-        tablePlayer.href = "/bracket.html?year=" + params.year + "&cid=" + params.cid + "&pid=" + leader.name
+        tablePlayer.href = "/bracket.html?year=" + params.year + "&cid=" + params.cid + "&pid=" + leader.pid
         tableCell.append(tablePlayer)
 
         tableCell = tableRow.insertCell()

@@ -32,8 +32,8 @@ module.exports = {
       import: "./src/scripts/scoreboard.js",
       dependOn: "shared"
     },
-    newplayer: {
-      import: "./src/scripts/newplayer.js",
+    join: {
+      import: "./src/scripts/join.js",
       dependOn: "shared"
     },
     index: {
@@ -87,10 +87,10 @@ module.exports = {
       chunks: ["shared", "scoreboard"]
     }),
     new HtmlWebpack({
-      title: "New Player",
-      filename: "newplayer.html",
-      template: "./src/newplayer.html",
-      chunks: ["shared", "newplayer"]
+      title: "Join Game",
+      filename: "join.html",
+      template: "./src/join.html",
+      chunks: ["shared", "join"]
     }),
     new HtmlWebpack({
       title: "Rules",

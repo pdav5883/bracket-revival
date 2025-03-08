@@ -51,6 +51,7 @@ def lambda_handler(event, context):
         player_picks = []
     else:
         player_key = year + "/" + cid + "/" + pid + ".json"
+        print(player_key)
         player = utils.read_file(player_key)
         player_picks = player["picks"]
 

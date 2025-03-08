@@ -15,11 +15,11 @@ def lambda_handler(event, context):
     """
     if "queryStringParameters" in event:
         year = event["queryStringParameters"].get("year")
-        cid = event["queryStringParameters"].get("cid")
+        cid = event["queryStringParameters"].get("cid").replace(" ", "").lower()
     elif "Records" in event:
         msg = json.loads(event["Records"][0]["Sns"]["Message"])
         year = msg.get("year")
-        cid = msg.get("cid")
+        cid = msg.get("cid").replace(" ", "").lower()
 
     # TODO: assert arguments exist
 
