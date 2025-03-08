@@ -7,7 +7,10 @@ import { initIndexOnly,
   initButtons,
   isAuthenticated,
   signOut,
-  getValidAccessToken } from "./shared.js"
+  getValidAccessToken,
+  spinnerOn,
+  spinnerOff
+} from "./shared.js"
 
 import $ from "jquery"
 
@@ -156,8 +159,7 @@ async function submitNewPlayer() {
   // disable button until response received
   $("#statustext").text("")
   $("#submitbutton").prop("disabled", true)
-  $("#submitbutton span").hide()
-  $("#submitbutton div").show()
+  spinnerOn("submitbutton")
 
   // client validation
   let validationErr = false
@@ -174,8 +176,7 @@ async function submitNewPlayer() {
   if (validationErr) {
     $("#statustext").text("Missing entries")
     $("#submitbutton").prop("disabled", false)
-    $("#submitbutton span").show()
-    $("#submitbutton div").hide()
+    spinnerOff("submitbutton")
     return
   }
 
@@ -198,8 +199,7 @@ async function submitNewPlayer() {
     crossDomain: true,
     success: function() {
       $("#submitbutton").prop("disabled", false)
-      $("#submitbutton span").show()
-      $("#submitbutton div").hide()
+      spinnerOff("submitbutton")
 
       $("#statustext").text("Success! Visit the picks page to pick your brackets.")
       $("#submitdiv").hide()
@@ -213,8 +213,7 @@ async function submitNewPlayer() {
 
     error: function(err) {
       $("#submitbutton").prop("disabled", false)
-      $("#submitbutton span").show()
-      $("#submitbutton div").hide()
+      spinnerOff("submitbutton")
       $("#statustext").text(err.responseText)
     }
   }) 

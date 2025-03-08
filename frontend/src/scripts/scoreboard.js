@@ -1,5 +1,12 @@
 import { API_URL } from "./constants.js" 
-import { initIndexYears, populateCompetitions, initCommon, getRenderNames, initButtons } from "./shared.js"
+import { initIndexYears,
+  populateCompetitions,
+  initCommon,
+  getRenderNames,
+  initButtons,
+  spinnerOn,
+  spinnerOff
+} from "./shared.js"
 import $ from "jquery"
 
 let index
@@ -35,13 +42,11 @@ function populateCompetitionsWrapper() {
 
 function changeCompetition(queryParams) {
   // Hide span, show div for loading state
-  $("#gobutton span").hide()
-  $("#gobutton div").show()
+  spinnerOn("gobutton")
   
   // Call populateScoreboard with callback to restore button state
   populateScoreboard(queryParams, function() {
-    $("#gobutton span").show()
-    $("#gobutton div").hide()
+    spinnerOff("gobutton")
     
   })
 }

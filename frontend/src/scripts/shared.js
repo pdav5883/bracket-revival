@@ -200,6 +200,16 @@ export function populatePlayerNames(index, pid, emptyLabel) {
   }
 }
 
+export function spinnerOn(buttonId) {
+  $(`#${buttonId} span`).hide();
+  $(`#${buttonId} div`).show();
+}
+
+export function spinnerOff(buttonId) {
+  $(`#${buttonId} span`).show();
+  $(`#${buttonId} div`).hide();
+}
+
 // Add this new function to handle refresh
 async function refreshToken() {
   try {

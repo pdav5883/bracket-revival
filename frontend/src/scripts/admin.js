@@ -1,5 +1,13 @@
 import { API_URL } from "./constants.js"
-import { initIndexYears, populateCompetitions, initCommon, initButtons, getValidAccessToken } from "./shared.js"
+import {
+  initIndexYears,
+  populateCompetitions,
+  initCommon,
+  initButtons,
+  getValidAccessToken,
+  spinnerOn,
+  spinnerOff
+} from "./shared.js"
 import $ from "jquery"
 
 
@@ -14,22 +22,18 @@ $(function () {
 
   $("#yearsel").on("change", populateCompetitionsWrapper)
   $("#submitbutton").on("click", async () => {
-    $("#submitbutton span").hide()
-    $("#submitbutton div").show()
+    spinnerOn("submitbutton")
 
     await submitEdits(() => {
-      $("#submitbutton span").show()
-      $("#submitbutton div").hide()
+      spinnerOff("submitbutton")
     })
   })
 
   $("#gobutton").on("click",() => {
-    $("#gobutton span").hide()
-    $("#gobutton div").show()
+    spinnerOn("gobutton")
 
     changeAdminPage(() => {
-      $("#gobutton span").show()
-      $("#gobutton div").hide()
+      spinnerOff("gobutton")
     })
   })
 

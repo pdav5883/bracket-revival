@@ -6,7 +6,10 @@ import { initIndexOnly,
   populatePlayerNames,
   initCommon,
   initButtons,
-  getValidAccessToken } from "./shared.js"
+  getValidAccessToken,
+  spinnerOn,
+  spinnerOff
+} from "./shared.js"
 
   import { createBracket } from "bracketry"
   import $ from "jquery"
@@ -98,12 +101,10 @@ async function changeRoundStart(queryParams) {
   $("#bracketbutton").hide()
   $("#morepicksbutton").hide()
 
-  $("#gobutton span").hide()
-  $("#gobutton div").show()
+  spinnerOn("gobutton")
 
   await populateRoundStart(queryParams, function() {
-    $("#gobutton span").show()
-    $("#gobutton div").hide()
+    spinnerOff("gobutton")
   })
 }
 
@@ -123,6 +124,10 @@ async function populateRoundStart(queryParams, callback) {
   else {
     params = Object.fromEntries(queryParams)
   }
+
+  yearSubmit = params.year
+  cidSubmit = params.cid
+  pidSubmit = params.pid
 
   $.ajax({
     method: "GET",
@@ -320,10 +325,7 @@ function prepopulateBracket(bracketData) {
 async function submitPicks() {
   $("#statustext").text("")
   $("#submitbutton").prop("disabled", true)
-
-  // spinner
-  $("#submitbutton span").hide()
-  $("#submitbutton div").show()
+  spinnerOn("submitbutton")
 
   matches = bracket.getAllData().matches
 
@@ -337,6 +339,7 @@ async function submitPicks() {
   })
 
   if (incomplete.length > 0) {
+    spinnerOff("submitbutton")
     $("#statustext").text("Error: " + String(incomplete.length) + " missing picks. Use the Next/Prev Round buttons to navigate the full bracket.")
     $("#submitbutton").prop("disabled", false)
     bracket.applyMatchesUpdates(incomplete)
@@ -378,8 +381,7 @@ async function submitPicks() {
     crossDomain: true,
     success: function() {
       $("#submitbutton").prop("disabled", false)
-      $("#submitbutton span").show()
-      $("#submitbutton div").hide()
+      spinnerOff("submitbutton")
       $("#bracketdiv").html("") // clear the bracket so player doesn't try to edit picks
       $("#statustext").text("Submission successful!")
 
@@ -390,8 +392,7 @@ async function submitPicks() {
     },
     error: function(err) {
       $("#submitbutton").prop("disabled", false)
-      $("#submitbutton span").show()
-      $("#submitbutton div").hide()
+      spinnerOff("submitbutton")
       $("#statustext").text(err.responseText)
     }
   })

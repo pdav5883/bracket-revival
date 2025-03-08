@@ -1,7 +1,15 @@
 // API_URL is in global namespace from constants.js
 
 import { API_URL, ROUND_NAMES } from "./constants.js" 
-import { initIndexYears, populateCompetitions, populatePlayerNames, initCommon, initButtons } from "./shared.js"
+import {
+  initIndexYears,
+  populateCompetitions,
+  populatePlayerNames,
+  initCommon,
+  initButtons,
+  spinnerOn,
+  spinnerOff
+} from "./shared.js"
 import { createBracket } from "bracketry"
 import { Modal } from "bootstrap"
 import $ from "jquery"
@@ -48,13 +56,11 @@ function populatePlayerNamesWrapper() {
 
 function changeBracket(queryParams) {
   // spinner
-  $("#gobutton span").hide()
-  $("#gobutton div").show()
+  spinnerOn("gobutton")
 
   // nests within function to avoid passing click arg to populateBracket
   populateBracket(queryParams, function() {
-    $("#gobutton span").show()
-    $("#gobutton div").hide()
+    spinnerOff("gobutton")
   })
 }
 

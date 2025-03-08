@@ -7,7 +7,14 @@ import {
     GetUserCommand
 } from "@aws-sdk/client-cognito-identity-provider";
 
-import { initCommon, initButtons, isAuthenticated } from "./shared.js"
+import {
+    initCommon,
+    initButtons,
+    isAuthenticated,
+    spinnerOn,
+    spinnerOff
+} from "./shared.js"
+
 import $ from "jquery"
 
 const poolData = {
@@ -62,8 +69,7 @@ function clearMessage() {
 $("#signupButton").on("click", async (e) => {
     e.preventDefault();
 
-    $("#signupButton span").hide()
-    $("#signupButton div").show()
+    spinnerOn("signupButton")
 
     const email = $("#signupEmail").val();
     const firstName = $("#signupFirstName").val();
@@ -107,8 +113,7 @@ $("#signupButton").on("click", async (e) => {
         $("#loginMessage").removeClass('error');
         $("#loginMessage").show();
 
-        $("#signupButton span").show()
-        $("#signupButton div").hide()
+        spinnerOff("signupButton")
     }
     
     catch (error) {
@@ -116,8 +121,7 @@ $("#signupButton").on("click", async (e) => {
         $("#loginMessage").addClass('error');
         $("#loginMessage").show();
 
-        $("#signupButton span").show()
-        $("#signupButton div").hide()
+        spinnerOff("signupButton")
     }
 });
 
@@ -125,15 +129,13 @@ $("#signupButton").on("click", async (e) => {
 $("#signinButton").on("click", async (e) => {
     e.preventDefault();
 
-    $("#signinButton span").hide()
-    $("#signinButton div").show()
+    spinnerOn("signinButton")
 
     const email = $("#signinEmail").val();
 
     await startAuthFlow(email);
     
-    $("#signinButton span").show()
-    $("#signinButton div").hide()
+    spinnerOff("signinButton")
 });
 
 async function startAuthFlow(email) {
