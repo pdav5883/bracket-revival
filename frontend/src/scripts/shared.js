@@ -103,9 +103,10 @@ export function initIndexOnly(setIndexCallback) {
   })
 }
 
-export function initIndexYears(setIndexCallback) {
+export function initIndexYears(setIndexCallback, year, cid, pid) {
   // need the setIndexCallback argument to allow calling script to set index,
   // since returning from this function will happen before ajax query completes
+  // year is the value that select gets set to, undefined set to latest. cid and pid are passed on
   $.ajax({
     method: "GET",
     url: API_URL.competitions,
@@ -115,26 +116,31 @@ export function initIndexYears(setIndexCallback) {
 
       //populate years
       let yearOpt
-      for (const year in index) {
+      for (const yr in index) {
         yearOpt = document.createElement("option")
-        yearOpt.value = year
-        yearOpt.textContent = year
+        yearOpt.value = yr
+        yearOpt.textContent = yr
         $("#yearsel").append(yearOpt)
       }
 
-      // this must happen before .change() below, which requires index
+      // this must happen before .trigger() below, which requires index
       setIndexCallback(index)
       
       // set to latest year with change to populate competitions
-      if (yearOpt !== undefined) {
-        $("#yearsel").val(yearOpt.value).change()
+      if (year == undefined) {
+        $("#yearsel").val(yearOpt.value).trigger("change")
+      }
+      else {
+        // don't trigger a change, instead directly call populateCompetitions
+        $("#yearsel").val(year)
+        populateCompetitions(index, cid, pid)
       }
     }
   })
 }
 
 
-export function populateCompetitions(index) {
+export function populateCompetitions(index, cid, pid) {
   $("#compsel").empty()
 
   let compOpt
@@ -146,13 +152,23 @@ export function populateCompetitions(index) {
   }
 
   // set to last competition
-  if (compOpt !== undefined) {
-    $("#compsel").val(compOpt.value).change()
+  if (cid == undefined) {
+    $("#compsel").val(compOpt.value).trigger("change")
+  }
+  else {
+    // means there is no player select on this page
+    if (pid == undefined) {
+      $("#compsel").val(cid).trigger("change")
+    }
+    else {
+      $("#compsel").val(cid)
+      populatePlayerNames(index, pid)
+    }
   }
 }
 
 
-export function populatePlayerNames(index, emptyLabel) {
+export function populatePlayerNames(index, pid, emptyLabel) {
   $("#playersel").empty()
 
   let playerOpt
@@ -176,8 +192,11 @@ export function populatePlayerNames(index, emptyLabel) {
   }
 
   // set to latest
-  if (playerOpt !== undefined) {
-    $("#playersel").val(playerOpt.value).change()
+  if (pid == undefined) {
+    $("#playersel").val(playerOpt.value).trigger("change")
+  }
+  else {
+    $("#playersel").val(pid)
   }
 }
 

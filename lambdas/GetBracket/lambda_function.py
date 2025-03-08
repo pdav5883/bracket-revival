@@ -10,7 +10,7 @@ def lambda_handler(event, context):
     """
     GET request
 
-    Input: year, cid (opt), pid (opt), completed_rounds (opt)
+    Input: year, cid (opt), pid (opt),  rounds (opt)
     Output: nested list of games
             [[{"teams": [a,b], "seeds": [a,b], "score": [a,b], "result": 0/1, "picks": [[a,b,0/1], ], "points": None/0/1/2/..., "correct": None/#}, (r0g1), ...],
              [(r1g0), (r1g1), ...],
@@ -23,7 +23,7 @@ def lambda_handler(event, context):
     year = event["queryStringParameters"].get("year")
     cid = event["queryStringParameters"].get("cid", None).replace(" ", "").lower()
     pid = event["queryStringParameters"].get("pid", None).replace(" ", "__").lower()
-    completed_rounds_query = event["queryStringParameters"].get("completed_rounds", None)
+    completed_rounds_query = event["queryStringParameters"].get("rounds", None)
 
     # TODO: assert arguments exist
 

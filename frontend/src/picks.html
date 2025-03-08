@@ -1,66 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <!-- Basic Page Needs -->
   <meta charset="utf-8">
   <!-- Mobile Specific Metas -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title><%= htmlWebpackPlugin.options.title %></title>
+  <title>
+    <%= htmlWebpackPlugin.options.title %>
+  </title>
   <link rel="icon" type="image/x-icon" href="./assets/favicon.ico">
 </head>
-  <body>
-    <div id="nav-placeholder"></div>
-    <div class="col-10 col-8-md mx-auto">
-      <h1>Pick Your Bracket</h1>
-      <div class="row">
-	<div class="col-4 col-sm-3 col-lg-2 mb-2">
-	  <label id="yearlabel" for="yearsel" class="form-label">Year</label>
-          <select class="form-select" id="yearsel"></select>
-	  <h5 class="my-0" id="yeardisplay"><strong>Year: </strong><span id="yearinsert"></span></h5>
-	</div>
-	<div class="col-8 col-sm-5 col-lg-3 mb-2">
-          <label id="complabel" for="compsel" class="form-label">Competition</label>
-          <select id="compsel" class="form-select"></select>
-	  <h5 class="my-0" id="compdisplay"><strong>Competition: </strong><span id="compinsert"></span></h5>
-	</div>
-	<div class="col-lg-2 mb-2">
-	  <div class="col-6 col-lg-12">
-            <label id="playerlabel" for="playersel" class="form-label">Player</label>
-            <select id="playersel" class="form-select"></select>
-	    <h5 class="my-0" id="playerdisplay"><strong>Player: </strong><span id="playerinsert"></span></h5>
-	  </div>
-	</div>
-	<div class="col-lg-2 mb-2 d-flex align-items-end" id="buttondiv">
-	  <button id="gobutton" class="btn btn-primary">Go</button>
-	</div>
-      </div>
 
-      <div class="col col-sm-8 col-lg-7 text-center">
-        <button id="submitbutton" class="btn btn-submit">Submit Picks</button>
-        <button id="scoreboardbutton" class="m-1 btn btn-dark">Scoreboard</button>
-        <button id="bracketbutton" class="m-1 btn btn-secondary">Bracket</button>
-        <button id="morepicksbutton" class="m-1 btn btn-success">Check for More Picks</button>
-        <p id="statustext"></p>
+<body>
+  <div id="nav-placeholder"></div>
+  <div class="col-10 col-8-md mx-auto">
+    <h1>Pick Your Bracket</h1>
+    <div class="row">
+      <div class="col-4 col-sm-3 col-lg-2 mb-2">
+        <label id="yearlabel" for="yearsel" class="form-label">Year</label>
+        <select class="form-select" id="yearsel"></select>
+      </div>
+      <div class="col-8 col-sm-5 col-lg-3 mb-2">
+        <label id="complabel" for="compsel" class="form-label">Competition</label>
+        <select id="compsel" class="form-select"></select>
+      </div>
+      <div class="col-lg-2 mb-2">
+        <div class="col-6 col-lg-12">
+          <label id="playerlabel" for="playersel" class="form-label">Player</label>
+          <select id="playersel" class="form-select"></select>
+        </div>
+      </div>
+      <div class="col-lg-2 mb-2 d-flex align-items-end" id="buttondiv">
+        <button id="gobutton" class="btn btn-primary">Go</button>
       </div>
     </div>
 
-    <div class="modal fade" id="gameModal" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-	    <h5 class="modal-title" id="gameheader"></h5>
-          </div>
-          <div class="modal-body">
-	    <span id="gameresult"></span>
-	    <ul id="picklist"></ul>
-          </div>
-          <div class="modal-footer" style="justify-content: center">
-	    <h5 id="gamepoints"></h5>
-          </div>
+    <div class="col col-sm-8 col-lg-7 text-center">
+      <button id="submitbutton" class="btn btn-submit">Submit Picks</button>
+      <button id="scoreboardbutton" class="m-1 btn btn-dark">Scoreboard</button>
+      <button id="bracketbutton" class="m-1 btn btn-secondary">Bracket</button>
+      <button id="morepicksbutton" class="m-1 btn btn-success">Check for More Picks</button>
+      <p id="statustext"></p>
+    </div>
+  </div>
+
+  <div class="modal fade" id="gameModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="gameheader"></h5>
+        </div>
+        <div class="modal-body">
+          <span id="gameresult"></span>
+          <ul id="picklist"></ul>
+        </div>
+        <div class="modal-footer" style="justify-content: center">
+          <h5 id="gamepoints"></h5>
         </div>
       </div>
     </div>
-  
-    <div id="bracketdiv"></div>
-  </body>
+  </div>
+
+  <div id="bracketdiv"></div>
+</body>
+
 </html>

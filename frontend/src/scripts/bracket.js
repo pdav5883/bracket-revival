@@ -14,80 +14,25 @@ let index
 $(function() { 
   initCommon()
   initButtons(["gobutton"])
-  $("#gobutton").on("click", changeBracket)
+  $("#gobutton").on("click", () => changeBracket(undefined))
   $("#yearsel").on("change", populateCompetitionsWrapper)
   $("#compsel").on("change", populatePlayerNamesWrapper)
 
   initBracketPage()
-
-  $("#editbutton").on("click", function() {
-    editMode()
-  })
 })
 
 
 function initBracketPage() {
-  const params = new URLSearchParams(window.location.search)
+  const queryParams = new URLSearchParams(window.location.search)
 
-  // check query params first, then local storage for year/comp
-  if (params.has("year") && params.has("cid")) {
-    displayMode(params.get("year"), params.get("cid"), params.has("pid") ? params.get("pid") : "None")
-    populateBracket({"year": params.get("year"),
-      "cid": params.get("cid"),
-      "pid": params.has("pid") ? params.get("pid") : "",
-      "completedRounds": params.has("rounds") ? params.get("rounds") : ""
-    })
-  }
-  // else if localStorage
-  else {
-    editMode()
-  }
-}
+  initIndexYears(function(ind) {
+    index = ind
 
-
-function editMode() {
-  $("#editbutton").hide()
-  $("#yeardisplay").hide()
-  $("#compdisplay").hide()
-  $("#playerdisplay").hide()
-  $("#yearsel").show()
-  $("#compsel").show()
-  $("#playersel").show()
-  $("#yearlabel").show()
-  $("#complabel").show()
-  $("#playerlabel").show()
-  $("#gobutton").show()
-  $("#buttondiv").removeClass("align-items-center")
-  $("#buttondiv").addClass("align-items-end")
-
-  // first time we populate selects, call backend
-  if (index === undefined) {
-    initIndexYears(function(ind) {
-      index = ind
-    })
-  }
-}
-
-
-function displayMode(year, cid, pid) {
-  $("#editbutton").show()
-  $("#yeardisplay").show()
-  $("#compdisplay").show()
-  $("#playerdisplay").show()
-  $("#yearsel").hide()
-  $("#compsel").hide()
-  $("#playersel").hide()
-  $("#yearlabel").hide()
-  $("#complabel").hide()
-  $("#playerlabel").hide()
-  $("#gobutton").hide()
-  $("#buttondiv").removeClass("align-items-end")
-  $("#buttondiv").addClass("align-items-center")
-
-  $("#yearinsert").text(year)
-  $("#compinsert").text(cid)
-  $("#playerinsert").text(pid)
-
+    if (queryParams.has("year") && queryParams.has("cid") && queryParams.has("pid")) {
+      changeBracket(queryParams)
+    }
+    // TODO deal with local storage from previous visit
+  }, queryParams.get("year"), queryParams.get("cid"), queryParams.get("pid"))
 }
 
 
@@ -97,56 +42,47 @@ function populateCompetitionsWrapper() {
 
 
 function populatePlayerNamesWrapper() {
-  populatePlayerNames(index, "--Results--")
+  populatePlayerNames(index, undefined,"--Results--")
 }
 
 
-function changeBracket() {
+function changeBracket(queryParams) {
   // spinner
   $("#gobutton span").hide()
   $("#gobutton div").show()
 
   // nests within function to avoid passing click arg to populateBracket
-  populateBracket(undefined, function() {
+  populateBracket(queryParams, function() {
     $("#gobutton span").show()
     $("#gobutton div").hide()
   })
 }
 
 
-function populateBracket(args, callback) {
+function populateBracket(queryParams, callback) {
   let year
   let cid
   let pid
   let completedRounds
 
-  if (args === undefined) {
-    year = $("#yearsel").val()
-    cid = $("#compsel").val()
-    pid = $("#playersel").val()
-    completedRounds = $("#rndinput").val()
+  let params
+  if (queryParams === undefined) {
+    params = {
+      year: $("#yearsel").val(),
+      cid: $("#compsel").val(),
+      pid: $("#playersel").val(),
+      rounds: $("#rndinput").val() // rndinput select not implemented
+    }
   }
 
   else {
-    year = args.year
-    cid = args.cid
-    pid = args.pid
-    completedRounds = args.completedRounds
-  }
-
-  let queryData = {"year": year, "cid": cid}
-
-  if (completedRounds !== "") {
-    queryData["completed_rounds"] = completedRounds
-  }
-  if (pid !== "") {
-    queryData["pid"] = pid 
+    params = Object.fromEntries(queryParams)
   }
 
   $.ajax({
     method: "GET",
     url: API_URL.bracket,
-    data: queryData,
+    data: params,
     crossDomain: true,
     success: function(gamesNested) {
       const bracketData = makeBracketryData(gamesNested)

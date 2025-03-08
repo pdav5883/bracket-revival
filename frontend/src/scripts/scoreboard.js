@@ -7,9 +7,7 @@ let index
 $(function() { 
   initCommon()
   initButtons(["gobutton"])
-  $("#gobutton").on("click", () => {
-    changeCompetition(undefined) // undefined means no query params
-  })
+  $("#gobutton").on("click", () => changeCompetition(undefined)) // undefined means no query params
   $("#yearsel").on("change", populateCompetitionsWrapper)
 
   initScoreboardPage()
@@ -23,13 +21,10 @@ function initScoreboardPage() {
     index = ind
 
     if (queryParams.has("year") && queryParams.has("cid")) {
-      $("#yearsel").val(queryParams.get("year"))
-      $("#compsel").val(queryParams.get("cid"))
-
       changeCompetition(queryParams)
     }
     // TODO deal with local storage from previous visit
-  })
+  }, queryParams.get("year"), queryParams.get("cid"))
 }
 
 

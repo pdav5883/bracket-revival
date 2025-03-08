@@ -9,7 +9,7 @@ import { initIndexOnly,
   getValidAccessToken } from "./shared.js"
 
   import { createBracket } from "bracketry"
-import $ from "jquery"
+  import $ from "jquery"
 
 let bracket
 let matches
@@ -50,70 +50,22 @@ $(async function() {
 
 
 async function initPickPage() {
-  const params = new URLSearchParams(window.location.search)
-
-  // check query params first, then local storage for year/comp
-  if (params.has("year") && params.has("cid") && params.has("pid")) {
-    // populate function goes inside the callback because we need index to be there before populate executes
-    initIndexOnly(async function(ind) {
-      index = ind
-
-      displayMode(params.get("year"), params.get("cid"), params.get("pid"))
-
-      // params.get("secret") will default to null if secret not present
-      await populateRoundStart({"year": params.get("year"),
-        "cid": params.get("cid"),
-        "pid": params.get("pid")
-      })
-    })
-  }
-  else {
-    initIndexYears(function(ind) {
-      index = ind
-    })
-
-    editMode()
-  }
-}
-
-
-function editMode() {
-  $("#yeardisplay").hide()
-  $("#compdisplay").hide()
-  $("#playerdisplay").hide()
-  $("#yearsel").show()
-  $("#compsel").show()
-  $("#playersel").show()
-  $("#yearlabel").show()
-  $("#complabel").show()
-  $("#playerlabel").show()
-  $("#gobutton").show()
-  $("#submitbutton").hide()
-  $("#scoreboardbutton").hide()
-  $("#bracketbutton").hide()
-  $("#morepicksbutton").hide()
-}
-
-
-function displayMode(year, cid, pid) {
-  $("#yeardisplay").show()
-  $("#compdisplay").show()
-  $("#playerdisplay").show()
-  $("#yearsel").hide()
-  $("#compsel").hide()
-  $("#playersel").hide()
-  $("#yearlabel").hide()
-  $("#complabel").hide()
-  $("#playerlabel").hide()
-  $("#gobutton").hide()
+  
   $("#submitbutton").hide()
   $("#scoreboardbutton").hide()
   $("#bracketbutton").hide()
   $("#morepicksbutton").hide()
 
-  $("#yearinsert").text(year)
-  $("#compinsert").text(cid)
-  $("#playerinsert").text(pid)
+  const queryParams = new URLSearchParams(window.location.search)
+
+  initIndexYears(async function(ind) {
+    index = ind
+
+    if (queryParams.has("year") && queryParams.has("cid") && queryParams.has("pid")) {
+      await changeRoundStart(queryParams)
+    }
+    // TODO deal with local storage from previous visit
+  }, queryParams.get("year"), queryParams.get("cid"), queryParams.get("pid"))
 }
 
 
@@ -139,42 +91,43 @@ function goToBracket() {
 }
 
 
-async function changeRoundStart() {
+async function changeRoundStart(queryParams) {
   // nests within function to avoid passing click arg to populate
   $("#submitbutton").hide()
+  $("#scoreboardbutton").hide()
+  $("#bracketbutton").hide()
+  $("#morepicksbutton").hide()
 
   $("#gobutton span").hide()
   $("#gobutton div").show()
 
-  await populateRoundStart(undefined, function() {
+  await populateRoundStart(queryParams, function() {
     $("#gobutton span").show()
     $("#gobutton div").hide()
   })
 }
 
 
-async function populateRoundStart(args, callback) {
+async function populateRoundStart(queryParams, callback) {
   $("#statustext").text("")
   $("#bracketdiv").html("")
   
-  if (args === undefined) {
-    yearSubmit = $("#yearsel").val()
-    cidSubmit = $("#compsel").val()
-    pidSubmit = $("#playersel").val()
+  let params
+  if (queryParams === undefined) {
+    params = {
+      year: $("#yearsel").val(),
+      cid: $("#compsel").val(),
+      pid: $("#playersel").val()
+    }
   }
-
   else {
-    yearSubmit = args.year
-    cidSubmit = args.cid
-    pidSubmit = args.pid
+    params = Object.fromEntries(queryParams)
   }
-
-  const queryData = {"year": yearSubmit, "cid": cidSubmit, "pid": pidSubmit}
 
   $.ajax({
     method: "GET",
     url: API_URL.start,
-    data: queryData,
+    data: params,
     headers: {"authorization": await getValidAccessToken()},
     crossDomain: true,
     success: function(result) {
@@ -182,10 +135,6 @@ async function populateRoundStart(args, callback) {
       // teams/seeds/score=[null, null], result=null
 
       // in case we got here by checking for more picks
-      $("#scoreboardbutton").hide()
-      $("#bracketbutton").hide()
-      $("#morepicksbutton").hide()
-
       $("#submitbutton").show()
 
       let bracketData = makeBracketryStartData(result.start_games, result.bonus_games)
