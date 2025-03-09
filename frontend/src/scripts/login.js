@@ -62,6 +62,7 @@ $(async function () {
 
 function clearMessage() {
     $("#statustext").hide();
+    $("#statustext").removeClass('text-danger');
     $("#statustext").text('');
 }
 
@@ -107,18 +108,27 @@ $("#signupButton").on("click", async (e) => {
 
         await startAuthFlow(email);
 
-        $("#closeButton").show();
-        $("#signinForm").hide()
+        clearMessage();
         $("#statustext").text('Check your email for verification link.');
-        $("#statustext").removeClass('error');
         $("#statustext").show();
+        $("#closeButton").show();
 
         spinnerOff("signupButton")
     }
     
     catch (error) {
-        $("#statustext").text(error.message);
-        $("#statustext").addClass('error');
+        // Extract just the meaningful part of the error message
+        let errorMessage = error.message;
+        if (error.name == "UserLambdaValidationException") {
+            if (error.message.includes(':')) {
+                errorMessage = error.message.split(':').pop().trim().replace(/\.$/, '!');
+            }
+        } else if (error.name == "InvalidParameterException") {
+            errorMessage = "Valid Email, First Name, and Last Name must be provided!"
+        }
+        
+        $("#statustext").text(errorMessage);
+        $("#statustext").addClass('text-danger');
         $("#statustext").show();
 
         spinnerOff("signupButton")
@@ -164,8 +174,8 @@ async function startAuthFlow(email) {
             $("#closeButton").show();
             $("#signinForm").hide()
             $("#signupForm").hide()
+            clearMessage();
             $("#statustext").text('Check your email for verification link.');
-            $("#statustext").removeClass('error');
             $("#statustext").show();
         } else if (response.AuthenticationResult) {
             localStorage.setItem('blr-accessToken', response.AuthenticationResult.AccessToken);
@@ -179,8 +189,15 @@ async function startAuthFlow(email) {
             leavePage()
         }
     } catch (error) {
-        $("#statustext").text(error.message);
-        $("#statustext").addClass('error');
+        let errorMessage = error.message;
+        if (error.name == "UserNotFoundException") {
+            errorMessage = "Account doesn't exist!"
+        }
+        else if (error.name == "InvalidParameterException") {
+            errorMessage = "Enter something!"
+        }
+        $("#statustext").text(errorMessage);
+        $("#statustext").addClass('text-danger');
         $("#statustext").show();
     }
 }
@@ -223,7 +240,7 @@ async function handleVerification() {
             }
         } catch (error) {
             $("#statustext").text('Verification failed: ' + error.message);
-            $("#statustext").addClass('error');
+            $("#statustext").addClass('text-danger');
             $("#statustext").show();
             $("#signinForm").show();
         }

@@ -152,7 +152,7 @@ def admin_endpoint_auth(event, context):
 
 def handle_auth_flow(event, context):
     if event['triggerSource'] == 'PreSignUp_SignUp':
-            return pre_sign_up(event, context)
+        return pre_sign_up(event, context)
     elif event['triggerSource'] == 'DefineAuthChallenge_Authentication':
         return define_auth_challenge(event, context)
     elif event['triggerSource'] == 'CreateAuthChallenge_Authentication':
@@ -173,11 +173,15 @@ def pre_sign_up(event, context):
 
     existing_email = cognito.list_users(UserPoolId=event['userPoolId'],Filter=f'email = "{email}"')['Users']
     if len(existing_email) > 0:
-        raise Exception("Email already in use")
+        raise ClientError(
+            error_response={'Error': {'Message': 'Email already in use'}}, operation_name='pre_sign_up'
+            )
     
     existing_name = cognito.list_users(UserPoolId=event['userPoolId'],Filter=f'name = "{name}"')['Users']
     if len(existing_name) > 0:
-        raise Exception("Name already in use")
+        raise ClientError(
+            error_response={'Error': {'Message': 'Name already in use'}}, operation_name='pre_sign_up'
+        )
     
     # Auto-confirm but don't verify email
     event['response']['autoConfirmUser'] = True
