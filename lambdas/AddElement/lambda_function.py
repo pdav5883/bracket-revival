@@ -168,12 +168,12 @@ def add_player(year, compname, pfirst, plast, access_token):
                 "body": f"Competition {compname} does not allow guests"}
     
     player_key = year + "/" + cid + "/" + pid + ".json"
+    playername = pfirst + " " + plast
 
     if utils.key_exists(player_key):
         return {"statusCode": 400,
-                "body": f"Player pid {pid} already exists"}
+                "body": f"{playername} already exists in this competition"}
 
-    playername = pfirst + " " + plast
     player = {"pid": pid,
               "name": playername,
               "picks": []}
