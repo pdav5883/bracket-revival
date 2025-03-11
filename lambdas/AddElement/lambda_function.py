@@ -144,7 +144,7 @@ def add_player(year, compname, pfirst, plast, access_token):
                 "body": "Request requires compname parameter"}
     if (pfirst is None or plast is None) and (access_token is None):
         return {"statusCode": 400,
-                "body": "Request requires either playerfirst + playerlast, or access_token"}
+                "body": "Request requires access_token"}
     
     cid = compname.replace(" ", "").lower()
     competition_key = year + "/" + cid + "/competition.json"
@@ -157,15 +157,8 @@ def add_player(year, compname, pfirst, plast, access_token):
     if not competition["open_players"]:
         return {"statusCode": 400,
                 "body": f"Competiton {compname} is not accepting new players"}
-
-    if access_token is not None:
-        pfirst, plast = utils.get_user_attribute(access_token, ["given_name", "family_name"])
-        pid = pfirst.lower() + "__" + plast.lower()
-    elif competition["allow_guests"]:
-        pid = pfirst.lower() + "__" + plast.lower() + "__guest"
-    else:
-        return {"statusCode": 400,
-                "body": f"Competition {compname} does not allow guests"}
+    
+    pfirst, plast, pid, email = utils.get_user_attribute(access_token, ["given_name", "family_name", "name", "email"])
     
     player_key = year + "/" + cid + "/" + pid + ".json"
     playername = pfirst + " " + plast
@@ -194,9 +187,8 @@ def add_player(year, compname, pfirst, plast, access_token):
     utils.trigger_sync(year, cid)
 
     # send welcome email
-    if not competition["allow_guests"]:
-        email = {"typ": "welcome", "content": {"year": year, "compname": compname, "deadline": competition["first_deadline"]}, "recipients": [playername]}
-        utils.trigger_email(email) # TODO: update email trigger to use email from cognito
+    email = {"typ": "welcome", "content": {"year": year, "compname": compname, "deadline": competition["first_deadline"]}, "recipient_names": [pfirst], "recipient_emails": [email]}
+    utils.trigger_email(email) # TODO: update email trigger to use email from cognito
 
     return {"body": f"Successfully created new player {playername} in competition {compname} in year {year}"}
 

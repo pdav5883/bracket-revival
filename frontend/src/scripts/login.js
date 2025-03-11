@@ -92,7 +92,7 @@ $("#signupButton").on("click", async (e) => {
         },
         {
             Name: "name",
-            Value: `${firstName}-${lastName}`.toLowerCase().replace(' ', '')
+            Value: `${firstName}__${lastName}`.toLowerCase().replace(' ', '')
         }
     ];
 

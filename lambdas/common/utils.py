@@ -88,8 +88,12 @@ def trigger_sync_sns(year, cid):
 def trigger_email_sns(emailbatch):
     # emailbatch: {"typ": t , "content": {}, "recipients": [pname1, pname2,...]}
     msg = json.dumps(emailbatch)
-    response = sns.publish(TopicArn=email_topic_arn, Message=msg)
-    return None
+
+    try:
+        response = sns.publish(TopicArn=email_topic_arn, Message=msg)
+    except ClientError as e:
+        print(f"Error sending email batch: {msg}")
+        raise e
 
 
 def get_user_cognito(access_token):

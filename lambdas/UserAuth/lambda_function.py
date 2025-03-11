@@ -223,40 +223,19 @@ def create_auth_challenge(event, context):
         
         # Get user email URL
         email = event['request']['userAttributes']['email']
+        name = event['request']['userAttributes']['given_name']
         
         # Build verification link with code
-        verify_params = f"code={code}&email={email}"
-            
-        verify_link = f"http://{DOMAIN}/login.html?{verify_params}"
-        
-        # Prepare email content
-        email_html = f"""
-        <h1>Verify your email</h1>
-        <p>Click the link below to verify your email and get access:</p>
-        <a href="{verify_link}">Verify Email</a>
-        """
+        verify_path = f"login.html?code={code}&email={email}"
+
+        email_msg = {"typ": "verify", "content": {"verify_path": verify_path}, "recipient_names": [name], "recipient_emails": [email]}
         
         try:
-            # Send email using SES
-            # TODO: change to SNS publish
-            ses.send_email(
-                Source="bracket@bearloves.rocks",
-                Destination={
-                    'ToAddresses': [email]
-                },
-                Message={
-                    'Subject': {
-                        'Data': 'Verify your email'
-                    },
-                    'Body': {
-                        'Html': {
-                            'Data': email_html
-                        }
-                    }
-                }
-            )
+            utils.trigger_email(email_msg)
+        
         except ClientError as e:
-            print(f"Error sending email: {str(e)}")
+            print(f"Error sending email: {str(email_msg)}")
+            print(f"Error: {str(e)}")
             raise e
         
         # Return challenge metadata
