@@ -30,12 +30,6 @@ $(function() {
     initSingleYearCompetition($("#yearsel").val(), $("#compsel").val())
   })
 
-  $("#guestbutton").on("click", () => {
-    $("#namediv").show()
-    $("#notsignedindiv").hide()
-    $("#submitbutton").show()
-  })
-
   $("#newplayer-signinbutton").on("click", () => {
     const year = $("#yearsel").val();
     const compname = $("#compsel").val();
@@ -133,19 +127,6 @@ function initSingleYearCompetition(year, compName) {
     $("#namediv").show()
     $("#signedindiv").show()
     $('#submitbutton').show()
-    return
-  }
-
-  else {
-    $("#notsignedindiv").show()
-
-    if (index[year][compName].allow_guests === false) {
-      $("#guestbutton").hide()
-    }
-    else {
-      $("#guestbutton").show()
-    }
-    return
   }
 }
 

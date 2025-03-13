@@ -166,14 +166,6 @@ function populateCompetitionTable(year, cid, callback) {
       input = makeTextInput("email_deadline", 16, "DEADLINE")
       cell.appendChild(input)
 
-      // allow guests
-      row = table.insertRow()
-      cell = row.insertCell()
-      cell.textContent = "Allow Guests"
-      cell = row.insertCell()
-      input = makeBooleanSelect("selguests", result.allow_guests)
-      cell.appendChild(input)
-
       // open players
       row = table.insertRow()
       cell = row.insertCell()
@@ -453,7 +445,6 @@ async function submitCompetitionEdits(callback) {
     "completed_rounds": parseInt($("#inprounds").val()),
     "open_picks": $("#selpicks").val(),
     "open_players": $("#selplayers").val(),
-    "allow_guests": $("#selguests").val(),
     "email_individual": emailNames,
     "autopick_individual": autopickNames,
     "players": players

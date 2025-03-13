@@ -14,7 +14,7 @@ def lambda_handler(event, context):
     PUT request with all input in query params
 
     The /add endpoint that calls this lambda uses the UserAuth authorizer. year and competition adds
-    require admin user. player requires signed in user or guest info if allowed.
+    require admin user. player requires signed in user
 
     Input: - type: year/competition/player
            - year
@@ -115,14 +115,13 @@ def add_competition(year, compname):
                    "completed_rounds": 0,
                    "open_picks": False,
                    "open_players": False,
-                   "allow_guests": False,
                    "first_deadline": "Thursday, March 21st at Noon (EST)"}
 
     utils.write_file(competition_key, competition)
 
     # update index file
     index = utils.read_file("index.json")
-    index[year][compname] = {"players": [], "allow_guests": False, "open_players": False}
+    index[year][compname] = {"players": [], "open_players": False}
     utils.write_file("index.json", index)
 
     return {"body": f"Successfully created new competition {compname} in year {year}"}

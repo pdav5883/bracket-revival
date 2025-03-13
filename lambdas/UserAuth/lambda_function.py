@@ -51,10 +51,6 @@ def start_or_picks_endpoint_auth(event, context):
     competition_key = f"{year}/{cid}/competition.json"
     print("competition_key:", competition_key)
     competition = utils.read_file(competition_key)
-    allow_guests = competition['allow_guests']
-    
-    if allow_guests:
-        return {"isAuthorized": True}
 
     # confirm that pid matches cognito user name
     access_token = event['headers'].get('authorization', '')
@@ -104,18 +100,11 @@ def add_player_endpoint_auth(event, context):
     access_token = event['headers'].get('authorization', '')
 
     if not access_token:
-        index = utils.read_file("index.json")
-        year = event['queryStringParameters']['year']
-        cid = event['queryStringParameters']['cid'].replace(" ", "").lower()
-
-        if index[year][cid]['allow_guests']:
-            return {"isAuthorized": True}
-        else:
-            return {"isAuthorized": False,
-                    "context": {
-                        "message": "You must be signed in to perform this action"
-                        }
+        return {"isAuthorized": False,
+                "context": {
+                    "message": "You must be signed in to perform this action"
                     }
+                }
 
     try:    
         user = utils.get_user(access_token)

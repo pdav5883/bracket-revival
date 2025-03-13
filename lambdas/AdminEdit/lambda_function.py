@@ -23,7 +23,6 @@ with etype argument in request body:
                           "completed_rounds":,
                           "open_picks",
                           "open_players",
-                          "allow_guests",
                           "email_individual", [name1, ...],
                           "autopick_individual", [name1, ...],
                           "players": {old_name: new_name,...}} if new_name is None,  delete the player
@@ -151,11 +150,9 @@ def update_competition(year, cid, new_competition):
     new_data["completed_rounds"] = int(new_competition["completed_rounds"])
     new_data["open_picks"] = new_competition["open_picks"] in (True, "true", "True", 1, "1")
     new_data["open_players"] = new_competition["open_players"] in (True, "true", "True", 1, "1")
-    new_data["allow_guests"] = new_competition["allow_guests"] in (True, "true", "True", 1, "1")
 
     # start updating index, do write after any updates from name edit loop below
     index = utils.read_file("index.json")
-    index[year][new_data["name"]]["allow_guests"] = new_data["allow_guests"]
     index[year][new_data["name"]]["open_players"] = new_data["open_players"]
     index_player_list = index[year][new_data["name"]]["players"]
 
