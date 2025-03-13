@@ -3,6 +3,7 @@
   "HostedZoneId=Z0361942AJYCRL79BJEU",
   "DeployedRootURL=bracket.bearloves.rocks",
   "LambdaReadWritePermissionName=bracket-read-write",
+  "LambdaReadWritePublishPermissionName=bracket-read-write-publish",
   "LambdaPublishPermissionName=bracket-sns-publish",
   "LambdaReadPermissionName=bracket-read",
   "LambdaReadSendPermissionName=bracket-read-sent",

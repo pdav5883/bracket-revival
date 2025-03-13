@@ -7,9 +7,11 @@ Parameters:
     Type: String
   LambdaReadWritePermissionName:
     Type: String
-  LambdaPublishPermissionName:
+  LambdaReadWritePublishPermissionName:
     Type: String
   LambdaReadPermissionName:
+    Type: String
+  LambdaPublishPermissionName:
     Type: String
   LambdaReadSendPermissionName:
     Type: String
@@ -89,7 +91,7 @@ Resources:
                 return False
       Layers:
         - !Ref LayerBracketCommon
-      Role: !GetAtt RoleBracketReadWrite.Arn 
+      Role: !GetAtt RoleBracketReadWritePublish.Arn 
       FileSystemConfigs: []
       Runtime: "python3.12"
       PackageType: "Zip"
@@ -510,6 +512,26 @@ Resources:
           Effect: "Allow"
           Principal:
             Service: "lambda.amazonaws.com"
+  RoleBracketReadWritePublish:
+    Type: "AWS::IAM::Role"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      Path: "/"
+      ManagedPolicyArns:
+      - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      - !GetAtt PolicyBracketReadWrite.PolicyArn
+      - !GetAtt PolicyBracketPublish.PolicyArn
+      MaxSessionDuration: 3600
+      RoleName: !Sub "role-lambda-${LambdaReadWritePublishPermissionName}"
+      Description: ""
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Action: "sts:AssumeRole"
+          Effect: "Allow"
+          Principal:
+            Service: "lambda.amazonaws.com"
   RoleBracketUserAuth:
     Type: "AWS::IAM::Role"
     UpdateReplacePolicy: "Delete"
@@ -519,7 +541,6 @@ Resources:
       ManagedPolicyArns:
       - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
       - !GetAtt PolicyBracketUserAuth.PolicyArn
-      - !GetAtt PolicyBracketSend.PolicyArn # remove once switched to SNS for email send
       - !GetAtt PolicyBracketPublish.PolicyArn
       - !GetAtt PolicyBracketRead.PolicyArn
       MaxSessionDuration: 3600

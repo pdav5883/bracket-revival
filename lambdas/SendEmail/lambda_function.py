@@ -37,19 +37,22 @@ def lambda_handler(event, context):
 
         if email_type == "verify":
             content["verify_url"] = f"https://{root_url}/{content['verify_path']}"
-
-        else:
+        elif email_type == "welcome":
             year = batch["content"]["year"]
             compname = batch["content"]["compname"]
-            pick_round = content.pop("pick_round")
-
-            content["pick_round_name"] = trn.ROUND_NAMES[pick_round]
-            content["bracket_name"] = ["First", "Second", "Third", "Fourth", "Fifth", "Sixth"][pick_round]
             content["scoreboard_url"] = f"https://{root_url}/scoreboard.html?year={year}&cid={compname}"
             content["bracket_url"] = f"https://{root_url}/bracket.html?year={year}&cid={compname}"
             content["pick_url"] = f"https://{root_url}/picks.html?year={year}&cid={compname}"
-        
 
+        elif email_type in ("reminder", "newround"):
+            year = batch["content"]["year"]
+            compname = batch["content"]["compname"]
+            content["scoreboard_url"] = f"https://{root_url}/scoreboard.html?year={year}&cid={compname}"
+            content["bracket_url"] = f"https://{root_url}/bracket.html?year={year}&cid={compname}"
+            content["pick_url"] = f"https://{root_url}/picks.html?year={year}&cid={compname}"
+            content["pick_round_name"] = trn.ROUND_NAMES[content["pick_round"]]
+            content["bracket_name"] = ["First", "Second", "Third", "Fourth", "Fifth", "Sixth"][content["pick_round"]]
+            
         for name, email in zip(batch["recipient_names"], batch["recipient_emails"]):
             content["name"] = name
 

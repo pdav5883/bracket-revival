@@ -19,8 +19,6 @@ def lambda_handler(event, context):
     Input: - type: year/competition/player
            - year
            - compname (for competition, player)
-           - playerfirst (for guest player)
-           - playerlast (for guest player)
            - access_token (contained in header))
     Output: None
     """
@@ -28,8 +26,6 @@ def lambda_handler(event, context):
     typ = event["queryStringParameters"].get("type")
     year = event["queryStringParameters"].get("year", None)
     cname = event["queryStringParameters"].get("compname", None)
-    pfirst = event["queryStringParameters"].get("playerfirst", None)
-    plast = event["queryStringParameters"].get("playerlast", None)
     
     access_token = event['headers'].get('authorization', '')
 
@@ -41,7 +37,7 @@ def lambda_handler(event, context):
         return add_competition(year, cname)
     elif typ == "player":
         # need access token to grab name for signed in user
-        return add_player(year, cname, pfirst, plast, access_token)
+        return add_player(year, cname, access_token)
     else:
         return {"statusCode": 400,
                 "body": f"Invalid element type {typ}"}
@@ -132,9 +128,9 @@ def add_competition(year, compname):
     return {"body": f"Successfully created new competition {compname} in year {year}"}
 
 
-def add_player(year, compname, pfirst, plast, access_token):
+def add_player(year, compname, access_token):
     """
-    Adds pid.json. Competition must already exist. If pfirst/plast are provided, adds guest player.
+    Adds pid.json. Competition must already exist.
     """
     if year is None:
         return {"statusCode": 400,
@@ -142,7 +138,7 @@ def add_player(year, compname, pfirst, plast, access_token):
     if compname is None:
         return {"statusCode": 400,
                 "body": "Request requires compname parameter"}
-    if (pfirst is None or plast is None) and (access_token is None):
+    if access_token is None:
         return {"statusCode": 400,
                 "body": "Request requires access_token"}
     
@@ -158,7 +154,7 @@ def add_player(year, compname, pfirst, plast, access_token):
         return {"statusCode": 400,
                 "body": f"Competiton {compname} is not accepting new players"}
     
-    pfirst, plast, pid, email = utils.get_user_attribute(access_token, ["given_name", "family_name", "name", "email"])
+    pfirst, plast, pid, pemail = utils.get_user_attribute(access_token, ["given_name", "family_name", "name", "email"])
     
     player_key = year + "/" + cid + "/" + pid + ".json"
     playername = pfirst + " " + plast
@@ -187,8 +183,8 @@ def add_player(year, compname, pfirst, plast, access_token):
     utils.trigger_sync(year, cid)
 
     # send welcome email
-    email = {"typ": "welcome", "content": {"year": year, "compname": compname, "deadline": competition["first_deadline"]}, "recipient_names": [pfirst], "recipient_emails": [email]}
-    utils.trigger_email(email) # TODO: update email trigger to use email from cognito
+    email = {"typ": "welcome", "content": {"year": year, "compname": compname, "deadline": competition["first_deadline"]}, "recipient_names": [pfirst], "recipient_emails": [pemail]}
+    utils.trigger_email(email)
 
     return {"body": f"Successfully created new player {playername} in competition {compname} in year {year}"}
 
