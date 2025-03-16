@@ -1,7 +1,11 @@
 import json
+import boto3
 
 from common import utils
 from common import tournament as trn
+
+user_pool_id = "us-east-1_7j2Ragbz6"
+cognito = boto3.client('cognito-idp')
 
 """
 Lambda admin_edit allows direct updates to .json files from
@@ -130,7 +134,7 @@ def update_competition(year, cid, new_competition):
     if delete_competition:
         # remove all pid.json, competition.json, update index.json
         for playername in old_competition["scoreboard"]:
-            player_key = year + "/" + cid.replace(" ", "").lower() + "/" + playername.replace(" ", "").lower() + ".json"
+            player_key = year + "/" + cid.replace(" ", "").lower() + "/" + playername.replace(" ", "__").lower() + ".json"
             utils.delete_file(player_key)
 
         utils.delete_file(competition_key)
@@ -226,19 +230,62 @@ def update_competition(year, cid, new_competition):
 
     # emails
     if new_competition["email_all"]:
+        # Get emails for all players from Cognito
+        player_emails = []
+        print(f"Sending emails to all players: {index_player_list}")
+        
+        for player_name in index_player_list:
+            try:
+                response = cognito.list_users(
+                    UserPoolId=user_pool_id,
+                    Filter=f'name = "{player_name.replace(" ", "__").lower()}"'
+                )
+                if response['Users']:
+                    # Get email from user attributes
+                    for attr in response['Users'][0]['Attributes']:
+                        if attr['Name'] == 'email':
+                            player_emails.append(attr['Value'])
+                            break
+            except Exception as e:
+                print(f"Error getting email for player {player_name}: {str(e)}")
+        
         utils.trigger_email({"typ": "newround",
-                             "content": {"year": year,
-                                         "compname": new_data["name"],
-                                         "pick_round": new_data["completed_rounds"],
-                                         "deadline": new_competition["deadline"]},
-                             "recipients": index_player_list})
+                           "content": {"year": year,
+                                     "compname": new_data["name"],
+                                     "pick_round": new_data["completed_rounds"],
+                                     "deadline": new_competition["deadline"]},
+                           "recipient_names": index_player_list,
+                           "recipient_emails": player_emails})
+        
+        print(f"Sent to addresses: {player_emails}")
 
     if len(new_competition["email_individual"]) > 0:
+        player_emails = []
+        print(f"Sending emails to individual players: {new_competition['email_individual']}")
+        
+        for player_name in new_competition["email_individual"]:
+            try:
+                response = cognito.list_users(
+                    UserPoolId=user_pool_id,
+                    Filter=f'name = "{player_name.replace(" ", "__").lower()}"'
+                )
+                if response['Users']:
+                    # Get email from user attributes
+                    for attr in response['Users'][0]['Attributes']:
+                        if attr['Name'] == 'email':
+                            player_emails.append(attr['Value'])
+                            break
+            except Exception as e:
+                print(f"Error getting email for player {player_name}: {str(e)}")
+
+        print(f"Sent to addresses: {player_emails}")
+
         utils.trigger_email({"typ": "reminder",
                              "content": {"year": year,
                                          "compname": new_data["name"],
                                          "pick_round": new_data["completed_rounds"],
                                          "deadline": new_competition["deadline"]},
-                             "recipients": new_competition["email_individual"]})
+                             "recipient_names": new_competition["email_individual"],
+                             "recipient_emails": player_emails})
 
     return {"body": "Successful competition update"}

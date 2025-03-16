@@ -270,7 +270,11 @@ async function populateRoundStart(queryParams, callback) {
       if (callback) callback()
     },
     error: function(err) {
-      $("#statustext").text(err.responseText)
+      if (err.status === 403) {
+        $("#statustext").text("You must be signed in as " + $("#playersel").val())
+      } else {
+        $("#statustext").text(err.responseText)
+      }
       if (callback) callback()
     }
   })
@@ -393,7 +397,12 @@ async function submitPicks() {
     error: function(err) {
       $("#submitbutton").prop("disabled", false)
       spinnerOff("submitbutton")
-      $("#statustext").text(err.responseText)
+      
+      if (err.status === 403) {
+        $("#statustext").text("You must be signed in as " + $("#playersel").val())
+      } else {
+        $("#statustext").text(err.responseText)
+      }
     }
   })
 }

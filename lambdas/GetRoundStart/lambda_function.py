@@ -51,7 +51,7 @@ def lambda_handler(event, context):
 
     if not competition["open_picks"]:
         return {"statusCode": 400,
-                "body": f"Picks for {cid} are currently locked"}
+                "body": f"Picks for {competition['name']} {year} are currently locked"}
 
     if round_start > completed_rounds:
         return {"statusCode": 400,

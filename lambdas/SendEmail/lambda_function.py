@@ -41,31 +41,25 @@ def lambda_handler(event, context):
             year = batch["content"]["year"]
             compname = batch["content"]["compname"]
             content["scoreboard_url"] = f"https://{root_url}/scoreboard.html?year={year}&cid={compname}"
-            content["bracket_url"] = f"https://{root_url}/bracket.html?year={year}&cid={compname}"
-            content["pick_url"] = f"https://{root_url}/picks.html?year={year}&cid={compname}"
 
         elif email_type in ("reminder", "newround"):
             year = batch["content"]["year"]
             compname = batch["content"]["compname"]
             content["scoreboard_url"] = f"https://{root_url}/scoreboard.html?year={year}&cid={compname}"
-            content["bracket_url"] = f"https://{root_url}/bracket.html?year={year}&cid={compname}"
-            content["pick_url"] = f"https://{root_url}/picks.html?year={year}&cid={compname}"
             content["pick_round_name"] = trn.ROUND_NAMES[content["pick_round"]]
             content["bracket_name"] = ["First", "Second", "Third", "Fourth", "Fifth", "Sixth"][content["pick_round"]]
             
         for name, email in zip(batch["recipient_names"], batch["recipient_emails"]):
-            content["name"] = name
+            content["name"] = name.split(" ")[0] # first name only
+            content["bracket_url"] = f"https://{root_url}/bracket.html?year={year}&cid={compname}&pid={name}"
+            content["pick_url"] = f"https://{root_url}/picks.html?year={year}&cid={compname}&pid={name}"
 
             subject = templates[email_type]["subject"]
             body = templates[email_type]["body"]
-            print(subject)
-            print(body)
-            print(ses_identity)
-            print(email)
 
             for key, val in content.items():
-                subject = subject.replace("{{" + key + "}}", val)
-                body = body.replace("{{" + key + "}}", val)     
+                subject = subject.replace("{{" + key + "}}", str(val))
+                body = body.replace("{{" + key + "}}", str(val))     
             try:
                 ses.send_email(Source=f"bracket@{ses_identity}",
                                 Destination={"ToAddresses": [email]},
@@ -73,6 +67,7 @@ def lambda_handler(event, context):
                                         "Body": {"Html": {"Data": body}}
                                 }
                       )
+                print(f"Sent to {email}")
             except ClientError as e:
                 print(f"Error sending email to {email} with content:")
                 print(content)

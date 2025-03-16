@@ -6,7 +6,6 @@ from botocore.exceptions import ClientError
 
 from common import utils
 
-DOMAIN = "localhost:8000"
 user_pool_id = "us-east-1_7j2Ragbz6"
 
 cognito = boto3.client('cognito-idp')
@@ -36,43 +35,25 @@ def handle_endpoint_auth(event, context):
     elif event["rawPath"] == "/add":
         return add_endpoint_auth(event, context)
     else:
-        return {"isAuthorized": False,
-                "context": {
-                    "message": f"Invalid endpoint {event['rawPath']}"
-                    }
-                }
+        return {"isAuthorized": False}
     
 def start_or_picks_endpoint_auth(event, context):
-    # grab the competition
-    year = event['queryStringParameters']['year']   
-    cid = event['queryStringParameters']['cid'].replace(" ", "").lower()
+    # compare the pid of the request with the pid of the signed in user
     pid = event['queryStringParameters']['pid'].replace(" ", "__").lower()
-
-    competition_key = f"{year}/{cid}/competition.json"
-    print("competition_key:", competition_key)
-    competition = utils.read_file(competition_key)
 
     # confirm that pid matches cognito user name
     access_token = event['headers'].get('authorization', '')
     
     if not access_token:
-        return {"isAuthorized": False,
-                "context": {
-                    "message": f"You must be signed in as {pid.lower()} to access this page"
-                    }
-                }
+        return {"isAuthorized": False}
 
-    first_name, last_name    = utils.get_user_attribute(access_token, ["given_name", "family_name"])
-    name = first_name + "__" + last_name
+    cognito_pid,  = utils.get_user_attribute(access_token, ["name"])
+
     
-    if name.lower() == pid:
+    if cognito_pid == pid:
         return {"isAuthorized": True}
     else:
-        return {"isAuthorized": False,
-                "context": {
-                    "message": f"You must be signed in as {pid} to access this page"
-                    }
-                }
+        return {"isAuthorized": False}
     
 def add_endpoint_auth(event, context):
     typ = event['queryStringParameters']['type']
@@ -84,11 +65,7 @@ def add_endpoint_auth(event, context):
     elif typ == "player":
         return add_player_endpoint_auth(event, context)
     else:
-        return {"isAuthorized": False,
-                "context": {
-                    "message": f"Invalid element type {typ}"
-                    }
-                }
+        return {"isAuthorized": False}
     
 def add_year_or_competition_endpoint_auth(event, context):
     # submitting user must always be admin
@@ -100,44 +77,28 @@ def add_player_endpoint_auth(event, context):
     access_token = event['headers'].get('authorization', '')
 
     if not access_token:
-        return {"isAuthorized": False,
-                "context": {
-                    "message": "You must be signed in to perform this action"
-                    }
-                }
+        return {"isAuthorized": False}
 
     try:    
         user = utils.get_user(access_token)
         return {"isAuthorized": True}
     
     except cognito.exceptions.UserNotFoundException:
-        return {"isAuthorized": False,
-                "context": {
-                    "message": "Access key does not match any user"
-                    }
-                }
+        return {"isAuthorized": False}
     
 
 def admin_endpoint_auth(event, context):
     access_token = event['headers'].get('authorization', '')
     
     if not access_token:
-        return {"isAuthorized": False,
-                "context": {
-                    "message": f"You must be signed in as an admin for this action"
-                    }
-                }
+        return {"isAuthorized": False}
 
     user = utils.get_user(access_token)
 
     if user_is_admin(user['Username']):
         return {"isAuthorized": True}
     else:
-        return {"isAuthorized": False,
-                "context": {
-                    "message": f"You must be signed in as an admin for this action"
-                    }
-                }
+        return {"isAuthorized": False}
 
 def handle_auth_flow(event, context):
     if event['triggerSource'] == 'PreSignUp_SignUp':

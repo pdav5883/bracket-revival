@@ -182,7 +182,7 @@ def add_player(year, compname, access_token):
     utils.trigger_sync(year, cid)
 
     # send welcome email
-    email = {"typ": "welcome", "content": {"year": year, "compname": compname, "deadline": competition["first_deadline"]}, "recipient_names": [pfirst], "recipient_emails": [pemail]}
+    email = {"typ": "welcome", "content": {"year": year, "compname": compname, "deadline": competition["first_deadline"]}, "recipient_names": [playername], "recipient_emails": [pemail]}
     utils.trigger_email(email)
 
     return {"body": f"Successfully created new player {playername} in competition {compname} in year {year}"}

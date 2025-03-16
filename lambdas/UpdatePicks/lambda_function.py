@@ -39,7 +39,7 @@ def lambda_handler(event, context):
     competition = utils.read_file(competition_key)
 
     if not competition["open_picks"]:
-        err_msg = f"Picks for {cid} are currently locked"
+        err_msg = f"Picks for {competition['name']} {year} are currently locked"
         print(err_msg)
         return {"statusCode": 400,
                 "body": err_msg}
