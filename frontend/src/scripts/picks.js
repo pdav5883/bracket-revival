@@ -34,17 +34,6 @@ $(async function() {
   $("#yearsel").on("change", populateCompetitionsWrapper)
   $("#compsel").on("change", populatePlayerNamesWrapper)
 
-  // Add test fill button if in testing mode
-  if (localStorage.getItem('blr-testing') === 'true') {
-    const testButton = $("<button>")
-      .attr("id", "testfillbutton")
-      .addClass("btn btn-warning")
-      .text("Test Fill")
-      .on("click", () => testFillBracket());
-    
-    $("#buttondiv").append(testButton);
-  }
-
   await initPickPage()
 
   // no switch to edit mode for picks page, since this
