@@ -10,7 +10,7 @@ const cfParams = Object.fromEntries(
     .split('\n')
     .map(line => {
       const [key, value] = line.split('=')
-      return [key, JSON.stringify(value)]
+      return [key, JSON.stringify(value.trim())]
     })
 )
 

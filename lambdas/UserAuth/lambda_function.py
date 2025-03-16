@@ -6,7 +6,8 @@ from botocore.exceptions import ClientError
 
 from common import utils
 
-user_pool_id = "us-east-1_7j2Ragbz6"
+user_pool_id = SUB_UserPoolId
+admin_group_name = SUB_CognitoAdminGroupName
 
 cognito = boto3.client('cognito-idp')
 ses = boto3.client('ses')
@@ -239,4 +240,4 @@ def user_is_admin(user_name):
         UserPoolId=user_pool_id,
         Username=user_name
     )
-    return 'admin' in [group['GroupName'] for group in response['Groups']]
+    return admin_group_name in [group['GroupName'] for group in response['Groups']]

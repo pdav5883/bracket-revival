@@ -51,8 +51,9 @@ def lambda_handler(event, context):
             
         for name, email in zip(batch["recipient_names"], batch["recipient_emails"]):
             content["name"] = name.split(" ")[0] # first name only
-            content["bracket_url"] = f"https://{root_url}/bracket.html?year={year}&cid={compname}&pid={name}"
-            content["pick_url"] = f"https://{root_url}/picks.html?year={year}&cid={compname}&pid={name}"
+            if email_type in ("welcome", "newround", "reminder"):
+              content["bracket_url"] = f"https://{root_url}/bracket.html?year={year}&cid={compname}&pid={name}"
+              content["pick_url"] = f"https://{root_url}/picks.html?year={year}&cid={compname}&pid={name}"
 
             subject = templates[email_type]["subject"]
             body = templates[email_type]["body"]

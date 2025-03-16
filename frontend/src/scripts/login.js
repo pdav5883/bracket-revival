@@ -18,8 +18,8 @@ import {
 import $ from "jquery"
 
 const poolData = {
-    UserPoolId: 'us-east-1_7j2Ragbz6', // Replace with your User Pool ID
-    ClientId: 'oe8k6bdnfaalq92ti8if2rcjp' // Replace with your Client ID
+    UserPoolId: SUB_UserPoolId, // Replace with your User Pool ID
+    ClientId: SUB_UserPoolClientId // Replace with your Client ID
 };
 
 // Initialize the Cognito client

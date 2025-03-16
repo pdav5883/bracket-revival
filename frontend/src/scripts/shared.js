@@ -7,12 +7,12 @@ import "bootstrap"
 import { InitiateAuthCommand, CognitoIdentityProviderClient } from "@aws-sdk/client-cognito-identity-provider";
 
 const poolData = {
-  UserPoolId: 'us-east-1_7j2Ragbz6', // Replace with your User Pool ID
-  ClientId: 'oe8k6bdnfaalq92ti8if2rcjp' // Replace with your Client ID
+  UserPoolId: SUB_UserPoolId,
+  ClientId: SUB_UserPoolClientId
 };
 
 const client = new CognitoIdentityProviderClient({
-  region: "us-east-1" // Your region
+  region: "us-east-1"
 });
 
 // Common init of navbar

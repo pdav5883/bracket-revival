@@ -4,7 +4,7 @@ import boto3
 from common import utils
 from common import tournament as trn
 
-user_pool_id = "us-east-1_7j2Ragbz6"
+user_pool_id = SUB_UserPoolId
 cognito = boto3.client('cognito-idp')
 
 """
