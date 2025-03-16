@@ -128,6 +128,9 @@ function initSingleYearCompetition(year, compName) {
     $("#signedindiv").show()
     $('#submitbutton').show()
   }
+  else {
+    $('#notsignedindiv').show()
+  }
 }
 
 
