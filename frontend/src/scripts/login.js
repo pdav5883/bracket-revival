@@ -67,8 +67,8 @@ $("#signupButton").on("click", async (e) => {
     spinnerOn("signupButton")
 
     const email = $("#signupEmail").val();
-    const firstName = $("#signupFirstName").val();
-    const lastName = $("#signupLastName").val();
+    const firstName = $("#signupFirstName").val().replace(/[^a-zA-Z]/g, '');
+    const lastName = $("#signupLastName").val().replace(/[^a-zA-Z]/g, '');
 
     
     const userAttributes = [
