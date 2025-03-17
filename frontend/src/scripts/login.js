@@ -103,7 +103,7 @@ $("#signupButton").on("click", async (e) => {
         await startAuthFlow(email);
 
         clearMessage();
-        $("#statustext").text('Check your email for a verification link.<br>You can close this tab.');
+        $("#statustext").text('Check your email for a verification link. You can close this tab.');
         $("#statustext").show();
 
         spinnerOff("signupButton")
@@ -167,7 +167,7 @@ async function startAuthFlow(email) {
             $("#signinForm").hide()
             $("#signupForm").hide()
             clearMessage();
-            $("#statustext").text('Check your email for a verification link.<br>You can close this tab.');
+            $("#statustext").text('Check your email for a verification link. You can close this tab.');
             $("#statustext").show();
         } else if (response.AuthenticationResult) {
             localStorage.setItem('blr-accessToken', response.AuthenticationResult.AccessToken);
