@@ -115,7 +115,7 @@ def add_competition(year, compname):
                    "completed_rounds": 0,
                    "open_picks": False,
                    "open_players": False,
-                   "first_deadline": "Thursday, March 21st at Noon (EST)"}
+                   "first_deadline": "Thursday, March 20th at Noon (EST)"}
 
     utils.write_file(competition_key, competition)
 

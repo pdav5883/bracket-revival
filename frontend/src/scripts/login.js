@@ -32,14 +32,8 @@ $(async function () {
     initCommon()
     initButtons(["signupButton", "signinButton"])
     // Show/Hide Forms
-    $("#closeButton").hide()
     $("#signupForm").hide();
     $("#signinForm").hide();
-
-    $("#closeButton").on('click', (e) => {
-        e.preventDefault();
-        window.close();
-    });
 
     $("#showSignin").on('click', (e) => {
         e.preventDefault();
@@ -109,9 +103,8 @@ $("#signupButton").on("click", async (e) => {
         await startAuthFlow(email);
 
         clearMessage();
-        $("#statustext").text('Check your email for verification link.');
+        $("#statustext").text('Check your email for a verification link.<br>You can close this tab.');
         $("#statustext").show();
-        $("#closeButton").show();
 
         spinnerOff("signupButton")
     }
@@ -171,11 +164,10 @@ async function startAuthFlow(email) {
         if (response.ChallengeName === 'CUSTOM_CHALLENGE') {
             // Store the session for later use
             localStorage.setItem('cognitoSession', response.Session);
-            $("#closeButton").show();
             $("#signinForm").hide()
             $("#signupForm").hide()
             clearMessage();
-            $("#statustext").text('Check your email for verification link.');
+            $("#statustext").text('Check your email for a verification link.<br>You can close this tab.');
             $("#statustext").show();
         } else if (response.AuthenticationResult) {
             localStorage.setItem('blr-accessToken', response.AuthenticationResult.AccessToken);
