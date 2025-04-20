@@ -210,7 +210,7 @@ def update_competition(year, cid, new_competition):
 
     # check for auto-picks
     for pname in new_competition["autopick_individual"]:
-        player_key = year + "/" + cid.replace(" ", "").lower()  + "/" + pname.replace(" ", "").lower() + ".json"
+        player_key = year + "/" + cid.replace(" ", "").lower()  + "/" + pname.replace(" ", "__").lower() + ".json"
         player = utils.read_file(player_key)
         picks = player["picks"]
 
