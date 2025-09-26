@@ -1,8 +1,10 @@
 import json
 
-from common import tournament as trn
-from common import utils
+from bracket_common import tournament as trn
+from blr_common import blr_utils
+from bracket_common import bracket_utils
 
+bucket = SUB_PrivateBucketName
 
 def lambda_handler(event, context):
     """
@@ -21,7 +23,7 @@ def lambda_handler(event, context):
     # TODO: check that pid exists
 
     player_key = year + "/" + cid + "/" + pid + ".json"
-    player = utils.read_file(player_key)
+    player = blr_utils.read_file_s3(bucket, player_key)
     
     # check that there are right number of picks for round, infer round
     #  from number of times that player has picked
@@ -36,7 +38,7 @@ def lambda_handler(event, context):
 
     # check that this submission is allowed
     competition_key = year + "/" + cid + "/competition.json"
-    competition = utils.read_file(competition_key)
+    competition = blr_utils.read_file_s3(bucket, competition_key)
 
     if not competition["open_picks"]:
         err_msg = f"Picks for {competition['name']} {year} are currently locked"
@@ -52,10 +54,10 @@ def lambda_handler(event, context):
 
     player["picks"].append(new_picks)
     
-    utils.write_file(player_key, player)
+    blr_utils.write_file_s3(bucket, player_key, player)
 
     # sync scoreboard
-    utils.trigger_sync(year, cid)
+    bracket_utils.trigger_sync(year, cid)
     
     msg = f"Successfully added new picks for round {rnd} to player {pid} in {cid}"
     print(msg)

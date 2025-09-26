@@ -4,8 +4,10 @@
 import json
 from copy import deepcopy
 
-from common import tournament as trn
-from common import utils
+from bracket_common import tournament as trn
+from blr_common import blr_utils
+
+bucket = SUB_PrivateBucketName
 
 
 def lambda_handler(event, context):
@@ -23,7 +25,7 @@ def lambda_handler(event, context):
 
     competition_key = year + "/" + cid + "/competition.json"
     
-    competition = utils.read_file(competition_key)
+    competition = blr_utils.read_file_s3(bucket, competition_key)
     completed_rounds = competition["completed_rounds"]
     scoreboard = competition["scoreboard"]
 

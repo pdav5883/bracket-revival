@@ -4,7 +4,7 @@
 STACK_NAME="bracket-revival"
 LAYER_NAME_KEY="LayerCommonName"
 ZIP_FILE="common/common.zip"
-ZIP_STRUCTURE="python/common"
+ZIP_STRUCTURE="python/bracket_common"
 TEMP_DIR="common/temp"
 
 # Initialize force flag

@@ -3,9 +3,10 @@
 
 import json
 
-from common import tournament as trn
-from common import utils
+from bracket_common import tournament as trn
+from blr_common import blr_utils
 
+bucket = SUB_PrivateBucketName
 
 def lambda_handler(event, context):
     """
@@ -24,7 +25,7 @@ def lambda_handler(event, context):
     if pid is not None:
         pid = pid.replace(" ", "__").lower()
         player_key = year + "/" + cid + "/" + pid + ".json"
-        player = utils.read_file(player_key)
+        player = blr_utils.read_file_s3(bucket, player_key)
         picks = player["picks"]
         round_start = len(picks)
     elif round_start is not None:
@@ -41,12 +42,12 @@ def lambda_handler(event, context):
     teams_key = year + "/teams.json"
     competition_key = year + "/" + cid + "/competition.json"
  
-    results_dict = utils.read_file(results_key)
+    results_dict = blr_utils.read_file_s3(bucket, results_key)
     results = results_dict.get("results")
 
-    teams = utils.read_file(teams_key)
+    teams = blr_utils.read_file_s3(bucket, teams_key)
     
-    competition = utils.read_file(competition_key)
+    competition = blr_utils.read_file_s3(bucket, competition_key)
     completed_rounds = competition.get("completed_rounds")
 
     if not competition["open_picks"]:

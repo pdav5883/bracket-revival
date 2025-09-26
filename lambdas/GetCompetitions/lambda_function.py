@@ -2,8 +2,9 @@
 ### Return structure with valid years and cids 
 
 import json 
-from common import utils
+from blr_common import blr_utils
 
+bucket = SUB_PrivateBucketName
 
 def lambda_handler(event, context):
     """
@@ -16,9 +17,9 @@ def lambda_handler(event, context):
     cid = params.get("cid", None)
 
     if year is None or cid is None:
-        return utils.read_file("index.json")
+        return blr_utils.read_file_s3(bucket, "index.json")
     else:
         cid = cid.replace(" ", "").lower()
-        return utils.read_file(year + "/" + cid + "/competition.json")
+        return blr_utils.read_file_s3(bucket, year + "/" + cid + "/competition.json")
   
 

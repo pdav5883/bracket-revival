@@ -1,8 +1,10 @@
 import json
 
-from common import tournament as trn
-from common import points
-from common import utils
+from bracket_common import tournament as trn
+from bracket_common import points
+from blr_common import blr_utils
+
+bucket = SUB_PrivateBucketName
 
 
 def lambda_handler(event, context):
@@ -24,12 +26,12 @@ def lambda_handler(event, context):
     # TODO: assert arguments exist
 
     results_key = year + "/results.json"
-    results_dict = utils.read_file(results_key)
+    results_dict = blr_utils.read_file_s3(bucket, results_key)
     results = results_dict["results"]
 
     competition_key = year + "/" + cid + "/competition.json"
     
-    competition = utils.read_file(competition_key)
+    competition = blr_utils.read_file_s3(bucket, competition_key)
     scoreboard = competition["scoreboard"]
 
     player_names = list(scoreboard.keys())
@@ -41,7 +43,7 @@ def lambda_handler(event, context):
     for pname in player_names:
         pid = pname.replace(" ", "__").lower()
         player_key = year + "/" + cid + "/" + pid + ".json"
-        player = utils.read_file(player_key)
+        player = blr_utils.read_file_s3(bucket, player_key)
 
         points_game = points.calc_points_revival(player["picks"], results)
         points_round = []
@@ -64,7 +66,7 @@ def lambda_handler(event, context):
     competition["scoreboard"] = scoreboard
     competition["pick_status"] = pick_status
 
-    utils.write_file(competition_key, competition)
+    blr_utils.write_file_s3(bucket, competition_key, competition)
 
     return f"Successfully updated scoreboard for year {year}, cid {cid}"
 

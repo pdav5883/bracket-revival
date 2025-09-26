@@ -53,11 +53,7 @@ Parameters:
     Type: String
   SesIdentity:
     Type: String
-  CognitoUserPoolName:
-    Type: String
-  CognitoUserPoolId:
-    Type: String
-  CognitoAdminGroupName:
+  BLRStackName:
     Type: String
 Outputs:
   CloudFrontDistroId:
@@ -68,10 +64,12 @@ Outputs:
     Value: !GetAtt SNSTopicBracketSync.TopicArn
   EmailTopicArn:
     Value: !GetAtt SNSTopicBracketEmail.TopicArn
-  UserPoolId:
-    Value: !Ref CognitoBLRUserPool
-  UserPoolClientId:
-    Value: !Ref CognitoBLRUserPoolClient
+  BLRLayerCommonName:
+    Value: !ImportValue
+      Fn::Sub: ${BLRStackName}-CommonLayerName
+  BLRLambdaUserAuthArn:
+    Value: !ImportValue
+      Fn::Sub: ${BLRStackName}-LambdaUserAuthArn
 Resources:
 ############################
 ##### Lambda 
@@ -97,6 +95,8 @@ Resources:
                 return False
       Layers:
         - !Ref LayerBracketCommon
+        - !ImportValue
+            Fn::Sub: ${BLRStackName}-CommonLayerArn
       Role: !GetAtt RoleBracketReadWrite.Arn 
       FileSystemConfigs: []
       Runtime: "python3.12"
@@ -129,6 +129,8 @@ Resources:
                 return False
       Layers:
         - !Ref LayerBracketCommon
+        - !ImportValue
+            Fn::Sub: ${BLRStackName}-CommonLayerArn
       Role: !GetAtt RoleBracketAdminEdit.Arn 
       FileSystemConfigs: []
       Runtime: "python3.12"
@@ -161,6 +163,8 @@ Resources:
                 return False
       Layers:
         - !Ref LayerBracketCommon
+        - !ImportValue
+            Fn::Sub: ${BLRStackName}-CommonLayerArn
       Role: !GetAtt RoleBracketRead.Arn 
       FileSystemConfigs: []
       Runtime: "python3.12"
@@ -193,6 +197,8 @@ Resources:
                 return False
       Layers:
         - !Ref LayerBracketCommon
+        - !ImportValue
+            Fn::Sub: ${BLRStackName}-CommonLayerArn
       Role: !GetAtt RoleBracketRead.Arn 
       FileSystemConfigs: []
       Runtime: "python3.12"
@@ -225,6 +231,8 @@ Resources:
                 return False
       Layers:
         - !Ref LayerBracketCommon
+        - !ImportValue
+            Fn::Sub: ${BLRStackName}-CommonLayerArn
       Role: !GetAtt RoleBracketRead.Arn 
       FileSystemConfigs: []
       Runtime: "python3.12"
@@ -257,6 +265,8 @@ Resources:
                 return False
       Layers:
         - !Ref LayerBracketCommon
+        - !ImportValue
+            Fn::Sub: ${BLRStackName}-CommonLayerArn
       Role: !GetAtt RoleBracketRead.Arn 
       FileSystemConfigs: []
       Runtime: "python3.12"
@@ -289,6 +299,8 @@ Resources:
                 return False
       Layers:
         - !Ref LayerBracketCommon
+        - !ImportValue
+            Fn::Sub: ${BLRStackName}-CommonLayerArn
       Role: !GetAtt RoleBracketReadSend.Arn
       FileSystemConfigs: []
       Runtime: "python3.12"
@@ -321,6 +333,8 @@ Resources:
                 return False
       Layers:
         - !Ref LayerBracketCommon
+        - !ImportValue
+            Fn::Sub: ${BLRStackName}-CommonLayerArn
       Role: !GetAtt RoleBracketReadWrite.Arn 
       FileSystemConfigs: []
       Runtime: "python3.12"
@@ -353,6 +367,8 @@ Resources:
                 return False
       Layers:
         - !Ref LayerBracketCommon
+        - !ImportValue
+            Fn::Sub: ${BLRStackName}-CommonLayerArn
       Role: !GetAtt RoleBracketReadWrite.Arn 
       FileSystemConfigs: []
       Runtime: "python3.12"
@@ -383,8 +399,6 @@ Resources:
           def lambda_handler(event, context):
                 # upload code via lambda deploy script
                 return False
-      Layers:
-        - !Ref LayerBracketCommon
       Role: !GetAtt RoleBracketUserAuth.Arn 
       FileSystemConfigs: []
       Runtime: "python3.12"
@@ -527,8 +541,6 @@ Resources:
       ManagedPolicyArns:
       - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
       - !GetAtt PolicyBracketUserAuth.PolicyArn
-      - !GetAtt PolicyBracketPublish.PolicyArn
-      - !GetAtt PolicyBracketRead.PolicyArn
       MaxSessionDuration: 3600
       RoleName: !Sub "role-lambda-${LambdaUserAuthPermissionName}"
       Description: ""
@@ -547,7 +559,6 @@ Resources:
       Path: "/"
       ManagedPolicyArns:
       - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-      - !GetAtt PolicyBracketUserAuth.PolicyArn
       - !GetAtt PolicyBracketPublish.PolicyArn
       - !GetAtt PolicyBracketReadWrite.PolicyArn
       MaxSessionDuration: 3600
@@ -649,15 +660,13 @@ Resources:
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
-          Resource: !Sub "arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/*"
-          Action:
-          - "cognito-idp:AdminGetUser"
-          - "cognito-idp:AdminUpdateUserAttributes"
-          - "cognito-idp:AdminListGroupsForUser"
-          - "cognito-idp:ListUsers"
-          - "cognito-idp:GetUser"
+          Resource:
+          - !GetAtt LambdaBracketSendEmail.Arn
+          - !ImportValue
+              Fn::Sub: ${BLRStackName}-LambdaUserAuthArn
+          Action: "lambda:InvokeFunction"
           Effect: "Allow"
-          Sid: "VisualEditor0"
+          Sid: "LambdaInvokePermission"
 ############################
 #### S3
 ############################
@@ -1010,17 +1019,6 @@ Resources:
         - !Ref DeployedRootURL 
         IPV6Enabled: true
         HttpVersion: "http2"
-        #  CloudFrontOACBracket:
-        #Type: "AWS::CloudFront::OriginAccessControl"
-        #UpdateReplacePolicy: "Delete"
-        #DeletionPolicy: "Delete"
-        #Properties:
-        #OriginAccessControlConfig:
-        #SigningBehavior: "always"
-        #Description: ""
-        #SigningProtocol: "sigv4"
-        #OriginAccessControlOriginType: "s3"
-        #Name: !GetAtt S3BracketPublic.RegionalDomainName
   S3BucketPolicyBracket:
     Type: "AWS::S3::BucketPolicy"
     UpdateReplacePolicy: "Retain"
@@ -1064,90 +1062,11 @@ Resources:
       HostedZoneId: !Ref HostedZoneId
       AliasTarget:
         DNSName: !GetAtt CloudFrontDistroBracket.DomainName
-        HostedZoneId: "Z2FDTNDATAQYW2" # TODO: replace this with param
+        HostedZoneId: "Z2FDTNDATAQYW2"
 ############################
-#### Cognito
+#### Cognito - moved to BLR stack
 ############################
-  CognitoBLRUserPool:
-    Type: "AWS::Cognito::UserPool"
-    UpdateReplacePolicy: "Delete"
-    DeletionPolicy: "Delete"
-    Properties:
-      UserPoolName: !Ref CognitoUserPoolName
-      AdminCreateUserConfig:
-        AllowAdminCreateUserOnly: false
-      AutoVerifiedAttributes:
-        - email
-      UsernameAttributes:
-        - email
-      Policies:
-        PasswordPolicy:
-          MinimumLength: 8
-          RequireLowercase: false
-          RequireNumbers: false
-          RequireSymbols: false
-          RequireUppercase: false
-      Schema:
-        - Name: email
-          AttributeDataType: String
-          Mutable: true
-          Required: true
-        - Name: given_name
-          AttributeDataType: String
-          Mutable: true
-          Required: true
-        - Name: family_name
-          AttributeDataType: String
-          Mutable: true
-          Required: true
-        - Name: name
-          AttributeDataType: String
-          Mutable: true
-          Required: false
-        - Name: is_admin
-          AttributeDataType: Boolean
-          Mutable: true
-          Required: false
-        - Name: custom:is_admin
-          AttributeDataType: Boolean
-          Mutable: true
-          Required: false
-      LambdaConfig:
-        CreateAuthChallenge: !GetAtt LambdaBracketUserAuth.Arn
-        DefineAuthChallenge: !GetAtt LambdaBracketUserAuth.Arn
-        PostAuthentication: !GetAtt LambdaBracketUserAuth.Arn
-        PreSignUp: !GetAtt LambdaBracketUserAuth.Arn
-        VerifyAuthChallengeResponse: !GetAtt LambdaBracketUserAuth.Arn
-  CognitoBLRUserPoolClient:
-    Type: "AWS::Cognito::UserPoolClient"
-    Properties:
-      UserPoolId: !Ref CognitoBLRUserPool
-      ClientName: !Sub "${CognitoUserPoolName}-client"
-      GenerateSecret: false
-      ExplicitAuthFlows:
-        - ALLOW_CUSTOM_AUTH
-        - ALLOW_REFRESH_TOKEN_AUTH
-      PreventUserExistenceErrors: LEGACY
-      AuthSessionValidity: 3
-      RefreshTokenValidity: 1000
-      AccessTokenValidity: 1
-      IdTokenValidity: 1
-      TokenValidityUnits:
-        RefreshToken: days
-        IdToken: hours
-        AccessToken: hours
-  CognitoBLRAdminGroup:
-    Type: AWS::Cognito::UserPoolGroup
-    Properties:
-      GroupName: !Sub ${CognitoAdminGroupName}
-      UserPoolId: !Ref CognitoBLRUserPool
-  CognitoLambdaTriggerPermission:
-    Type: AWS::Lambda::Permission
-    Properties:
-      FunctionName: !GetAtt LambdaBracketUserAuth.Arn
-      Action: lambda:InvokeFunction
-      Principal: cognito-idp.amazonaws.com
-      SourceArn: !GetAtt CognitoBLRUserPool.Arn
+  
 ############################
 #### Logs 
 ############################

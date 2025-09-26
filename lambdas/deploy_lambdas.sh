@@ -2,7 +2,7 @@
 
 # Constants
 STACK_NAME="bracket-revival"
-LAYER_NAME_KEY="LayerCommonName"
+LAYER_NAME_KEYS=("LayerCommonName" "BLRLayerCommonName")
 PREFIX="Lambda"
 SUFFIX="Name"
 
@@ -34,12 +34,28 @@ while IFS= read -r line; do
     CF_PARAMS["$key"]="$value"
 done < <(aws cloudformation describe-stacks --stack-name "$STACK_NAME" --query "Stacks[0].Outputs[]" --output text | awk '{print $1, $2}')
 
-# name of the common layer that all lambdas reference and mod time
-layer_name="${CF_PARAMS[$LAYER_NAME_KEY]}"
-layer_version=$(aws lambda list-layer-versions --layer-name "$layer_name" --query 'LayerVersions[0].Version' --output text)
-layer_arn=$(aws lambda get-layer-version --layer-name "$layer_name" --version-number "$layer_version" --query 'LayerVersionArn' --output text)
-layer_modified=$(aws lambda get-layer-version --layer-name "$layer_name" --version-number "$layer_version" --query 'CreatedDate' --output text)
-layer_modified_epoch=$(date -d "$layer_modified" +%s)
+# Process layer information for each layer name key
+layer_names=()
+layer_versions=()
+layer_arns=()
+layer_modified_epochs=()
+
+for layer_key in "${LAYER_NAME_KEYS[@]}"; do
+    layer_name="${CF_PARAMS[$layer_key]}"
+    if [[ -n "$layer_name" ]]; then
+        layer_version=$(aws lambda list-layer-versions --layer-name "$layer_name" --query 'LayerVersions[0].Version' --output text)
+        layer_arn=$(aws lambda get-layer-version --layer-name "$layer_name" --version-number "$layer_version" --query 'LayerVersionArn' --output text)
+        layer_modified=$(aws lambda get-layer-version --layer-name "$layer_name" --version-number "$layer_version" --query 'CreatedDate' --output text)
+        layer_modified_epoch=$(date -d "$layer_modified" +%s)
+        
+        layer_names+=("$layer_name")
+        layer_versions+=("$layer_version")
+        layer_arns+=("$layer_arn")
+        layer_modified_epochs+=("$layer_modified_epoch")
+    else
+        echo "Warning: No layer name found for key: $layer_key"
+    fi
+done
 
 for dir in $dirs; do
     # lambda short name is directory name
@@ -110,13 +126,32 @@ for dir in $dirs; do
         echo "Lambda $lambda_name is already up-to-date."
     fi
 
-    if [[ "$FORCE_UPDATE" = true || $layer_modified_epoch -gt $lambda_modified_epoch ]]; then
-      echo "Updating $lambda_name layer version to $layer_arn"
-      # wait to make sure that the code update completes before trying layer version update
-      aws lambda wait function-updated --function-name $lambda_name
-      aws lambda update-function-configuration --function-name $lambda_name --layers $layer_arn > /dev/null
-    else
-      echo "Lambda layer $layer_name for lambda $lambda_name is already up-to-date."
+    # Update layers for this lambda
+    layers_to_update=()
+    layers_needed_update=false
+    
+    for i in "${!layer_names[@]}"; do
+        layer_name="${layer_names[$i]}"
+        layer_arn="${layer_arns[$i]}"
+        layer_modified_epoch="${layer_modified_epochs[$i]}"
+        
+        if [[ -n "$layer_name" && -n "$layer_arn" ]]; then
+            if [[ "$FORCE_UPDATE" = true || $layer_modified_epoch -gt $lambda_modified_epoch ]]; then
+                layers_needed_update=true
+                layers_to_update+=("$layer_arn")
+                echo "Layer $layer_name needs update"
+            else
+                layers_to_update+=("$layer_arn")
+                echo "Layer $layer_name is already up-to-date."
+            fi
+        fi
+    done
+    
+    if [[ "$layers_needed_update" = true ]]; then
+        echo "Updating $lambda_name with layer versions..."
+        # wait to make sure that the code update completes before trying layer version update
+        aws lambda wait function-updated --function-name $lambda_name
+        aws lambda update-function-configuration --function-name $lambda_name --layers "${layers_to_update[@]}" > /dev/null
     fi
 
     echo ""

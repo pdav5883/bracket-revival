@@ -5,10 +5,10 @@ import json
 import boto3
 from datetime import datetime, UTC
 
-from common import utils
-from common import tournament as trn
+from bracket_common import tournament as trn
 
 from botocore.exceptions import ClientError
+
 
 """
 event = {"Records": [{"Sns": {"Message": emailbatch}}]}

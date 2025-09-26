@@ -26,6 +26,5 @@
   "SNSTopicSyncName=bracket-sync-topic",
   "ApiName=bracket-revival",
   "SesIdentity=bearloves.rocks",
-  "CognitoUserPoolName=blr-users",
-  "CognitoAdminGroupName=blr-admin"
+  "BLRStackName=blr-home"
 ]

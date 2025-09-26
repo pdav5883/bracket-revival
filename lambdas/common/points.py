@@ -1,4 +1,4 @@
-from common import tournament as trn
+from bracket_common import tournament as trn
 
 
 def calc_points_revival(picks, results, K=2):
@@ -51,4 +51,3 @@ def calc_points_revival(picks, results, K=2):
         num_prev_games += trn.GAMES_PER_ROUND[rnd]
 
     return points
-

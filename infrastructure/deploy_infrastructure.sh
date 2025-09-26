@@ -19,8 +19,8 @@ aws cloudformation deploy \
   --capabilities CAPABILITY_NAMED_IAM \
   # --no-execute-changeset
 
-cd ../lambdas
-bash deploy_common.sh
-bash deploy_lambdas.sh
-cd ../infrastructure
+# cd ../lambdas
+# bash deploy_common.sh
+# bash deploy_lambdas.sh
+# cd ../infrastructure
 
