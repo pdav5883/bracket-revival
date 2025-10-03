@@ -1,10 +1,14 @@
 import json
 import boto3
 
-from common import utils
-from common import tournament as trn
+from blr_common import blr_utils
+from bracket_common import bracket_utils
+from bracket_common import tournament as trn
 
-user_pool_id = "UserPoolId" # this won't work
+bucket = SUB_PrivateBucketName
+email_topic_arn = SUB_BLREmailTopicArn
+
+user_pool_id = SUB_UserPoolId
 cognito = boto3.client('cognito-idp')
 
 """
@@ -62,7 +66,7 @@ def update_results(year, new_data):
     Updates the {year}/results.json file
     """
     obj_key = year + "/results.json"
-    old_data = utils.read_file(obj_key)
+    old_data = blr_utils.read_file_s3(bucket, obj_key)
 
     # validation checks
     try:
@@ -88,19 +92,19 @@ def update_results(year, new_data):
     print(write_data)
 
     # update results.json file
-    utils.write_file(obj_key, write_data)
+    blr_utils.write_file_s3(bucket, obj_key, write_data)
 
     # sync scoreboard for all competitions in year
-    index = utils.read_file("index.json")
+    index = blr_utils.read_file_s3(bucket, "index.json")
     for cid in index[year]:
-        utils.trigger_sync(year, cid.replace(" ", "").lower())
+        bracket_utils.trigger_sync_sns(year, cid.replace(" ", "").lower())
 
     return {"body": "Successful results update"}
 
 
 def update_teams(year, new_teams):
     obj_key = year + "/teams.json"
-    old_teams = utils.read_file(obj_key)
+    old_teams = blr_utils.read_file_s3(bucket, obj_key)
 
     # validation checks
     try:
@@ -120,14 +124,14 @@ def update_teams(year, new_teams):
         new_data[i]["name"] = name
         new_data[i]["short_name"] = sname
 
-    utils.write_file(obj_key, new_data)
+    blr_utils.write_file_s3(bucket, obj_key, new_data)
 
     return {"body": "Successful teams update"}
 
 
 def update_competition(year, cid, new_competition):
     competition_key = year + "/" + cid.replace(" ", "").lower() + "/competition.json"
-    old_competition = utils.read_file(competition_key)
+    old_competition = blr_utils.read_file_s3(bucket, competition_key)
 
     delete_competition = new_competition.pop("delete_competition")
 
@@ -135,14 +139,13 @@ def update_competition(year, cid, new_competition):
         # remove all pid.json, competition.json, update index.json
         for playername in old_competition["scoreboard"]:
             player_key = year + "/" + cid.replace(" ", "").lower() + "/" + playername.replace(" ", "__").lower() + ".json"
-            utils.delete_file(player_key)
+            blr_utils.delete_file_s3(bucket, player_key)
 
-        utils.delete_file(competition_key)
-        utils.delete_directory(year + "/" + cid.replace(" ", ""))
+        blr_utils.delete_file_s3(bucket, competition_key)
 
-        index = utils.read_file("index.json")
+        index = blr_utils.read_file_s3(bucket, "index.json")
         index[year].pop(cid)
-        utils.write_file("index.json", index)
+        blr_utils.write_file_s3(bucket, "index.json", index)
 
         return
 
@@ -156,7 +159,7 @@ def update_competition(year, cid, new_competition):
     new_data["open_players"] = new_competition["open_players"] in (True, "true", "True", 1, "1")
 
     # start updating index, do write after any updates from name edit loop below
-    index = utils.read_file("index.json")
+    index = blr_utils.read_file_s3(bucket, "index.json")
     index[year][new_data["name"]]["open_players"] = new_data["open_players"]
     index_player_list = index[year][new_data["name"]]["players"]
 
@@ -166,7 +169,7 @@ def update_competition(year, cid, new_competition):
             print(f"Deleting player name {old_name} from competition")
             old_pid = old_name.replace(" ", "__").lower()
             old_player_key = year + "/" + cid.replace(" ", "").lower()  + "/" + old_pid + ".json"
-            utils.delete_file(old_player_key)
+            blr_utils.delete_file_s3(bucket, old_player_key)
 
             # update competition.json
             new_data["scoreboard"].pop(old_name)
@@ -183,11 +186,11 @@ def update_competition(year, cid, new_competition):
             new_player_key = year + "/" + cid.replace(" ", "").lower()  + "/" + new_pid + ".json"
 
             # update {name}.json
-            player = utils.read_file(old_player_key)
+            player = blr_utils.read_file_s3(bucket, old_player_key)
             player["pid"] = new_pid
             player["name"] = new_name
-            utils.write_file(new_player_key, player)
-            utils.delete_file(old_player_key)
+            blr_utils.write_file_s3(bucket, new_player_key, player)
+            blr_utils.delete_file_s3(bucket, old_player_key)
 
             # update to competition.json
             score = new_data["scoreboard"].pop(old_name)
@@ -203,15 +206,15 @@ def update_competition(year, cid, new_competition):
     print(new_data)
 
     # update competition.json
-    utils.write_file(competition_key, new_data)
+    blr_utils.write_file_s3(bucket, competition_key, new_data)
 
     # update index.json
-    utils.write_file("index.json", index)
+    blr_utils.write_file_s3(bucket, "index.json", index)
 
     # check for auto-picks
     for pname in new_competition["autopick_individual"]:
         player_key = year + "/" + cid.replace(" ", "").lower()  + "/" + pname.replace(" ", "__").lower() + ".json"
-        player = utils.read_file(player_key)
+        player = blr_utils.read_file_s3(bucket, player_key)
         picks = player["picks"]
 
         if len(picks) <= new_data["completed_rounds"]:
@@ -219,14 +222,14 @@ def update_competition(year, cid, new_competition):
             games_last_round = trn.GAMES_PER_ROUND[len(picks) - 1]
             next_picks = last_picks[games_last_round:]
             picks.append(next_picks)
-            utils.write_file(player_key, player)
+            blr_utils.write_file_s3(bucket, player_key, player)
 
             print(f"Submitted auto-picks for player {pname} in comp {cid} year {year}: {next_picks}")
         else:
             print("Cannot make auto-picks for player {pname} in comp {cid} year {year}. Player has made {len(picks)} picks through {new_data['completed_rounds'] rounds")
 
     # sync scoreboard
-    utils.trigger_sync(year, cid)
+    bracket_utils.trigger_sync_sns(year, cid)
 
     # emails
     if new_competition["email_all"]:
@@ -249,7 +252,8 @@ def update_competition(year, cid, new_competition):
             except Exception as e:
                 print(f"Error getting email for player {player_name}: {str(e)}")
         
-        utils.trigger_email({"typ": "newround",
+        # TODO use bracket_utils.populate_email_content
+        blr_utils.trigger_email_sns(email_topic_arn, {"typ": "newround",
                            "content": {"year": year,
                                      "compname": new_data["name"],
                                      "pick_round": new_data["completed_rounds"],
@@ -280,7 +284,8 @@ def update_competition(year, cid, new_competition):
 
         print(f"Sent to addresses: {player_emails}")
 
-        utils.trigger_email({"typ": "reminder",
+        # TODO use bracket_utils.populate_email_content
+        blr_utils.trigger_email_sns(email_topic_arn, {"typ": "reminder",
                              "content": {"year": year,
                                          "compname": new_data["name"],
                                          "pick_round": new_data["completed_rounds"],

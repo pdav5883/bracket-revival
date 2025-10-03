@@ -57,7 +57,7 @@ def lambda_handler(event, context):
     blr_utils.write_file_s3(bucket, player_key, player)
 
     # sync scoreboard
-    bracket_utils.trigger_sync(year, cid)
+    bracket_utils.trigger_sync_sns(year, cid)
     
     msg = f"Successfully added new picks for round {rnd} to player {pid} in {cid}"
     print(msg)

@@ -1,6 +1,9 @@
 # bracket-revival
 A March Madness bracket picking game where you get to re-pick your bracket after every round. 
 
+## TODO
+- Issues with initial welcome email when join game (currently disabled) and batch emailing from admin.
+
 ## New Game Flow
   - If /join.html includes year, cid arguments, then go straight to page, other provide dropdown with GO selector
   - Upon GO, check to see if game can be joined (accepting players)

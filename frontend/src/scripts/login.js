@@ -18,13 +18,13 @@ import {
 import $ from "jquery"
 
 const poolData = {
-    UserPoolId: SUB_UserPoolId, // Replace with your User Pool ID
-    ClientId: SUB_UserPoolClientId // Replace with your Client ID
+    UserPoolId: SUB_UserPoolId,
+    ClientId: SUB_UserPoolClientId
 };
 
 // Initialize the Cognito client
 const client = new CognitoIdentityProviderClient({
-    region: "us-east-1" // Your region
+    region: "us-east-1"
 });
 
 // Move all UI initialization into a DOMContentLoaded event listener

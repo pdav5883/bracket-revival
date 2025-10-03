@@ -6,8 +6,12 @@ import os
 import random
 import string
 
-from common import utils
-from common import tournament as trn
+from bracket_common import bracket_utils
+from bracket_common import tournament as trn
+from blr_common import blr_utils
+
+bucket = SUB_PrivateBucketName
+email_topic_arn = SUB_BLREmailTopicArn
 
 def lambda_handler(event, context):
     """
@@ -54,7 +58,7 @@ def add_year(year):
     results_key = year + "/results.json"
     teams_key = year + "/teams.json"
 
-    if utils.key_exists(results_key):
+    if blr_utils.key_exists_s3(bucket, results_key):
         return {"statusCode": 400,
                 "body": f"Year {year} already exists"}
 
@@ -73,13 +77,13 @@ def add_year(year):
         team["seed"] = seed
         teams.append(team)
 
-    utils.write_file(results_key, results)
-    utils.write_file(teams_key, teams)
+    blr_utils.write_file_s3(bucket, results_key, results)
+    blr_utils.write_file_s3(bucket, teams_key, teams)
 
     # update index file
-    index = utils.read_file("index.json")
+    index = blr_utils.read_file_s3(bucket, "index.json")
     index[str(year)] = {}
-    utils.write_file("index.json", index)
+    blr_utils.write_file_s3(bucket, "index.json", index)
 
     return {"body": f"Successfully created new year {year}"}
 
@@ -100,11 +104,11 @@ def add_competition(year, compname):
     results_key = year + "/results.json"
     competition_key = year + "/" + cid + "/competition.json"
 
-    if not utils.key_exists(results_key):
+    if not blr_utils.key_exists_s3(bucket, results_key):
         return {"statusCode": 400,
                 "body": f"Year {year} does not yet exist"}
 
-    if utils.key_exists(competition_key):
+    if blr_utils.key_exists_s3(bucket, competition_key):
         return {"statusCode": 400,
                 "body": f"Competition cid {cid} already exists"}
 
@@ -117,12 +121,12 @@ def add_competition(year, compname):
                    "open_players": False,
                    "first_deadline": "Thursday, March 20th at Noon (EST)"}
 
-    utils.write_file(competition_key, competition)
+    blr_utils.write_file_s3(bucket, competition_key, competition)
 
     # update index file
-    index = utils.read_file("index.json")
+    index = blr_utils.read_file_s3(bucket, "index.json")
     index[year][compname] = {"players": [], "open_players": False}
-    utils.write_file("index.json", index)
+    blr_utils.write_file_s3(bucket, "index.json", index)
 
     return {"body": f"Successfully created new competition {compname} in year {year}"}
 
@@ -143,7 +147,7 @@ def add_player(year, compname, access_token):
     
     cid = compname.replace(" ", "").lower()
     competition_key = year + "/" + cid + "/competition.json"
-    competition = utils.read_file(competition_key)
+    competition = blr_utils.read_file_s3(bucket, competition_key)
 
     if competition is None:
         return {"statusCode": 400,
@@ -153,12 +157,12 @@ def add_player(year, compname, access_token):
         return {"statusCode": 400,
                 "body": f"Competiton {compname} is not accepting new players"}
     
-    pfirst, plast, pid, pemail = utils.get_user_attribute(access_token, ["given_name", "family_name", "name", "email"])
+    pfirst, plast, pid, pemail = blr_utils.get_user_attribute_cognito(access_token, ["given_name", "family_name", "name", "email"])
     
     player_key = year + "/" + cid + "/" + pid + ".json"
     playername = pfirst + " " + plast
 
-    if utils.key_exists(player_key):
+    if blr_utils.key_exists_s3(bucket, player_key):
         return {"statusCode": 400,
                 "body": f"{playername} already exists in this competition"}
 
@@ -166,24 +170,26 @@ def add_player(year, compname, access_token):
               "name": playername,
               "picks": []}
 
-    utils.write_file(player_key, player)
+    blr_utils.write_file_s3(bucket, player_key, player)
 
     # update competition file
     competition["scoreboard"][playername] = []
-    utils.write_file(competition_key, competition)
+    blr_utils.write_file_s3(bucket, competition_key, competition)
 
     # update index.json. Grab the actual full competition name from competition.json since we
     #  want to be robust to the compname input being the cid
-    index = utils.read_file("index.json")
+    index = blr_utils.read_file_s3(bucket, "index.json")
     index[year][competition["name"]]["players"].append(playername)
-    utils.write_file("index.json", index)
+    blr_utils.write_file_s3(bucket, "index.json", index)
 
     # sync scoreboard
-    utils.trigger_sync(year, cid)
+    bracket_utils.trigger_sync_sns(year, cid)
 
     # send welcome email
-    email = {"typ": "welcome", "content": {"year": year, "compname": compname, "deadline": competition["first_deadline"]}, "recipient_names": [playername], "recipient_emails": [pemail]}
-    utils.trigger_email(email)
+    # TODO: this currently won't work because "name" is required to fill in URLs, however don't have name until the BLRSendEmail lambda when it gets subbed in. Just need to pass url downstream for later subbing
+    # content = bracket_utils.populate_email_content("welcome", {"year": year, "compname": compname, "deadline": competition["first_deadline"]})
+    # email = {"typ": "welcome", "content": content, "recipient_names": [playername], "recipient_emails": [pemail]}
+    # blr_utils.trigger_email_sns(email_topic_arn, email)
 
     return {"body": f"Successfully created new player {playername} in competition {compname} in year {year}"}
 

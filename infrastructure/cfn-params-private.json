@@ -9,6 +9,7 @@
   "LambdaSendPermissionName=bracket-send",
   "LambdaUserAuthPermissionName=bracket-user-auth",
   "LambdaAdminEditPermissionName=bracket-admin-edit",
+  "LambdaListCognitoUsersPermissionName=bracket-list-cognito-users",
   "PublicBucketName=bracket-revival-public",
   "PrivateBucketName=bracket-revival-private",
   "LambdaAddElementName=BracketAddElement",
@@ -17,14 +18,11 @@
   "LambdaGetCompetitionsName=BracketGetCompetitions",
   "LambdaGetRoundStartName=BracketGetRoundStart",
   "LambdaGetScoreboardName=BracketGetScoreboard",
-  "LambdaSendEmailName=BracketSendEmail",
   "LambdaUpdatePicksName=BracketUpdatePicks",
   "LambdaUpdateScoreboardName=BracketUpdateScoreboard",
   "LambdaUserAuthName=BracketUserAuth",
   "LayerCommonName=BracketCommon",
-  "SNSTopicEmailName=bracket-email-topic",
   "SNSTopicSyncName=bracket-sync-topic",
   "ApiName=bracket-revival",
-  "SesIdentity=bearloves.rocks",
   "BLRStackName=blr-home"
 ]

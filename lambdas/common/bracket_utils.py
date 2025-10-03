@@ -1,9 +1,13 @@
 import os
 import json
 import boto3
-from botocore.exceptions import ClientError
+from datetime import datetime, UTC
+from . import tournament as trn
 
 sns = boto3.client("sns")
+
+root_url = SUB_DeployedRootURL
+sync_topic_arn = SUB_SyncTopicArn
 
 
 def trigger_sync_sns(year, cid):
@@ -12,12 +16,99 @@ def trigger_sync_sns(year, cid):
     return None
 
 
-def trigger_email_sns(emailbatch):
-    # emailbatch: {"typ": t , "content": {}, "recipients": [pname1, pname2,...]}
-    msg = json.dumps(emailbatch)
+def populate_email_content(email_type, content):
+    """
+    Populate email content with URLs and other dynamic values
+    """
+    if email_type == "welcome":
+        content["scoreboard_url"] = f"https://{root_url}/scoreboard.html?year={content['year']}&cid={content['compname']}"
+    elif email_type in ("reminder", "newround"):
+        content["scoreboard_url"] = f"https://{root_url}/scoreboard.html?year={content['year']}&cid={content['compname']}"
+        content["pick_round_name"] = trn.ROUND_NAMES[content["pick_round"]]
+        content["bracket_name"] = ["First", "Second", "Third", "Fourth", "Fifth", "Sixth"][content["pick_round"]]
+        
+    if email_type in ("welcome", "newround", "reminder"):
+        content["bracket_url"] = f"https://{root_url}/bracket.html?year={content['year']}&cid={content['compname']}&pid={content['name']}"
+        content["pick_url"] = f"https://{root_url}/picks.html?year={content['year']}&cid={content['compname']}&pid={content['name']}"
 
-    try:
-        response = sns.publish(TopicArn=email_topic_arn, Message=msg)
-    except ClientError as e:
-        print(f"Error sending email batch: {msg}")
-        raise e
+    # Add timestamp to content
+    content["timestamp"] = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
+    
+    return content
+
+
+welcome_template = {"subject": "Welcome to bracket-revival! ({{compname}} {{year}})",
+                    "body": "<html>\
+                               <head>\
+                                 <style>\
+                                   body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }\
+                                   .content { max-width: 600px; margin: 0 auto; }\
+                                   .timestamp { font-size: 7pt; color: #999; margin-top: 15px; text-align: right; }\
+                                 </style>\
+                               </head>\
+                               <body>\
+                                 <div class='content'>\
+                                   <div class='timestamp'>{{timestamp}}</div>\
+                                   <p>Hi {{name}},</p>\
+                                   <p>Welcome to bracket-revival! Before each round of March Madness, you'll be picking a fresh bracket from the surviving teams. The more times you correctly pick a team to win, the more points you'll score!</p>\
+                                   <p>Click <a href='{{pick_url}}'>HERE</a> to pick your First Bracket!</p>\
+                                   <p>You have until <strong>{{deadline}}</strong> when the first game starts to submit your picks - so don't delay!</p>\
+                                   <p>For more info, be sure to check out the <a href='https://bracket.bearloves.rocks/rules.html'>Rules</a> and your game's <a href='{{scoreboard_url}}'>Scoreboard</a>.</p>\
+                                   <p>Look for an email like this after every round with a link to pick your next bracket. Thanks for playing!</p>\
+                                   <p>Your Friend,<br>The BLR Commissioner</p>\
+                                   <div class='timestamp'>{{timestamp}}</div>\
+                                 </div>\
+                               </body>\
+                             </html>"}
+
+newround_template = {"subject": "Time to Pick Your {{bracket_name}} Bracket! ({{compname}} {{year}})",
+                     "body": "<html>\
+                               <head>\
+                                 <style>\
+                                   body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }\
+                                   .content { max-width: 600px; margin: 0 auto; }\
+                                   .timestamp { font-size: 7pt; color: #999; margin-top: 15px; text-align: right; }\
+                                 </style>\
+                               </head>\
+                               <body>\
+                                 <div class='content'>\
+                                   <div class='timestamp'>{{timestamp}}</div>\
+                                   <p>Hi {{name}},</p>\
+                                   <p>It's time to pick a fresh bracket starting in the {{pick_round_name}} and going all the way to the Championship.</p>\
+                                   <p>Click <a href='{{pick_url}}'>HERE</a> to make your picks.</p>\
+                                   <p>You have until <strong>{{deadline}}</strong> when the next round starts - so don't delay!</p>\
+                                   <p>Looking for the <a href='{{scoreboard_url}}'>Scoreboard</a>, your <a href='{{bracket_url}}'>Brackets</a>, or a <a href='https://bracket.bearloves.rocks/rules.html'>Rules Refresher</a>?</p>\
+                                   <p>Your Friend,<br>The BLR Commissioner</p>\
+                                   <div class='timestamp'>{{timestamp}}</div>\
+                                 </div>\
+                               </body>\
+                             </html>"}
+
+reminder_template = {"subject": "Don't Forget to Pick Your {{bracket_name}} Bracket! ({{compname}} {{year}})",
+                     "body": "<html>\
+                               <head>\
+                                 <style>\
+                                   body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }\
+                                   .content { max-width: 600px; margin: 0 auto; }\
+                                   .timestamp { font-size: 7pt; color: #999; margin-top: 15px; text-align: right; }\
+                                 </style>\
+                               </head>\
+                               <body>\
+                                 <div class='content'>\
+                                   <div class='timestamp'>{{timestamp}}</div>\
+                                   <p>Hi {{name}},</p>\
+                                   <p>A friendly reminder that time is running out to make your latest round of picks! The next round starts at <strong>{{deadline}}</strong>, so get your picks in before then!</p>\
+                                   <p>Click <a href='{{pick_url}}'>HERE</a> to make your picks.</p>\
+                                   <p>Your Friend,<br>The BLR Commissioner</p>\
+                                   <div class='timestamp'>{{timestamp}}</div>\
+                                 </div>\
+                               </body>\
+                             </html>"}
+
+templates = {"welcome": welcome_template,
+             "newround": newround_template,
+             "reminder": reminder_template}
+
+
+
+

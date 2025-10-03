@@ -19,6 +19,8 @@ Parameters:
     Type: String
   LambdaAdminEditPermissionName:
     Type: String
+  LambdaListCognitoUsersPermissionName:
+    Type: String
   PublicBucketName:
     Type: String
   PrivateBucketName:
@@ -35,8 +37,6 @@ Parameters:
     Type: String
   LambdaGetScoreboardName:
     Type: String
-  LambdaSendEmailName:
-    Type: String
   LambdaUpdatePicksName:
     Type: String
   LambdaUpdateScoreboardName:
@@ -45,13 +45,9 @@ Parameters:
     Type: String
   LayerCommonName:
     Type: String
-  SNSTopicEmailName:
-    Type: String
   SNSTopicSyncName:
     Type: String
   ApiName:
-    Type: String
-  SesIdentity:
     Type: String
   BLRStackName:
     Type: String
@@ -62,14 +58,21 @@ Outputs:
     Value: !Ref ApiGatewayBracket
   SyncTopicArn:
     Value: !GetAtt SNSTopicBracketSync.TopicArn
-  EmailTopicArn:
-    Value: !GetAtt SNSTopicBracketEmail.TopicArn
+  BLREmailTopicArn:
+    Value: !ImportValue
+      Fn::Sub: ${BLRStackName}-EmailTopicArn
   BLRLayerCommonName:
     Value: !ImportValue
       Fn::Sub: ${BLRStackName}-CommonLayerName
   BLRLambdaUserAuthArn:
     Value: !ImportValue
       Fn::Sub: ${BLRStackName}-LambdaUserAuthArn
+  UserPoolId:
+    Value: !ImportValue
+      Fn::Sub: ${BLRStackName}-UserPoolId
+  UserPoolClientId:
+    Value: !ImportValue
+      Fn::Sub: ${BLRStackName}-UserPoolClientId
 Resources:
 ############################
 ##### Lambda 
@@ -278,40 +281,6 @@ Resources:
         Size: 512
       Architectures:
       - "x86_64"
-  LambdaBracketSendEmail:
-    Type: "AWS::Lambda::Function"
-    UpdateReplacePolicy: "Delete"
-    DeletionPolicy: "Delete"
-    Properties:
-      FunctionName: !Ref LambdaSendEmailName
-      MemorySize: 128
-      Description: ""
-      TracingConfig:
-        Mode: "PassThrough"
-      Timeout: 3
-      RuntimeManagementConfig:
-        UpdateRuntimeOn: "Auto"
-      Handler: "lambda_function.lambda_handler"
-      Code:
-        ZipFile: |
-          def lambda_handler(event, context):
-                # upload code via lambda deploy script
-                return False
-      Layers:
-        - !Ref LayerBracketCommon
-        - !ImportValue
-            Fn::Sub: ${BLRStackName}-CommonLayerArn
-      Role: !GetAtt RoleBracketReadSend.Arn
-      FileSystemConfigs: []
-      Runtime: "python3.12"
-      PackageType: "Zip"
-      LoggingConfig:
-        LogFormat: "Text"
-        LogGroup: !Ref LogBracketLambdaSendEmail
-      EphemeralStorage:
-        Size: 512
-      Architectures:
-      - "x86_64"
   LambdaBracketUpdatePicks:
     Type: "AWS::Lambda::Function"
     UpdateReplacePolicy: "Delete"
@@ -424,29 +393,6 @@ Resources:
 ############################
 #### SNS
 ############################
-  SNSTopicBracketEmail:
-    Type: "AWS::SNS::Topic"
-    UpdateReplacePolicy: "Delete"
-    DeletionPolicy: "Delete"
-    Properties:
-      TopicName: !Ref SNSTopicEmailName
-  SNSSubscriptionBracketEmail:
-    Type: "AWS::SNS::Subscription"
-    UpdateReplacePolicy: "Delete"
-    DeletionPolicy: "Delete"
-    Properties:
-      Protocol: "lambda"
-      TopicArn: !GetAtt SNSTopicBracketEmail.TopicArn
-      Endpoint: !GetAtt LambdaBracketSendEmail.Arn
-  SNSTriggerPermissionBracketEmail:
-    Type: "AWS::Lambda::Permission"
-    UpdateReplacePolicy: "Delete"
-    DeletionPolicy: "Delete"
-    Properties:
-      FunctionName: !GetAtt LambdaBracketSendEmail.Arn
-      Action: "lambda:InvokeFunction"
-      SourceArn: !GetAtt SNSTopicBracketEmail.TopicArn
-      Principal: "sns.amazonaws.com"
   SNSTopicBracketSync:
     Type: "AWS::SNS::Topic"
     UpdateReplacePolicy: "Delete"
@@ -512,26 +458,6 @@ Resources:
           Effect: "Allow"
           Principal:
             Service: "lambda.amazonaws.com"
-  RoleBracketReadSend:
-    Type: "AWS::IAM::Role"
-    UpdateReplacePolicy: "Delete"
-    DeletionPolicy: "Delete"
-    Properties:
-      Path: "/"
-      ManagedPolicyArns:
-      - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-      - !GetAtt PolicyBracketRead.PolicyArn
-      - !GetAtt PolicyBracketSend.PolicyArn
-      MaxSessionDuration: 3600
-      RoleName: !Sub "role-lambda-${LambdaReadSendPermissionName}"
-      Description: ""
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-        - Action: "sts:AssumeRole"
-          Effect: "Allow"
-          Principal:
-            Service: "lambda.amazonaws.com"
   RoleBracketUserAuth:
     Type: "AWS::IAM::Role"
     UpdateReplacePolicy: "Delete"
@@ -561,6 +487,7 @@ Resources:
       - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
       - !GetAtt PolicyBracketPublish.PolicyArn
       - !GetAtt PolicyBracketReadWrite.PolicyArn
+      - !GetAtt PolicyBracketListCognitoUsers.PolicyArn
       MaxSessionDuration: 3600
       RoleName: !Sub "role-lambda-${LambdaAdminEditPermissionName}"
       Description: ""
@@ -606,12 +533,31 @@ Resources:
         Version: "2012-10-17"
         Statement:
         - Resource:
-          - !GetAtt SNSTopicBracketEmail.TopicArn
+          - !ImportValue
+              Fn::Sub: ${BLRStackName}-EmailTopicArn
           - !GetAtt SNSTopicBracketSync.TopicArn
           Action:
           - "sns:Publish"
           Effect: "Allow"
           Sid: "VisualEditor0"
+  PolicyBracketListCognitoUsers:
+    Type: "AWS::IAM::ManagedPolicy"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      ManagedPolicyName: !Sub "policy-lambda-${LambdaListCognitoUsersPermissionName}"
+      Path: "/"
+      Description: ""
+      Groups: []
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Resource:
+          - !ImportValue
+              Fn::Sub: ${BLRStackName}-UserPoolArn
+          Action:
+          - "cognito-idp:ListUsers"
+          Effect: "Allow"
   PolicyBracketRead:
     Type: "AWS::IAM::ManagedPolicy"
     UpdateReplacePolicy: "Delete"
@@ -632,22 +578,6 @@ Resources:
           - "s3:ListBucket"
           Effect: "Allow"
           Sid: "VisualEditor0"
-  PolicyBracketSend:
-    Type: "AWS::IAM::ManagedPolicy"
-    UpdateReplacePolicy: "Delete"
-    DeletionPolicy: "Delete"
-    Properties:
-      ManagedPolicyName: !Sub "policy-lambda-${LambdaSendPermissionName}"
-      Path: "/"
-      Description: ""
-      Groups: []
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          Resource: !Sub "arn:aws:ses:${AWS::Region}:${AWS::AccountId}:identity/${SesIdentity}"
-          Action: "ses:SendEmail"
-          Effect: "Allow"
-          Sid: "VisualEditor0"
   PolicyBracketUserAuth:
     Type: "AWS::IAM::ManagedPolicy"
     UpdateReplacePolicy: "Delete"
@@ -661,7 +591,6 @@ Resources:
         Version: "2012-10-17"
         Statement:
           Resource:
-          - !GetAtt LambdaBracketSendEmail.Arn
           - !ImportValue
               Fn::Sub: ${BLRStackName}-LambdaUserAuthArn
           Action: "lambda:InvokeFunction"
@@ -1111,13 +1040,6 @@ Resources:
     DeletionPolicy: "Delete"
     Properties:
       LogGroupName: !Sub "/aws/lambda/${LambdaGetScoreboardName}"
-      RetentionInDays: 7
-  LogBracketLambdaSendEmail:
-    Type: "AWS::Logs::LogGroup"
-    UpdateReplacePolicy: "Delete"
-    DeletionPolicy: "Delete"
-    Properties:
-      LogGroupName: !Sub "/aws/lambda/${LambdaSendEmailName}"
       RetentionInDays: 7
   LogBracketLambdaUpdatePicks:
     Type: "AWS::Logs::LogGroup"
