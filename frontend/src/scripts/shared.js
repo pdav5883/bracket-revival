@@ -1,10 +1,10 @@
 import { API_URL } from "./constants.js"
 import "../styles/custom.css"
 import $ from "jquery"
-import "bootstrap/dist/css/bootstrap.min.css"
-import "bootstrap"
 
 import { InitiateAuthCommand, CognitoIdentityProviderClient } from "@aws-sdk/client-cognito-identity-provider";
+import { initNavbar, updateNavbarAuth} from "blr-shared-frontend";
+import { navbarConfig } from "../config/navbar-config.js";
 
 const poolData = {
   UserPoolId: SUB_UserPoolId,
@@ -15,66 +15,46 @@ const client = new CognitoIdentityProviderClient({
   region: "us-east-1"
 });
 
-// Common init of navbar
+export { initButtons, spinnerOn, spinnerOff } from "blr-shared-frontend";
+
 export function initCommon() {
-  $(function() {
-    $.get("assets/nav.html", navbar => {
-      $("#nav-placeholder").replaceWith(navbar);
-      
-      // Determine whether to show signin button or user menu
-      if (isAuthenticated()) {
-        $("#signin-button").hide();
-        $("#user-menu").show();
-        const userFirstName = localStorage.getItem('blr-userFirstName');
-        const userLastName = localStorage.getItem('blr-userLastName');
-        const isAdmin = localStorage.getItem('blr-isAdmin') === 'true';
-        $("#user-menu").text(`${userFirstName} ${userLastName[0]}`);
-
-        if (isAdmin) {
-          $("#admin-button").show();
-        } else {
-          $("#admin-button").hide();
-        }
-      }
-
-      else {
-        $("#signin-button").show();
-        $("#user-menu").hide();
-      }
-      
-      $("#signout-button").on("click", signOut);
-
-      $("#signin-button").on("click", async () => {
-        window.location.href = '/login.html';
-      });
-
-      $("#admin-button").on("click", () => {
-        window.location.href = '/admin.html';
-      });
+  
+  // Initialize navbar with callback to set up button handlers
+  initNavbar(navbarConfig, () => {    
+    $("#signin-button").on("click", () => {
+      window.location.href = '/login.html';
     });
+    
+    $("#admin-button").on("click", () => {
+      window.location.href = '/admin.html';
+    });
+    
+    $("#signout-button").on("click", () => {
+      signOut();
+    });
+        
+    // Update navbar auth state after handlers are set up
+    updateAuthState();
   });
 }
 
-export function initButtons(buttonIdList) {
-  for (const buttonId of buttonIdList) {
-    const button = $(`#${buttonId}`);
-    const buttonText = button.text();
-    button.empty();
-    button.append($('<span>').text(buttonText));
-    button.append($('<div class="spinner-border spinner-border-sm" style="display: none;"></div>'));
-
-    // Store original dimensions
+// Update authentication state in navbar
+function updateAuthState() {
+  if (isAuthenticated()) {
+    const userFirstName = localStorage.getItem('blr-userFirstName');
+    const userLastName = localStorage.getItem('blr-userLastName');
+    const isAdmin = localStorage.getItem('blr-isAdmin') === 'true';
     
-    const width = button.outerWidth();
-    // const height = button.outerHeight();
-    
-    // Set fixed dimensions to prevent resizing during loading state
-    button.css({
-      width: width + 'px',
-      // height: height + 'px'
+    updateNavbarAuth(true, {
+      firstName: userFirstName,
+      lastName: userLastName,
+      isAdmin: isAdmin
     });
+  } else {
+    updateNavbarAuth(false);
   }
 }
+
 
 export function initIndexOnly(setIndexCallback) {
   // need the setIndexCallback argument to allow calling script to set index,
@@ -189,16 +169,6 @@ export function populatePlayerNames(index, pid, emptyLabel) {
   }
 }
 
-export function spinnerOn(buttonId) {
-  $(`#${buttonId} span`).hide();
-  $(`#${buttonId} div`).show();
-}
-
-export function spinnerOff(buttonId) {
-  $(`#${buttonId} span`).show();
-  $(`#${buttonId} div`).hide();
-}
-
 // Add this new function to handle refresh
 async function refreshToken() {
   try {
@@ -254,8 +224,8 @@ export function signOut() {
   localStorage.removeItem('blr-userLastName');
   localStorage.removeItem('blr-isAdmin');
 
-  $("#signin-button").show();
-  $("#user-menu").hide();
+  // Update navbar state
+  updateNavbarAuth(false);
 }
 
 export function isAuthenticated() {
