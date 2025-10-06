@@ -27,7 +27,7 @@ export const navbarConfig = {
     },
     {
       type: 'dropdown',
-      label: 'More!',
+      label: 'More',
       items: [
         { name: 'About <em>bracket-revival</em>', url: '/about.html' },
         { name: 'Join a Game', url: '/join.html' },

@@ -1,18 +1,22 @@
 import { API_URL } from "./constants.js" 
 
-import { initIndexOnly,
+import { 
+  initCommon,
   initIndexYears,
   populateCompetitions,
-  populatePlayerNames,
-  initCommon,
-  initButtons,
-  getValidAccessToken,
-  spinnerOn,
-  spinnerOff
+  populatePlayerNames
 } from "./shared.js"
 
-  import { createBracket } from "bracketry"
-  import $ from "jquery"
+import {
+  initButtons,
+  spinnerOn,
+  spinnerOff,
+  getValidAccessToken
+} from "blr-shared-frontend"
+
+
+import { createBracket } from "bracketry"
+import $ from "jquery"
 
 let bracket
 let matches

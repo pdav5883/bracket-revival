@@ -1,12 +1,18 @@
 import { API_URL } from "./constants.js" 
-import { initIndexYears,
-  populateCompetitions,
+
+import {
   initCommon,
+  initIndexYears,
+  populateCompetitions,
   getRenderNames,
+} from "./shared.js"
+
+import {
   initButtons,
   spinnerOn,
   spinnerOff
-} from "./shared.js"
+} from "blr-shared-frontend"
+
 import $ from "jquery"
 
 let index

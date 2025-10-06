@@ -45,8 +45,7 @@ module.exports = {
       dependOn: "shared"
     },
     login: {
-      import: "./src/scripts/login.js",
-      dependOn: "shared"
+      import: require.resolve('blr-shared-frontend/dist/login.js'),
     },
     shared: "./src/scripts/shared.js"
   },
@@ -73,6 +72,13 @@ module.exports = {
       filename: "bracket.html",
       template: "./src/bracket.html",
       chunks: ["shared", "bracket"]
+    }),
+    new HtmlWebpack({
+      title: "Login",
+      filename: "login.html",
+      template: require.resolve('blr-shared-frontend/src/login.html'),
+      chunks: ["navonly", "login"],
+      inject: true
     }),
     new HtmlWebpack({
       title: "Picks",
@@ -103,12 +109,6 @@ module.exports = {
       filename: "index.html",
       template: "./src/index.html",
       chunks: ["shared", "index"]
-    }),
-    new HtmlWebpack({
-      title: "Login",
-      filename: "login.html",
-      template: "./src/login.html",
-      chunks: ["shared", "login"]
     }),
     new CopyWebpack({
       patterns: [

@@ -5,13 +5,17 @@ import {
   initIndexYears,
   populateCompetitions,
   populatePlayerNames,
-  initCommon,
+  initCommon
+} from "./shared.js"
+
+import {
   initButtons,
   spinnerOn,
-  spinnerOff
-} from "./shared.js"
+  spinnerOff,
+  Modal
+} from "blr-shared-frontend"
+
 import { createBracket } from "bracketry"
-import { Modal } from "bootstrap"
 import $ from "jquery"
 
 let bracket

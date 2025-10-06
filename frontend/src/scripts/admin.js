@@ -1,13 +1,18 @@
 import { API_URL } from "./constants.js"
+
 import {
+  initCommon,
   initIndexYears,
   populateCompetitions,
-  initCommon,
-  initButtons,
-  getValidAccessToken,
-  spinnerOn,
-  spinnerOff
 } from "./shared.js"
+
+import {
+  initButtons,
+  spinnerOn,
+  spinnerOff,
+  getValidAccessToken
+} from "blr-shared-frontend"
+
 import $ from "jquery"
 
 
