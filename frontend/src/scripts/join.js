@@ -126,7 +126,7 @@ function initSingleYearCompetition(year, compName) {
 
   // check if user is signed in
   if(isAuthenticated()) {
-    $('#firstnameinput').val(localStorage.getItem('blr-userFirstName')).prop("readonly", true)
+    $('#firstnameinput').val(localStorage.getItem('blr-userFirstName')).prop("readonly", true) // TODO change to cookie!
     $('#lastnameinput').val(localStorage.getItem('blr-userLastName')).prop("readonly", true)
     $("#namediv").show()
     $("#signedindiv").show()
