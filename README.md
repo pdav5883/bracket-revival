@@ -2,7 +2,31 @@
 A March Madness bracket picking game where you get to re-pick your bracket after every round. 
 
 ## TODO
-- Issues with initial welcome email when join game (currently disabled) and batch emailing from admin.
+### New Features
+- Test page to play mini version to understand scoring
+- Add logos to bracket
+- Underdog bonus points
+
+### Improvements
+- Add user auth to admin edit
+- Add admin auth to add endpoint for year and game, access from admin.html
+- Button on picks page to see previous bracket
+- Next round buttons anchored to top of screen
+- Restricted endpoint to grab emails and pick links for players
+- Show completed rounds on scoreboard
+- Show pick round, bracket round on pages
+
+### Bugs
+- Confirm welcome email from join game works
+- Confirm batch emailing from admin works
+- Confirm admin edit works
+
+## Maybe TODO
+- Error handling for bad params
+- webpack into production
+- Refactor js into shared utils
+
+## Underdog Bonus
 
 ## New Game Flow
   - If /join.html includes year, cid arguments, then go straight to page, other provide dropdown with GO selector
@@ -11,22 +35,7 @@ A March Madness bracket picking game where you get to re-pick your bracket after
   - Create player, checking for access key if needed 
 - If they are signed in, their info autopopulates for name, TODO add option for nickname for the game, then a json file is created using first-last.json in S3 to hold their picks.
 
-## Maybe TODO
-- Use admin_auth to authorize /add endpoint for year and game
-- Error handling bad params on pages
-- Test page to play smaller version to understand rules
-- Button on picks page to see previous bracket
-- Next round buttons anchored to top of screen
-- Team logos
-- picks query params only works if you use cid=compname rather than cid=cid since it looks into index file
-- webpack into production
-- Restricted endpoint to grab emails and pick links for players
-- New player should throw error at submit when query params are incorrect
-- Show completed rounds on scoreboard
-- Show pick round, bracket round on pages
-- Refactor js into shared utils
-
-### Real-time game flow
+## Real-time game flow
 - Year is created
 - Admin edits teams.json to create bracket
 - Game is created, set `open_players=true`, `open_picks=true`, `completed_rounds=0`
@@ -127,3 +136,4 @@ index.json - {"yr": {"Comp Name 1": {"players": ["Name 1",...], "require_secret"
 	- Prev: pick = result
 	- Prev-prev: pick = result
 	- points MULT
+
