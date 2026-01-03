@@ -11,10 +11,6 @@ Parameters:
     Type: String
   LambdaPublishPermissionName:
     Type: String
-  LambdaReadSendPermissionName:
-    Type: String
-  LambdaSendPermissionName:
-    Type: String
   LambdaUserAuthPermissionName:
     Type: String
   LambdaAdminEditPermissionName:
@@ -84,7 +80,7 @@ Resources:
     Properties:
       FunctionName: !Ref LambdaAddElementName
       MemorySize: 128
-      Description: ""
+      Description: "Add a player, competition, or year to bracket-revival"
       TracingConfig:
         Mode: "PassThrough"
       Timeout: 3
@@ -118,7 +114,7 @@ Resources:
     Properties:
       FunctionName: !Ref LambdaAdminEditName
       MemorySize: 128
-      Description: ""
+      Description: "Edit game config and score results"
       TracingConfig:
         Mode: "PassThrough"
       Timeout: 3
@@ -152,7 +148,7 @@ Resources:
     Properties:
       FunctionName: !Ref LambdaGetBracketName
       MemorySize: 128
-      Description: ""
+      Description: "Retrieve an individual's bracket"
       TracingConfig:
         Mode: "PassThrough"
       Timeout: 3
@@ -186,7 +182,7 @@ Resources:
     Properties:
       FunctionName: !Ref LambdaGetCompetitionsName
       MemorySize: 128
-      Description: ""
+      Description: "Retrieve index of all compeitions or specific compeition data"
       TracingConfig:
         Mode: "PassThrough"
       Timeout: 3
@@ -220,7 +216,7 @@ Resources:
     Properties:
       FunctionName: !Ref LambdaGetRoundStartName
       MemorySize: 128
-      Description: ""
+      Description: "Get the starting teams for a round of bracket picks"
       TracingConfig:
         Mode: "PassThrough"
       Timeout: 3
@@ -254,7 +250,7 @@ Resources:
     Properties:
       FunctionName: !Ref LambdaGetScoreboardName
       MemorySize: 128
-      Description: ""
+      Description: "Retrieve the scoreboard for a competition"
       TracingConfig:
         Mode: "PassThrough"
       Timeout: 3
@@ -288,7 +284,7 @@ Resources:
     Properties:
       FunctionName: !Ref LambdaUpdatePicksName
       MemorySize: 128
-      Description: ""
+      Description: "Post an individual's new round of picks"
       TracingConfig:
         Mode: "PassThrough"
       Timeout: 3
@@ -322,7 +318,7 @@ Resources:
     Properties:
       FunctionName: !Ref LambdaUpdateScoreboardName
       MemorySize: 128
-      Description: ""
+      Description: "Sync a competition's scoreboard based on current results and picks"
       TracingConfig:
         Mode: "PassThrough"
       Timeout: 3
@@ -356,7 +352,7 @@ Resources:
     Properties:
       FunctionName: !Ref LambdaUserAuthName 
       MemorySize: 128
-      Description: ""
+      Description: "Lambda authorizer for protected endpoints, calls BLRUserAuth"
       TracingConfig:
         Mode: "PassThrough"
       Timeout: 3
@@ -382,10 +378,11 @@ Resources:
   LayerBracketCommon:
     Type: "AWS::Lambda::LayerVersion"
     Properties:
+      Description: "Point calculation, tournament configuration, email templates"
       LayerName: !Ref LayerCommonName
       Content:
         S3Bucket: !Ref S3BracketPrivate
-        S3Key: !Sub lambdas/empty_layer.zip
+        S3Key: lambdas/empty_layer.zip
       CompatibleRuntimes:
         - "python3.12"
       CompatibleArchitectures:
@@ -674,7 +671,7 @@ Resources:
     DeletionPolicy: "Delete"
     Properties:
       ApiId: !Ref ApiGatewayBracket
-      RouteKey: !Sub "PUT /add"
+      RouteKey: "PUT /add"
       Target: !Join ["/", ["integrations", !Ref ApiIntegrationBracketAddElement]]
   ApiIntegrationBracketAddElement:
     Type: "AWS::ApiGatewayV2::Integration"
@@ -701,7 +698,7 @@ Resources:
     DeletionPolicy: "Delete"
     Properties:
       ApiId: !Ref ApiGatewayBracket
-      RouteKey: !Sub "GET /bracket"
+      RouteKey: "GET /bracket"
       Target: !Join ["/", ["integrations", !Ref ApiIntegrationBracketGetBracket]]
   ApiIntegrationBracketGetBracket:
     Type: "AWS::ApiGatewayV2::Integration"
@@ -728,7 +725,7 @@ Resources:
     DeletionPolicy: "Delete"
     Properties:
       ApiId: !Ref ApiGatewayBracket
-      RouteKey: !Sub "GET /competitions"
+      RouteKey: "GET /competitions"
       Target: !Join ["/", ["integrations", !Ref ApiIntegrationBracketGetCompetitions]]
   ApiIntegrationBracketGetCompetitions:
     Type: "AWS::ApiGatewayV2::Integration"
@@ -755,7 +752,7 @@ Resources:
     DeletionPolicy: "Delete"
     Properties:
       ApiId: !Ref ApiGatewayBracket
-      RouteKey: !Sub "GET /start"
+      RouteKey: "GET /start"
       Target: !Join ["/", ["integrations", !Ref ApiIntegrationBracketGetRoundStart]]
       AuthorizationType: "CUSTOM"
       AuthorizerId: !Ref ApiAuthorizerBracketUserAuth
@@ -784,7 +781,7 @@ Resources:
     DeletionPolicy: "Delete"
     Properties:
       ApiId: !Ref ApiGatewayBracket
-      RouteKey: !Sub "GET /scoreboard"
+      RouteKey: "GET /scoreboard"
       Target: !Join ["/", ["integrations", !Ref ApiIntegrationBracketGetScoreboard]]
   ApiIntegrationBracketGetScoreboard:
     Type: "AWS::ApiGatewayV2::Integration"
@@ -811,7 +808,7 @@ Resources:
     DeletionPolicy: "Delete"
     Properties:
       ApiId: !Ref ApiGatewayBracket
-      RouteKey: !Sub "POST /picks"
+      RouteKey: "POST /picks"
       Target: !Join ["/", ["integrations", !Ref ApiIntegrationBracketUpdatePicks]]
       AuthorizationType: "CUSTOM"
       AuthorizerId: !Ref ApiAuthorizerBracketUserAuth
@@ -840,7 +837,7 @@ Resources:
     DeletionPolicy: "Delete"
     Properties:
       ApiId: !Ref ApiGatewayBracket
-      RouteKey: !Sub "GET /sync"
+      RouteKey: "GET /sync"
       Target: !Join ["/", ["integrations", !Ref ApiIntegrationBracketUpdateScoreboard]]
   ApiIntegrationBracketUpdateScoreboard:
     Type: "AWS::ApiGatewayV2::Integration"
@@ -867,8 +864,10 @@ Resources:
     DeletionPolicy: "Delete"
     Properties:
       ApiId: !Ref ApiGatewayBracket
-      RouteKey: !Sub "POST /admin"
+      RouteKey: "POST /admin"
       Target: !Join ["/", ["integrations", !Ref ApiIntegrationBracketAdminEdit]]
+      AuthorizationType: "CUSTOM"
+      AuthorizerId: !Ref ApiAuthorizerBracketUserAuth
   ApiIntegrationBracketAdminEdit:
     Type: "AWS::ApiGatewayV2::Integration"
     UpdateReplacePolicy: "Delete"
@@ -955,7 +954,7 @@ Resources:
     Properties:
       Bucket: !Ref S3BracketPublic
       PolicyDocument:
-        Version: "2008-10-17"
+        Version: "2012-10-17"
         Statement:
         - Condition:
             StringEquals:

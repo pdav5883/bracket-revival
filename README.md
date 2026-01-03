@@ -8,7 +8,6 @@ A March Madness bracket picking game where you get to re-pick your bracket after
 - Underdog bonus points
 
 ### Improvements
-- Add user auth to admin edit
 - Add admin auth to add endpoint for year and game, access from admin.html
 - Button on picks page to see previous bracket
 - Next round buttons anchored to top of screen

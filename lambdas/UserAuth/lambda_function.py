@@ -15,7 +15,7 @@ def lambda_handler(event, context):
     if not access_token:
         return {"isAuthorized": False}
 
-    user_id = event['queryStringParameters'].get('pid', '').replace(' ', '__').lower()
+    user_id = event.get('queryStringParameters', {}).get('pid', '').replace(' ', '__').lower()
 
     if event["rawPath"] == "/start":
         auth_type = "specificUser"
