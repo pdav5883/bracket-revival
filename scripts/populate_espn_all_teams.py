@@ -12,5 +12,9 @@ teams = [{"id": te["team"]["id"],
           "mascot": te["team"]["name"],
           "abbreviation": te["team"]["abbreviation"]} for te in team_entries]
 
-with open(f"all_teams_{datetime.now().strftime("%Y%m%d")}.json", "w") as fptr:
+fname = f"all_teams_{datetime.now().strftime("%Y%m%d")}.json"
+
+print(f"Writing {len(teams)} teams to {fname}")
+
+with open(fname, "w") as fptr:
     json.dump(teams, fptr)

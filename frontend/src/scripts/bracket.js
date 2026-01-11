@@ -1,6 +1,6 @@
 // API_URL is in global namespace from constants.js
 
-import { API_URL, ROUND_NAMES } from "./constants.js" 
+import { API_URL, LOGO_URL, ROUND_NAMES } from "./constants.js" 
 import {
   initIndexYears,
   populateCompetitions,
@@ -193,7 +193,12 @@ function populateBracket(queryParams, callback) {
         // TODO make logo size variable with device
         getNationalityHTML: player => {
           const teamId = player.espn_id
-          return `<img style="width: 30px" src="https://a1.espncdn.com/combiner/i?img=/i/teamlogos/ncaa/500/${teamId}.png&w=40&h=40&scale=crop&cquality=40">`
+          if (teamId === null) {
+            return '<span>?</span>'
+          }
+          else {
+            return `<img style="width: 30px" src="${LOGO_URL(teamId)}">`
+          }
         }
       }
 

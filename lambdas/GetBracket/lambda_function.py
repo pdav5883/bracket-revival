@@ -40,7 +40,7 @@ def lambda_handler(event, context):
     names = [t["name"] for t in teams]
     shorts = [t["short_name"] for t in teams]
     seeds = [t["seed"] for t in teams]
-    espn_ids = [t["espn_id"] for t in teams]
+    espn_ids = [t.get("espn_id", None) for t in teams]
 
     if cid == "":
         completed_rounds = trn.NUMROUNDS

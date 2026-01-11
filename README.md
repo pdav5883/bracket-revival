@@ -6,6 +6,7 @@ A March Madness bracket picking game where you get to re-pick your bracket after
 - Test page to play mini version to understand scoring
 - Add logos to bracket
 - Underdog bonus points
+- Automatic score updating
 
 ### Improvements
 - Add admin auth to add endpoint for year and game, access from admin.html
@@ -24,6 +25,8 @@ A March Madness bracket picking game where you get to re-pick your bracket after
 - Error handling for bad params
 - webpack into production
 - Refactor js into shared utils
+- Late picks are allowed, but if game has started that is autopicked
+- Change logo retrieval to BLR assets
 
 ## Underdog Bonus
 

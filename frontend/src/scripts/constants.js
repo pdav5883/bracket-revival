@@ -23,4 +23,4 @@ export const ROUND_NAMES = [
   "Championship"
 ]
 
-
+export const LOGO_URL = (teamId) => `https://a1.espncdn.com/combiner/i?img=/i/teamlogos/ncaa/500/${teamId}.png&w=40&h=40&scale=crop&cquality=40`
