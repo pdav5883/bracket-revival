@@ -189,6 +189,11 @@ function populateBracket(queryParams, callback) {
             })
             return titleHTML
           }
+        },
+        // TODO make logo size variable with device
+        getNationalityHTML: player => {
+          const teamId = player.espn_id
+          return `<img style="width: 30px" src="https://a1.espncdn.com/combiner/i?img=/i/teamlogos/ncaa/500/${teamId}.png&w=40&h=40&scale=crop&cquality=40">`
         }
       }
 
@@ -275,7 +280,8 @@ function makeBracketryData(gamesNested) {
       entryStatus: String(game.seeds[0]),
       players: [
         {
-          title: game.teams[0]
+          title: game.teams[0],
+          espn_id: game.espn_ids[0]
         }
       ]
     }
@@ -283,7 +289,8 @@ function makeBracketryData(gamesNested) {
       entryStatus: String(game.seeds[1]),
       players: [
         {
-          title: game.teams[1]
+          title: game.teams[1],
+          espn_id: game.espn_ids[1]
         }
       ]
     }

@@ -40,6 +40,7 @@ def lambda_handler(event, context):
     names = [t["name"] for t in teams]
     shorts = [t["short_name"] for t in teams]
     seeds = [t["seed"] for t in teams]
+    espn_ids = [t["espn_id"] for t in teams]
 
     if cid == "":
         completed_rounds = trn.NUMROUNDS
@@ -56,7 +57,6 @@ def lambda_handler(event, context):
         print(player_key)
         player = blr_utils.read_file_s3(bucket, player_key)
         player_picks = player["picks"]
-
 
     # don't show a player results past completed_rounds or beyond the picks they've made
     if completed_rounds_query is not None:
@@ -82,19 +82,34 @@ def lambda_handler(event, context):
 
     # points calc returns all zeros if picks is empty
     player_points = points.calc_points_revival(player_picks, results)
-    
+
     games = []
-    
+
     # write results and points into games flat list first
     abs_inds = make_absolute_bracket(results)
 
     for i, (i_upper, i_lower) in enumerate(abs_inds):
-        game = {"teams": [names[i_upper] if i_upper is not None else None, names[i_lower] if i_lower is not None else None],
-                "shorts": [shorts[i_upper] if i_upper is not None else None, shorts[i_lower] if i_lower is not None else None],
-                "seeds": [seeds[i_upper] if i_upper is not None else None, seeds[i_lower] if i_lower is not None else None],
-                "score": scores[i],
-                "result": results[i],
-                "picks": []}
+        game = {
+            "teams": [
+                names[i_upper] if i_upper is not None else None,
+                names[i_lower] if i_lower is not None else None,
+            ],
+            "shorts": [
+                shorts[i_upper] if i_upper is not None else None,
+                shorts[i_lower] if i_lower is not None else None,
+            ],
+            "seeds": [
+                seeds[i_upper] if i_upper is not None else None,
+                seeds[i_lower] if i_lower is not None else None,
+            ],
+            "espn_ids": [
+                espn_ids[i_upper] if i_upper is not None else None,
+                espn_ids[i_lower] if i_lower is not None else None,
+            ],
+            "score": scores[i],
+            "result": results[i],
+            "picks": [],
+        }
 
         if player is None:
             game["points"] = None
@@ -181,5 +196,3 @@ def make_absolute_bracket(results, picks=None):
         abs_inds.append((i_upper, i_lower))
 
     return abs_inds
-
-

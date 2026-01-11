@@ -82,6 +82,10 @@
   scroll-margin-top: 4rem;
 }
 
+.team-logo {
+  width: 30px;
+}
+
 /* Layout */
 @media (min-width: 768px) {
   .toc-body {

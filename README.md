@@ -27,6 +27,12 @@ A March Madness bracket picking game where you get to re-pick your bracket after
 
 ## Underdog Bonus
 
+## Logos
+- Get all the teams: http://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/teams?limit=1000
+- Logos are referenced: https://a.espncdn.com/i/teamlogos/ncaa/500/153.png
+- Smaller logo uses a different API: https://a1.espncdn.com/combiner/i?img=/i/teamlogos/ncaa/500/153.png&w=80&h=80&scale=crop&cquality=40
+- ESPN API repo: https://github.com/pseudo-r/Public-ESPN-API
+
 ## New Game Flow
   - If /join.html includes year, cid arguments, then go straight to page, other provide dropdown with GO selector
   - Upon GO, check to see if game can be joined (accepting players)
