@@ -53,6 +53,40 @@ function initAdminPage() {
   })
 }
 
+function changeAdminPage(callback) {
+  typeArg = $("#typesel").val();
+  yearArg = $("#yearsel").val();
+  compArg = $("#compsel").val();
+
+  $("#statustext").text("");
+
+  if (typeArg === "results") {
+    populateResultsTable(yearArg, callback);
+  } else if (typeArg === "teams") {
+    populateTeamsTable(yearArg, callback);
+  } else if (typeArg === "competition") {
+    populateCompetitionTable(yearArg, compArg, callback);
+  } else if (typeArg === "addyear") {
+    populateAddYearTable(callback)
+  } else if (typeArg === "addcompetition") {
+    populateAddCompetitionTable(callback)
+  }
+}
+
+async function submitEdits(callback) {
+  if (typeArg === "results") {
+    await submitResultsEdits(callback);
+  } else if (typeArg === "teams") {
+    await submitTeamsEdits(callback);
+  } else if (typeArg === "competition") {
+    await submitCompetitionEdits(callback);
+  } else if (typeArg === "addyear") {
+    submitAddYear(callback);
+  } else if (typeArg === "addcompetition") {
+    submitAddCompetition(callback);
+  }
+}
+
 
 function populateCompetitionsWrapper() {
   populateCompetitions(index)
@@ -235,6 +269,39 @@ function populateCompetitionTable(year, cid, callback) {
   })
 }
 
+function populateAddYearTable(callback) {
+  let table = document.getElementById("admintable");
+  table.innerHTML = "";
+  let row = table.insertRow();
+  let cell = row.insertCell();
+  cell.textContent = "Year";
+  cell = row.insertCell();
+  let input = makeTextInput("addyearval", 6, "");
+  cell.appendChild(input);
+
+  if (callback) callback()
+}
+
+function populateAddCompetitionTable(callback) {
+  let table = document.getElementById("admintable");
+  table.innerHTML = "";
+  let row = table.insertRow();
+  let cell = row.insertCell();
+  cell.textContent = "Year";
+  cell = row.insertCell();
+  let input = makeTextInput("addyearval", 6, "");
+  cell.appendChild(input);
+
+  row = table.insertRow();
+  cell = row.insertCell();
+  cell.textContent = "Competition";
+  cell = row.insertCell();
+  input = makeTextInput("addcompetitionval", 20, "");
+  cell.appendChild(input);
+
+  if (callback) callback();
+}
+
 
 function buildMatchup(tableCell, bracketCell) {
   tableCell.rowSpan = bracketCell.rowSpan
@@ -330,20 +397,6 @@ function makeCheckboxInput(id, labelStr) {
 
   return [input, label]
 }
-
-
-async function submitEdits(callback) {
-  if (typeArg === "results") {
-    await submitResultsEdits(callback)
-  }
-  else if (typeArg === "teams") {
-    await submitTeamsEdits(callback)
-  }
-  else if (typeArg === "competition") {
-    await submitCompetitionEdits(callback)
-  }
-}
-
 
 async function submitResultsEdits(callback) {
 
@@ -475,23 +528,60 @@ async function submitCompetitionEdits(callback) {
   })
 }
 
+async function submitAddYear(callback) {
+  $("#statustext").text("");
 
-function changeAdminPage(callback) {
-  typeArg = $("#typesel").val()
-  yearArg = $("#yearsel").val()
-  compArg = $("#compsel").val()
+  const queryParams = new URLSearchParams({
+    type: "year",
+    year: $("#addyearval").val(),
+  });
 
-  $("#statustext").text("")
+  $.ajax({
+    type: "PUT",
+    url: API_URL.add + "?" + queryParams.toString(),
+    headers: { authorization: await getValidAccessToken() },
+    crossDomain: true,
+    contentType: "application/json; charset=utf-8",
 
-  if (typeArg === "results") {
-    populateResultsTable(yearArg, callback)
-  }
-  else if (typeArg === "teams") {
-    populateTeamsTable(yearArg, callback)
-  }
-  else if (typeArg === "competition") {
-    populateCompetitionTable(yearArg, compArg, callback)
-  }
+    success: function () {
+      $("#statustext").text("Success!");
+      if (callback) callback();
+    },
+
+    error: function (err) {
+      adminSubmitError(err);
+      if (callback) callback();
+    },
+  });
+}
+
+
+async function submitAddCompetition(callback) {
+  $("#statustext").text("");
+
+  const queryParams = new URLSearchParams({
+    type: "competition",
+    year: $("#addyearval").val(),
+    compname: $("#addcompetitionval").val(),
+  });
+
+  $.ajax({
+    type: "PUT",
+    url: API_URL.add + "?" + queryParams.toString(),
+    headers: { authorization: await getValidAccessToken() },
+    crossDomain: true,
+    contentType: "application/json; charset=utf-8",
+
+    success: function () {
+      $("#statustext").text("Success!");
+      if (callback) callback();
+    },
+
+    error: function (err) {
+      adminSubmitError(err);
+      if (callback) callback();
+    },
+  });
 }
 
 function adminSubmitError(err) {
@@ -499,6 +589,6 @@ function adminSubmitError(err) {
     $("#statustext").text("Error: you must be an admin to submit changes")
   }
   else {
-    $("#statustext").text("Error: " + err.responseJSON.message)
+    $("#statustext").text("Error: " + err.responseText)
   }
 }

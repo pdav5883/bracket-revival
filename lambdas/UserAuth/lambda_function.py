@@ -21,14 +21,21 @@ def lambda_handler(event, context):
         return {"isAuthorized": False}
 
     user_id = event.get('queryStringParameters', {}).get('pid', '').replace(' ', '__').lower()
+    path = event.get("rawPath", "")
 
-    if event["rawPath"] == "/start":
+    if path == "/start":
         auth_type = "specificUser"
-    elif event["rawPath"] == "/picks":
+    elif path == "/picks":
         auth_type = "specificUser"
-    elif event["rawPath"] == "/add":
-        auth_type = "anyUser"
-    elif event["rawPath"] == "/admin":
+    elif path == "/add":
+        add_type = event.get('queryStringParameters', {}).get('type', '')
+        if add_type == "player":
+            auth_type = "anyUser"
+        elif add_type in ("year", "competition"):
+            auth_type = "adminUser"
+        else:
+            return {"isAuthorized": False}
+    elif path == "/admin":
         auth_type = "adminUser"
     else:
         return {"isAuthorized": False}

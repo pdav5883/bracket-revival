@@ -673,6 +673,8 @@ Resources:
       ApiId: !Ref ApiGatewayBracket
       RouteKey: "PUT /add"
       Target: !Join ["/", ["integrations", !Ref ApiIntegrationBracketAddElement]]
+      AuthorizationType: "CUSTOM"
+      AuthorizerId: !Ref ApiAuthorizerBracketUserAuth
   ApiIntegrationBracketAddElement:
     Type: "AWS::ApiGatewayV2::Integration"
     UpdateReplacePolicy: "Delete"

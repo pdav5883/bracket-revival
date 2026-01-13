@@ -26,7 +26,6 @@ def lambda_handler(event, context):
            - access_token (contained in header))
     Output: None
     """
-    # both GET and PUT requests alllowed, but all data is stored in query params
     typ = event["queryStringParameters"].get("type")
     year = event["queryStringParameters"].get("year", None)
     cname = event["queryStringParameters"].get("compname", None)
