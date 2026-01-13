@@ -8,6 +8,7 @@ from blr_common import blr_utils
 
 bucket = SUB_PrivateBucketName
 
+
 def lambda_handler(event, context):
     """
     GET request
@@ -33,42 +34,53 @@ def lambda_handler(event, context):
         picks = []
     else:
         # TODO: return an error here
-        return {"statusCode": 400,
-                "body": "Either pid or round_start must be present in query"}
+        return {
+            "statusCode": 400,
+            "body": "Either pid or round_start must be present in query",
+        }
 
     # TODO: assert arguments exist
 
     results_key = year + "/results.json"
     teams_key = year + "/teams.json"
     competition_key = year + "/" + cid + "/competition.json"
- 
+
     results_dict = blr_utils.read_file_s3(bucket, results_key)
     results = results_dict.get("results")
 
     teams = blr_utils.read_file_s3(bucket, teams_key)
-    
+
     competition = blr_utils.read_file_s3(bucket, competition_key)
     completed_rounds = competition.get("completed_rounds")
 
     if not competition["open_picks"]:
-        return {"statusCode": 400,
-                "body": f"Picks for {competition['name']} {year} are currently locked"}
+        return {
+            "statusCode": 400,
+            "body": f"Picks for {competition['name']} {year} are currently locked",
+        }
 
     if round_start > completed_rounds:
-        return {"statusCode": 400,
-                "body": f"There are no picks to make right now - check back later."}
+        return {
+            "statusCode": 400,
+            "body": f"There are no picks to make right now - check back later.",
+        }
 
     if round_start >= trn.NUMROUNDS:
-        return {"statusCode": 400,
-                "body": f"All picks have been made for this bracket"}
+        return {"statusCode": 400, "body": f"All picks have been made for this bracket"}
 
     start_games_ind = get_start_games_abs_ind(results, round_start)
-    start_games = [{"teams":[teams[t0]["name"], teams[t1]["name"]], "seeds": [teams[t0]["seed"], teams[t1]["seed"]]} for t0, t1 in start_games_ind]
+    start_games = [
+        {
+            "teams": [teams[t0]["name"], teams[t1]["name"]],
+            "seeds": [teams[t0]["seed"], teams[t1]["seed"]],
+            "espn_ids": [teams[t0]["espn_id"], teams[t1]["espn_id"]],
+        }
+        for t0, t1 in start_games_ind
+    ]
 
     bonus_games = get_bonus_games(results, picks, round_start, teams)
 
-    return {"start_games": start_games,
-            "bonus_games": bonus_games}
+    return {"start_games": start_games, "bonus_games": bonus_games}
 
 
 def get_start_games_abs_ind(results, round_start):
@@ -112,17 +124,22 @@ def get_bonus_games(results, picks, round_start, teams):
 
     for rnd, picks_rnd in enumerate(picks):
         prev_games = sum(trn.GAMES_PER_ROUND[0:rnd])
-        abs_bracket_inds = make_absolute_bracket(results[0:prev_games], picks_rnd) # contains upper/lower for each game
+        abs_bracket_inds = make_absolute_bracket(
+            results[0:prev_games], picks_rnd
+        )  # contains upper/lower for each game
 
         # fill abs_picks with None for completed games, two steps reqd bc earlier picks will include "picked" games already completed
-        abs_picks_rnd = prev_games * [None] + [upper_lower_abs[pick] for upper_lower_abs, pick in zip(abs_bracket_inds[prev_games:], picks_rnd)]
-        
+        abs_picks_rnd = prev_games * [None] + [
+            upper_lower_abs[pick]
+            for upper_lower_abs, pick in zip(abs_bracket_inds[prev_games:], picks_rnd)
+        ]
+
         # num completed games
         for i in range(sum(trn.GAMES_PER_ROUND[0:round_start])):
             abs_picks_rnd[i] = None
 
         abs_picks.append(abs_picks_rnd)
-        
+
     # compare picks for each game, starting with most recent round of picks, then generate [rnd ind, game ind, team name, num picked]
     bonus_games = []
     for flat_ind in range(trn.NUMGAMES):
@@ -141,11 +158,13 @@ def get_bonus_games(results, picks, round_start, teams):
                 break
             else:
                 num_picks += 1
-        
+
         rnd_ind, game_ind = flat_ind_to_nested_ind(flat_ind)
 
         # minus round_start because frontend wants round index relative to round_start
-        bonus_games.append([rnd_ind - round_start, game_ind, teams[latest_pick]["name"], num_picks])
+        bonus_games.append(
+            [rnd_ind - round_start, game_ind, teams[latest_pick]["name"], num_picks]
+        )
 
     return bonus_games
 
@@ -166,8 +185,7 @@ def flat_ind_to_nested_ind(flat_ind):
     return rnd, game_in_rnd
 
 
-
-# TODO: move this to utils (copied from get_bracket)  
+# TODO: move this to utils (copied from get_bracket)
 def make_absolute_bracket(results, picks=None):
     """
     Converts flat list of 0/1 results and/or picks into flat list of upper/lower absolute indices into teams
@@ -218,5 +236,3 @@ def make_absolute_bracket(results, picks=None):
         abs_inds.append((i_upper, i_lower))
 
     return abs_inds
-
-

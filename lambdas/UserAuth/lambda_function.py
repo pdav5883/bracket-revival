@@ -12,6 +12,11 @@ lambda_client = boto3.client('lambda')
 def lambda_handler(event, context):
     access_token = event['headers'].get('authorization', '')
 
+    ########################
+    ##### TESTING ONLY #####
+    ########################
+    # return {"isAuthorized": True}
+
     if not access_token:
         return {"isAuthorized": False}
 
@@ -32,7 +37,7 @@ def lambda_handler(event, context):
     lambda_response = lambda_client.invoke(FunctionName=blr_authorizer,
                                             InvocationType='RequestResponse',
                                             Payload=json.dumps(lambda_event))
-    
+
     if json.loads(lambda_response['Payload'].read())["isAuthorized"]:
         return {"isAuthorized": True}
     else:

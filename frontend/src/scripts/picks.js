@@ -1,4 +1,4 @@
-import { API_URL } from "./constants.js" 
+import { API_URL, LOGO_URL } from "./constants.js" 
 
 import { 
   initCommon,
@@ -214,6 +214,15 @@ async function populateRoundStart(queryParams, callback) {
             }
           }
           bracket.applyMatchesUpdates(updateMatches)
+        },
+        getNationalityHTML: player => {
+          const teamId = player.espn_id
+          if (teamId === null) {
+            return '<span>?</span>'
+          }
+          else {
+            return `<img style="width: 30px" src="${LOGO_URL(teamId)}">`
+          }
         }
       }
 
@@ -424,7 +433,8 @@ function makeBracketryStartData(startGames, bonusGames) {
       entryStatus: String(game.seeds[0]),
       players: [
         {
-          title: game.teams[0]
+          title: game.teams[0],
+          espn_id: game.espn_ids[0]
         }
       ]
     }
@@ -432,10 +442,11 @@ function makeBracketryStartData(startGames, bonusGames) {
       entryStatus: String(game.seeds[1]),
       players: [
         {
-          title: game.teams[1]
-        }
-      ]
-    }
+          title: game.teams[1],
+          espn_id: game.espn_ids[1],
+        },
+      ],
+    };
 
     // even if startRound > 0, the first round in bracket is 0
     const match = {
