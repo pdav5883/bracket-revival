@@ -13,7 +13,8 @@ import {
   spinnerOff,
   getValidAccessToken,
   signOut,
-  isAuthenticated
+  isAuthenticated,
+  getCookie
 } from "blr-shared-frontend"
 
 import $ from "jquery"
@@ -126,8 +127,8 @@ function initSingleYearCompetition(year, compName) {
 
   // check if user is signed in
   if(isAuthenticated()) {
-    $('#firstnameinput').val(localStorage.getItem('blr-userFirstName')).prop("readonly", true) // TODO change to cookie!
-    $('#lastnameinput').val(localStorage.getItem('blr-userLastName')).prop("readonly", true)
+    $("#firstnameinput").val(getCookie("blr-userFirstName")).prop("readonly", true);
+    $('#lastnameinput').val(getCookie('blr-userLastName')).prop("readonly", true);
     $("#namediv").show()
     $("#signedindiv").show()
     $('#submitbutton').show()
