@@ -4,7 +4,6 @@ A March Madness bracket picking game where you get to re-pick your bracket after
 ## TODO
 ### New Features
 - Test page to play mini version to understand scoring
-- Add logos to bracket
 - Underdog bonus points
 - Automatic score updating
 
