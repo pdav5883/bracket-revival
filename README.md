@@ -6,11 +6,11 @@ A March Madness bracket picking game where you get to re-pick your bracket after
 - Test page to play mini version to understand scoring
 - Underdog bonus points
 - Automatic score updating
+- Late picks are allowed, but if game has started that is autopicked
 
 ### Improvements
 - Button on picks page to see previous bracket
 - Next round buttons anchored to top of screen
-- Restricted endpoint to grab emails and pick links for players
 - Show completed rounds on scoreboard
 - Show pick round, bracket round on pages
 
@@ -23,16 +23,27 @@ A March Madness bracket picking game where you get to re-pick your bracket after
 - Error handling for bad params
 - webpack into production
 - Refactor js into shared utils
-- Late picks are allowed, but if game has started that is autopicked
 - Change logo retrieval to BLR assets
+- Restricted endpoint to grab emails and pick links for players
 
 ## Underdog Bonus
+- Underdog pick affects the base value of the win, which then gets multiplied the further you go down
+- The upset range is based on the highest seed that the team could have played when the pick was made
+- 0-2: 0 pts -- no upset (3 beats 1)
+- 3-5: 1 pts -- minor upset (4 beats 1)
+- 6-8: 2 pts -- upset (7 beats 1)
+- 9-11: 3 pts -- big upset big upset (10 beats 1)
+- 12-15: 4 pts -- massive upset (13 beats 1)
 
 ## Logos
 - Get all the teams: http://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/teams?limit=1000
 - Logos are referenced: https://a.espncdn.com/i/teamlogos/ncaa/500/153.png
 - Smaller logo uses a different API: https://a1.espncdn.com/combiner/i?img=/i/teamlogos/ncaa/500/153.png&w=80&h=80&scale=crop&cquality=40
 - ESPN API repo: https://github.com/pseudo-r/Public-ESPN-API
+
+## Scores
+- https://github.com/henrygd/ncaa-api?tab=readme-ov-file
+- Can get from espn, but there is a lot of data
 
 ## New Game Flow
   - If /join.html includes year, cid arguments, then go straight to page, other provide dropdown with GO selector
