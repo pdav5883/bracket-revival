@@ -3,9 +3,10 @@
 # Constants
 STACK_NAME="bracket-revival"
 LAYER_NAME_KEY="LayerCommonName"
-ZIP_FILE="common/common.zip"
-ZIP_STRUCTURE="python/bracket_common"
-TEMP_DIR="common/temp"
+LAYER_MODULE="bracket_common"
+ZIP_FILE="${LAYER_MODULE}/${LAYER_MODULE}.zip"
+ZIP_STRUCTURE="python/${LAYER_MODULE}"
+TEMP_DIR="${LAYER_MODULE}/temp"
 
 # Initialize force flag
 FORCE_UPDATE=fals
@@ -14,9 +15,9 @@ if [[ $1 == "--force" ]]; then
   FORCE_UPDATE=true
 fi
 
-# only do something if there is a common directory
-if [ ! -d "common" ]; then
-  echo "No common directory, exiting."; exit 0
+# only do something if there is a layer directory
+if [ ! -d "${LAYER_MODULE}" ]; then
+  echo "No layer directory ${LAYER_MODULE}, exiting."; exit 0
 fi
 
 # Fetch CloudFormation parameters and store them in an associative array
@@ -39,7 +40,7 @@ if [[ "$FORCE_UPDATE" = true || ! -f "$ZIP_FILE" ]]; then
 
 else
   REZIP=fals
-  for pyf in common/*.py; do
+  for pyf in ${LAYER_MODULE}/*.py; do
     if [ $pyf -nt $ZIP_FILE ]; then
       REZIP=true
       break
@@ -50,7 +51,7 @@ fi
 if [ $REZIP = true ]; then
   echo "Performing substitutions and updating $ZIP_FILE..."
   mkdir -p "$TEMP_DIR/$ZIP_STRUCTURE"
-  cp common/*.py "$TEMP_DIR/$ZIP_STRUCTURE"
+  cp ${LAYER_MODULE}/*.py "$TEMP_DIR/$ZIP_STRUCTURE"
 
   # Perform the substitution for "SUB_" placeholders
   for pyf in $TEMP_DIR/$ZIP_STRUCTURE/*.py; do

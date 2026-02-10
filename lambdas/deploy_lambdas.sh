@@ -61,8 +61,8 @@ for dir in $dirs; do
     # lambda short name is directory name
     lambda_short_name=${dir%/}
 
-    # Skip 'common' directory
-    if [[ "$lambda_short_name" == "common" || "$lambda_short_name" == "dev" ]]; then
+    # Skip 'common' directory that contains lambda layer
+    if [[ "$lambda_short_name" == *"common" || "$lambda_short_name" == "dev" ]]; then
         continue
     fi
 

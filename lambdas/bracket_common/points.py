@@ -1,5 +1,4 @@
-# from bracket_common import tournament as trn
-from common import tournament as trn
+from bracket_common import tournament as trn
 
 
 def calc_points_underdog_revival(picks, results):
