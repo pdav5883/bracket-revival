@@ -3,6 +3,8 @@ const HtmlWebpack = require("html-webpack-plugin")
 const CopyWebpack = require("copy-webpack-plugin")
 const { execSync } = require('child_process')
 
+const isProduction = process.env.NODE_ENV === "production"
+
 // Get CloudFormation parameters
 const cfParams = Object.fromEntries(
   execSync('bash get-cf-params.sh', { encoding: 'utf-8' })
@@ -18,127 +20,145 @@ module.exports = {
   entry: {
     admin: {
       import: "./src/scripts/admin.js",
-      dependOn: "shared"
     },
     bracket: {
       import: "./src/scripts/bracket.js",
-      dependOn: "shared"
     },
     picks: {
       import: "./src/scripts/picks.js",
-      dependOn: "shared"
     },
     scoreboard: {
       import: "./src/scripts/scoreboard.js",
-      dependOn: "shared"
     },
     join: {
       import: "./src/scripts/join.js",
-      dependOn: "shared"
     },
     index: {
-      import: "./src/scripts/index.js",
-      dependOn: "shared"
+      import: "./src/scripts/index.js"
+    },
+    demo: {
+      import: "./src/scripts/demo.js",
     },
     navonly: {
       import: "./src/scripts/navonly.js",
-      dependOn: "shared"
     },
     login: {
-      import: require.resolve('blr-shared-frontend/dist/login.js'),
+      import: require.resolve("blr-shared-frontend/dist/login.js"),
     },
-    shared: "./src/scripts/shared.js"
+    ...(isProduction ? {} : { "tests/testing": { import: "./tests/testing.js" } }),
   },
-  mode: "development",
+  mode: isProduction ? "production" : "development",
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: "scripts/[name].bundle.js"
+    filename: "scripts/[name].bundle.js",
   },
   plugins: [
     new HtmlWebpack({
       title: "Admin",
       filename: "admin.html",
       template: "./src/admin.html",
-      chunks: ["shared", "admin"]
+      chunks: ["admin"],
     }),
     new HtmlWebpack({
       title: "About",
       filename: "about.html",
       template: "./src/about.html",
-      chunks: ["shared", "navonly"]
+      chunks: ["navonly"],
     }),
     new HtmlWebpack({
       title: "Bracket",
       filename: "bracket.html",
       template: "./src/bracket.html",
-      chunks: ["shared", "bracket"]
+      chunks: ["bracket"],
+    }),
+    new HtmlWebpack({
+      title: "Demo",
+      filename: "demo.html",
+      template: "./src/demo.html",
+      chunks: ["demo"],
     }),
     new HtmlWebpack({
       title: "Login",
       filename: "login.html",
-      template: require.resolve('blr-shared-frontend/src/login.html'),
+      template: require.resolve("blr-shared-frontend/src/login.html"),
       chunks: ["navonly", "login"],
-      inject: true
+      inject: true,
     }),
     new HtmlWebpack({
       title: "Picks",
       filename: "picks.html",
       template: "./src/picks.html",
-      chunks: ["shared", "picks"]
+      chunks: ["picks"],
     }),
     new HtmlWebpack({
       title: "Scoreboard",
       filename: "scoreboard.html",
       template: "./src/scoreboard.html",
-      chunks: ["shared", "scoreboard"]
+      chunks: ["scoreboard"],
     }),
     new HtmlWebpack({
       title: "Join Game",
       filename: "join.html",
       template: "./src/join.html",
-      chunks: ["shared", "join"]
+      chunks: ["join"],
     }),
     new HtmlWebpack({
       title: "Rules",
       filename: "rules.html",
       template: "./src/rules.html",
-      chunks: ["shared", "navonly"]
+      chunks: ["navonly"],
     }),
     new HtmlWebpack({
       title: "Bracket Revival",
       filename: "index.html",
       template: "./src/index.html",
-      chunks: ["shared", "index"]
+      chunks: ["index"],
     }),
+    ...(isProduction ? [] : [
+      new HtmlWebpack({
+        title: "Testing",
+        filename: "tests/testing.html",
+        template: "./tests/testing.html",
+        chunks: ["tests/testing"],
+      }),
+    ]),
     new CopyWebpack({
       patterns: [
         {
           from: "./src/images",
           to: "assets",
         },
-      ]
+      ],
     }),
   ],
   module: {
     rules: [
       {
         test: /\.css$/i,
-        use: ["style-loader", "css-loader"]
+        use: ["style-loader", "css-loader"],
       },
       {
         test: /\.js$/,
-        use: [{
-          loader: 'string-replace-loader',
-          options: {
-            multiple: Object.entries(cfParams).map(([key, value]) => ({
-              search: key,
-              replace: value,
-              flags: 'g'
-            }))
-          }
-        }]
-      }
-    ]
+        use: [
+          {
+            loader: "string-replace-loader",
+            options: {
+              multiple: Object.entries(cfParams).map(([key, value]) => ({
+                search: key,
+                replace: value,
+                flags: "g",
+              })),
+            },
+          },
+        ],
+      },
+    ],
   },
-  devtool: 'source-map'
-}
+  devtool: "source-map",
+
+  optimization: {
+    splitChunks: {
+      chunks: "all",
+    },
+  }
+};

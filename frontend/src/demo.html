@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Basic Page Needs -->
+  <meta charset="utf-8">
+  <!-- Mobile Specific Metas -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+    <%= htmlWebpackPlugin.options.title %>
+  </title>
+  <link rel="icon" type="image/x-icon" href="./assets/favicon.ico">
+</head>
+
+<body>
+  <div id="nav-placeholder"></div>
+  <div class="col-10 col-8-md mx-auto">
+    <h1>Try <em>bracket-revival</em></h1>
+    <p>Explore <em>bracket-revival</em> scoring</p>
+    <div class="row">
+      <div class="col-4 col-sm-3 col-lg-2 mb-2">
+        <label id="yearlabel" for="yearsel" class="form-label">Year</label>
+        <select class="form-select" id="yearsel"></select>
+      </div>
+      <div class="col-auto mb-2 d-flex align-items-end">
+        <button id="submitbutton" class="btn btn-primary me-1">Submit Picks</button>
+        <button id="undobutton" class="btn btn-secondary me-1">Undo</button>
+        <button id="resetbutton" class="btn btn-outline-secondary" style="display: none">Reset</button>
+      </div>
+    </div>
+    <p id="statustext"></p>
+  </div>
+
+  <div id="bracketdiv"></div>
+  <div id="scoreexplanation" class="mt-4 font-monospace small"></div>
+</body>
+
+</html>

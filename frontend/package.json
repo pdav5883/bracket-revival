@@ -21,7 +21,8 @@
     "string-replace-loader": "^3.1.0"
   },
   "scripts": {
-    "build": "webpack",
+    "build": "NODE_ENV=production webpack --mode production",
+    "build:dev": "webpack",
     "serve": "webpack serve --port 8000"
   }
 }

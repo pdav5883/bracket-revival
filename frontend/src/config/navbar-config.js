@@ -32,6 +32,7 @@ export const navbarConfig = {
         { name: 'About <em>bracket-revival</em>', url: '/about.html' },
         { name: 'Join a Game', url: '/join.html' },
         { name: 'Make Picks', url: '/picks.html' },
+        { name: 'Play Demo', url: '/demo.html' },
         { name: 'See the Code', url: 'https://github.com/pdav5883/bracket-revival' },
         { name: 'Bear Loves Rocks', url: 'https://home.bearloves.rocks' }
       ]
