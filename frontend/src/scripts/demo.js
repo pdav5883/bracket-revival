@@ -1,5 +1,6 @@
 import { LOGO_URL } from "./constants.js"
 import { initCommon } from "./shared.js"
+import { Modal } from "blr-shared-frontend"
 import { createBracket } from "bracketry"
 import $ from "jquery"
 
@@ -210,7 +211,7 @@ function addPicks() {
 
   picks.push(roundPicks)
 
-  $("#statustext").text(picks.length >= 3 ? "All done! Reset or select a new year." : "Results revealed. Make any changes and Submit to continue.")
+  $("#statustext").text(picks.length >= 3 ? "All done! Reset or select a new year." : "Click on the blue points icon to see score details. Make your next picks and Submit to continue.")
   if (picks.length >= 3) {
     $("#resetbutton").show()
   }
@@ -226,6 +227,39 @@ function removePicks() {
   $("#resetbutton").hide()
 }
 
+function showGameModal(match) {
+  document.getElementById("gameheader").textContent =
+    DEMO_ROUND_NAMES[match.roundIndex] + " - Game " + String(match.order + 1)
+
+  const gr = document.getElementById("gameresult")
+  if (match.sides[0].isWinner) {
+    gr.textContent = "Result: " + match.sides[0].contestantId + " over " + match.sides[1].contestantId
+  } else {
+    gr.textContent = "Result: " + match.sides[1].contestantId + " over " + match.sides[0].contestantId
+  }
+
+  const pickList = document.getElementById("picklist")
+  pickList.innerHTML = ""
+  match.picks.forEach((pick, i) => {
+    const li = document.createElement("li")
+    if (pick[2] === 0) {
+      li.textContent = "Pick " + String(i + 1) + ": " + pick[0] + " over " + pick[1]
+    } else {
+      li.textContent = "Pick " + String(i + 1) + ": " + pick[1] + " over " + pick[0]
+    }
+    pickList.appendChild(li)
+  })
+
+  const gamePoints = document.getElementById("gamepoints")
+  if (match.points !== null) {
+    gamePoints.textContent = String(match.points) + (match.points === 1 ? " Point" : " Points")
+  } else {
+    gamePoints.textContent = ""
+  }
+
+  Modal.getOrCreateInstance(document.getElementById("gameModal")).show()
+}
+
 function renderBracket(year, picks) {
   $("#bracketdiv").empty()
   const bracketData = makeBracketryData(year, picks)
@@ -235,7 +269,7 @@ function renderBracket(year, picks) {
     matchMaxWidth: 250,
     displayWholeRounds: true,
     liveMatchBorderColor: "#ff4545",
-    matchStatusBgColor: "#5a9cd8",
+    matchStatusBgColor: "transparent",
     onMatchSideClick: (thisMatch, thisTopBottom) => {
       if (thisMatch.roundIndex < picks.length) return
       if (thisMatch.sides[thisTopBottom].isWinner) return
@@ -317,6 +351,14 @@ function renderBracket(year, picks) {
   }
 
   bracket = createBracket(bracketData, document.getElementById("bracketdiv"), bracketOptions)
+
+  $("#bracketdiv").off("click", ".demo-game-info").on("click", ".demo-game-info", function (e) {
+    e.stopPropagation()
+    const round = parseInt($(this).data("round"), 10)
+    const order = parseInt($(this).data("order"), 10)
+    const match = matches.find(m => m.roundIndex === round && m.order === order)
+    if (match) showGameModal(match)
+  })
 
   const mediaQuery = window.matchMedia("(max-width: 600px)")
   const mobileOptions = {
@@ -409,6 +451,11 @@ function makeBracketryData(year, picks) {
         picks: game.picks,
         points: game.points,
         correct: game.correct
+      }
+      if (rInd < picks.length && game.points !== null && game.picks && game.picks.length > 0) {
+        const pts = String(game.points)
+        const ptsSvg = "<svg xmlns='http://www.w3.org/2000/svg' height='35' width='35' viewBox='0 0 512 512' style='vertical-align:middle'><circle fill='#0d6efd' stroke='#0b5ed7' stroke-width='2' cx='256' cy='256' r='240'/><text x='256' y='256' font-size='280' font-weight='700' fill='#ffffff' text-anchor='middle' dominant-baseline='central' font-family='-apple-system, BlinkMacSystemFont, Segoe UI, system-ui, sans-serif'>" + pts + "</text></svg>"
+        match.matchStatus = "<span class='demo-game-info' data-round='" + rInd + "' data-order='" + gInd + "' style='cursor:pointer; display:inline-block; line-height:0'>" + ptsSvg + "</span>"
       }
       data.matches.push(match)
     })
