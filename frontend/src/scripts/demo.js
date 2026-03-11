@@ -57,10 +57,10 @@ $(function () {
 
 function resetBracket() {
   picks = []
-  $("#statustext").text("")
   $("#resetbutton").hide()
   const year = $("#yearsel").val()
   if (!DEMO_DATA[year]) return
+  $("#statustext").text(getStatusText())
   renderBracket(year, picks)
 }
 
@@ -187,6 +187,36 @@ function calcGamePicks(picks, results, teamNames) {
   return gamePicks
 }
 
+/** Simple status prompt for the current round. */
+function getStatusText() {
+  if (picks.length === 0) return "Make your first round of picks."
+  if (picks.length === 1) return "Make your second round of picks."
+  if (picks.length === 2) return "Make your final round of picks."
+  return "All done! Reset or select a new year."
+}
+
+/** Fills the score summary div from each game's points (by round index). */
+function updateScoreSummary(year, picks) {
+  const el = document.getElementById("scoresummary")
+  if (!el) return
+  if (picks.length === 0) {
+    el.innerHTML = ""
+    return
+  }
+  const gamesNested = buildGamesNested(year, picks)
+  let totalPts = 0
+  const roundBlocks = []
+  for (let r = 0; r < picks.length; r++) {
+    const roundTotal = gamesNested[r].reduce((sum, game) => sum + (game.points ?? 0), 0)
+    totalPts += roundTotal
+    roundBlocks.push(
+      "<div class=\"demo-score-round-line\">" + DEMO_ROUND_NAMES[r] + ": <span class=\"demo-score-pts\">" + roundTotal + "</span> pt" + (roundTotal === 1 ? "" : "s") + "</div>"
+    )
+  }
+  el.innerHTML =
+    "<div class=\"demo-score-total\">Total Score: <span class=\"demo-score-pts\">" + totalPts + "</span> pt" + (totalPts === 1 ? "" : "s") + "</div>" +
+    "<div class=\"demo-score-rounds\">" + roundBlocks.join("") + "</div>"
+}
 
 function addPicks() {
   const year = $("#yearsel").val()
@@ -211,7 +241,7 @@ function addPicks() {
 
   picks.push(roundPicks)
 
-  $("#statustext").text(picks.length >= 3 ? "All done! Reset or select a new year." : "Click on the blue points icon to see score details. Make your next picks and Submit to continue.")
+  $("#statustext").text(getStatusText())
   if (picks.length >= 3) {
     $("#resetbutton").show()
   }
@@ -223,7 +253,7 @@ function removePicks() {
   picks = picks.slice(0, -1)
   const year = $("#yearsel").val()
   renderBracket(year, picks)
-  $("#statustext").text("")
+  $("#statustext").text(getStatusText())
   $("#resetbutton").hide()
 }
 
@@ -238,6 +268,20 @@ function showGameModal(match) {
     gr.textContent = "Result: " + match.sides[1].contestantId + " over " + match.sides[0].contestantId
   }
 
+  const winnerId = match.sides[0].isWinner ? match.sides[0].contestantId : match.sides[1].contestantId
+  const checkmarkSvg = "<svg style='margin-left: 6px; vertical-align: middle' xmlns='http://www.w3.org/2000/svg' height='18' width='18' viewBox='0 0 512 512'><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><circle fill='#888888' cy='256' cx='256' r='260'/><circle fill='#ffffff' cy='256' cx='256' r='200'/><path fill='#22bc20' d='M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z'/></svg>"
+  const xmarkSvg = "<svg style='margin-left: 6px; vertical-align: middle' xmlns='http://www.w3.org/2000/svg' height='18' width='18' viewBox='0 0 512 512'><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><circle fill='#888888' cy='256' cx='256' r='260'/><circle fill='#ffffff' cy='256' cx='256' r='200'/><path fill='#e21212' d='M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM175 175c9.4-9.4 24.6-9.4 33.9 0l47 47 47-47c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-47 47 47 47c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-47-47-47 47c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l47-47-47-47c-9.4-9.4-9.4-24.6 0-33.9z'/></svg>"
+
+  // Walk backwards from end; correct picks get 1x, 2x, 4x, ... until an incorrect pick
+  const multiplierByIndex = []
+  let mult = 1
+  for (let i = match.picks.length - 1; i >= 0; i--) {
+    const correct = match.picks[i][match.picks[i][2]] === winnerId
+    if (!correct) break
+    multiplierByIndex[i] = mult
+    mult *= 2
+  }
+
   const pickList = document.getElementById("picklist")
   pickList.innerHTML = ""
   match.picks.forEach((pick, i) => {
@@ -247,6 +291,14 @@ function showGameModal(match) {
     } else {
       li.textContent = "Pick " + String(i + 1) + ": " + pick[1] + " over " + pick[0]
     }
+    const correct = pick[pick[2]] === winnerId
+    const iconWrap = document.createElement("span")
+    iconWrap.innerHTML = correct ? checkmarkSvg : xmarkSvg
+    if (multiplierByIndex[i] !== undefined) {
+      const paren = document.createTextNode(" (" + String(multiplierByIndex[i]) + "x)")
+      iconWrap.appendChild(paren)
+    }
+    li.appendChild(iconWrap)
     pickList.appendChild(li)
   })
 
@@ -266,7 +318,7 @@ function renderBracket(year, picks) {
   matches = bracketData.matches
 
   const bracketOptions = {
-    matchMaxWidth: 250,
+    // matchMaxWidth: 250,
     displayWholeRounds: true,
     liveMatchBorderColor: "#ff4545",
     matchStatusBgColor: "transparent",
@@ -371,7 +423,6 @@ function renderBracket(year, picks) {
     matchHorMargin: 14,
     distanceBetweenScorePairs: 10,
     scrollButtonPadding: "0px",
-    matchMaxWidth: 200
   }
   const desktopOptions = {
     navButtonsPosition: "beforeTitles",
@@ -394,36 +445,19 @@ function renderBracket(year, picks) {
 
   document.querySelectorAll(".player-title").forEach(el => { el.style.opacity = "1" })
 
-  // renderScoreExplanation()
-}
-
-function renderScoreExplanation() {
-  const el = document.getElementById("scoreexplanation")
-  if (!picks.length) {
-    el.textContent = ""
-    return
-  }
-  const lines = []
-  gamesNested.forEach((gamesRound, rInd) => {
-    lines.push(DEMO_ROUND_NAMES[rInd])
-    gamesRound.forEach((game, gInd) => {
-      const gameLabel = "  Game " + String(gInd + 1) + ": "
-      const matchup = (game.teams[0] ?? "?") + " vs " + (game.teams[1] ?? "?")
-      lines.push(gameLabel + matchup)
-      if (game.picks && game.picks.length > 0) {
-        game.picks.forEach((pick, i) => {
-          const winner = pick[2] === 0 ? pick[0] : pick[1]
-          const loser = pick[2] === 0 ? pick[1] : pick[0]
-          lines.push("    Pick " + String(i + 1) + ": " + winner + " over " + loser)
-        })
-      }
-      if (game.points !== null) {
-        lines.push("    " + String(game.points) + (game.points === 1 ? " point" : " points"))
+  // Keep bracket div height from shrinking when switching rounds so the top stays fixed
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const bracketEl = document.getElementById("bracketdiv")
+      if (bracketEl && bracketEl.offsetHeight > 0) {
+        bracketEl.style.minHeight = bracketEl.offsetHeight + "px"
       }
     })
   })
-  el.textContent = lines.join("\n")
+
+  updateScoreSummary(year, picks)
 }
+
 
 function makeBracketryData(year, picks) {
   const gamesNested = buildGamesNested(year, picks)

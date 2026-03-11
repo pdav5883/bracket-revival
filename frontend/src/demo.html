@@ -14,10 +14,33 @@
 
 <body>
   <div id="nav-placeholder"></div>
-  <div class="col-10 col-8-md mx-auto">
-    <h1>Try <em>bracket-revival</em></h1>
-    <p>Explore <em>bracket-revival</em> scoring</p>
-    <div class="row">
+  <div class="col-10 col-8-md mx-auto demo-page">
+    <header class="demo-header mb-4">
+      <h1 class="demo-title">Try <em>bracket-revival</em></h1>
+      <p class="demo-lead text-muted">Use the demo bracket below to see how scoring works—no sign-in required.</p>
+    </header>
+
+    <section class="demo-instructions card border-0 shadow-sm mb-4" aria-label="How to use the demo">
+      <div class="card-body">
+        <h2 class="h6 text-uppercase text-muted mb-3">How it works</h2>
+        <ol class="demo-steps list-unstyled mb-0">
+          <li class="demo-step">
+            <span class="demo-step-num" aria-hidden="true">1</span>
+            <span><strong>Submit picks</strong> for the current round. Results and points are revealed after each submission.</span>
+          </li>
+          <li class="demo-step">
+            <span class="demo-step-num" aria-hidden="true">2</span>
+            <span>Use <strong>Undo</strong> to go back a round, or <strong>Reset</strong> to start over from the beginning.</span>
+          </li>
+          <li class="demo-step">
+            <span class="demo-step-num" aria-hidden="true">3</span>
+            <span>Click the <strong>blue points icon</strong> on any game to see score breakdown and pick history.</span>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <div class="row demo-controls">
       <div class="col-4 col-sm-3 col-lg-2 mb-2">
         <label id="yearlabel" for="yearsel" class="form-label">Year</label>
         <select class="form-select" id="yearsel"></select>
@@ -29,6 +52,8 @@
       </div>
     </div>
     <p id="statustext"></p>
+    <div id="scoresummary" class="demo-score-summary mt-3" aria-live="polite"></div>
+    <div id="bracketdiv"></div>
   </div>
 
   <div class="modal fade" id="gameModal" tabindex="-1">
@@ -47,9 +72,6 @@
       </div>
     </div>
   </div>
-
-  <div id="bracketdiv"></div>
-  <div id="scoreexplanation" class="mt-4 font-monospace small"></div>
 </body>
 
 </html>
