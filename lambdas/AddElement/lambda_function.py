@@ -61,8 +61,10 @@ def add_year(year):
         return {"statusCode": 400,
                 "body": f"Year {year} already exists"}
 
-    results = {"results": [None] * trn.NUMGAMES,
-               "scores": [[None, None]] * trn.NUMGAMES}
+    results = {"ids": [None] * trn.NUMGAMES,
+               "results": [None] * trn.NUMGAMES,
+               "scores": [[None, None]] * trn.NUMGAMES,
+               "statuses": ["NOT_STARTED"] * trn.NUMGAMES}
 
     team_blank = {"name": "Full ", "short_name": "Short ", "seed": 0}
     seed_order = [1, 16, 8, 9, 5, 12, 4, 13, 6, 11, 3, 14, 7, 10, 2, 15] * 4

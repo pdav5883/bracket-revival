@@ -62,6 +62,8 @@ function changeAdminPage(callback) {
 
   if (typeArg === "results") {
     populateResultsTable(yearArg, callback);
+  } else if (typeArg === "resultsbygame") {
+    populateResultsByGameTable(yearArg, callback);
   } else if (typeArg === "teams") {
     populateTeamsTable(yearArg, callback);
   } else if (typeArg === "competition") {
@@ -76,6 +78,8 @@ function changeAdminPage(callback) {
 async function submitEdits(callback) {
   if (typeArg === "results") {
     await submitResultsEdits(callback);
+  } else if (typeArg === "resultsbygame") {
+    await submitResultsByGameEdits(callback);
   } else if (typeArg === "teams") {
     await submitTeamsEdits(callback);
   } else if (typeArg === "competition") {
@@ -114,6 +118,70 @@ function populateResultsTable(year, callback) {
           }
         })
       })
+      if (callback) callback()
+    },
+    error: function (err) {
+      $("#statustext").text("Error: " + err.responseJSON.message)
+      if (callback) callback()
+    }
+  })
+}
+
+
+function populateResultsByGameTable(year, callback) {
+  $.ajax({
+    method: "GET",
+    url: API_URL.bracket,
+    data: { "year": year },
+    crossDomain: true,
+    success: function (gamesNested) {
+      let table = document.getElementById("admintable")
+      table.innerHTML = ""
+
+      const headerRow = table.insertRow()
+      headerRow.insertCell().textContent = "Round"
+      headerRow.insertCell().textContent = "Game"
+      headerRow.insertCell().textContent = "Matchup"
+      headerRow.insertCell().textContent = "ID"
+      headerRow.insertCell().textContent = "Status"
+      headerRow.insertCell().textContent = "Score 0"
+      headerRow.insertCell().textContent = "Score 1"
+
+      let flatIndex = 0
+      for (let rnd = 0; rnd < gamesNested.length; rnd++) {
+        for (let g = 0; g < gamesNested[rnd].length; g++) {
+          const game = gamesNested[rnd][g]
+          const row = table.insertRow()
+          row.insertCell().textContent = "Round " + (rnd + 1)
+          row.insertCell().textContent = "Game " + (g + 1)
+
+          const matchup = game.teams[0] != null && game.teams[1] != null
+            ? "#" + game.seeds[0] + " " + game.teams[0] + " vs #" + game.seeds[1] + " " + game.teams[1]
+            : "—"
+          row.insertCell().textContent = matchup
+
+          const idInput = makeTextInput("gameid_" + flatIndex, 14, game.id ?? "")
+          row.insertCell().appendChild(idInput)
+
+          const statusSelect = document.createElement("select")
+          statusSelect.id = "gamestatus_" + flatIndex
+          ;["NOT_STARTED", "IN_PROGRESS", "COMPLETE"].forEach(s => {
+            const opt = document.createElement("option")
+            opt.value = s
+            opt.textContent = s
+            if (game.status === s) opt.selected = true
+            statusSelect.appendChild(opt)
+          })
+          row.insertCell().appendChild(statusSelect)
+
+          const score0 = makeTextInput("gamescore0_" + flatIndex, 3, game.score != null && game.score[0] != null ? String(game.score[0]) : "")
+          row.insertCell().appendChild(score0)
+          const score1 = makeTextInput("gamescore1_" + flatIndex, 3, game.score != null && game.score[1] != null ? String(game.score[1]) : "")
+          row.insertCell().appendChild(score1)
+
+          flatIndex++
+        }
+      }
       if (callback) callback()
     },
     error: function (err) {
@@ -432,6 +500,51 @@ async function submitResultsEdits(callback) {
     },
 
     error: function(err) {
+      adminSubmitError(err)
+      if (callback) callback()
+    }
+  })
+}
+
+
+async function submitResultsByGameEdits(callback) {
+  $("#statustext").text("")
+
+  const numGames = $("[id^=gameid_").length
+  const results = Array(numGames).fill(null)
+  const scores = Array(numGames).fill([null, null])
+  const ids = []
+  const statuses = []
+
+  for (let i = 0; i < numGames; i++) {
+    const idVal = $("#gameid_" + i).val().trim()
+    ids.push(idVal === "" ? null : idVal)
+    statuses.push($("#gamestatus_" + i).val())
+
+    const score0 = parseInt($("#gamescore0_" + i).val(), 10)
+    const score1 = parseInt($("#gamescore1_" + i).val(), 10)
+    if (!isNaN(score0) && !isNaN(score1)) {
+      scores[i] = [score0, score1]
+      results[i] = score0 > score1 ? 0 : 1
+    }
+  }
+
+  const data = { "results": results, "scores": scores, "ids": ids, "statuses": statuses }
+
+  $.ajax({
+    type: "POST",
+    url: API_URL.admin,
+    headers: { "authorization": await getValidAccessToken() },
+    crossDomain: true,
+    contentType: "application/json; charset=utf-8",
+    data: JSON.stringify({ "etype": "results", "year": yearArg, "data": data }),
+
+    success: function () {
+      $("#statustext").text("Success!")
+      if (callback) callback()
+    },
+
+    error: function (err) {
       adminSubmitError(err)
       if (callback) callback()
     }

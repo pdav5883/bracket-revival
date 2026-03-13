@@ -35,6 +35,8 @@ Parameters:
     Type: String
   LambdaUpdatePicksName:
     Type: String
+  LambdaUpdateResultsName:
+    Type: String
   LambdaUpdateScoreboardName:
     Type: String
   LambdaUserAuthName:
@@ -341,6 +343,40 @@ Resources:
       LoggingConfig:
         LogFormat: "Text"
         LogGroup: !Ref LogBracketLambdaUpdateScoreboard
+      EphemeralStorage:
+        Size: 512
+      Architectures:
+      - "x86_64"
+  LambdaBracketUpdateResults:
+    Type: "AWS::Lambda::Function"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      FunctionName: !Ref LambdaUpdateResultsName
+      MemorySize: 128
+      Description: "Update results.json from scoreboard data by matching game ids"
+      TracingConfig:
+        Mode: "PassThrough"
+      Timeout: 3
+      RuntimeManagementConfig:
+        UpdateRuntimeOn: "Auto"
+      Handler: "lambda_function.lambda_handler"
+      Code:
+        ZipFile: |
+          def lambda_handler(event, context):
+                # upload code via lambda deploy script
+                return False
+      Layers:
+        - !Ref LayerBracketCommon
+        - !ImportValue
+            Fn::Sub: ${BLRStackName}-CommonLayerArn
+      Role: !GetAtt RoleBracketReadWrite.Arn 
+      FileSystemConfigs: []
+      Runtime: "python3.12"
+      PackageType: "Zip"
+      LoggingConfig:
+        LogFormat: "Text"
+        LogGroup: !Ref LogBracketLambdaUpdateResults
       EphemeralStorage:
         Size: 512
       Architectures:
@@ -860,6 +896,33 @@ Resources:
       Action: "lambda:InvokeFunction"
       SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayBracket}/*/*/sync"
       Principal: "apigateway.amazonaws.com"
+  ApiRouteBracketUpdateResults:
+    Type: "AWS::ApiGatewayV2::Route"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      ApiId: !Ref ApiGatewayBracket
+      RouteKey: "GET /update-results"
+      Target: !Join ["/", ["integrations", !Ref ApiIntegrationBracketUpdateResults]]
+  ApiIntegrationBracketUpdateResults:
+    Type: "AWS::ApiGatewayV2::Integration"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      ApiId: !Ref ApiGatewayBracket
+      IntegrationType: AWS_PROXY
+      IntegrationMethod: POST
+      IntegrationUri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaBracketUpdateResults.Arn}/invocations"
+      PayloadFormatVersion: "2.0"
+  ApiTriggerPermissionBracketUpdateResults:
+    Type: "AWS::Lambda::Permission"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      FunctionName: !GetAtt LambdaBracketUpdateResults.Arn
+      Action: "lambda:InvokeFunction"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayBracket}/*/*/update-results"
+      Principal: "apigateway.amazonaws.com"
   ApiRouteBracketAdminEdit:
     Type: "AWS::ApiGatewayV2::Route"
     UpdateReplacePolicy: "Delete"
@@ -1055,6 +1118,13 @@ Resources:
     DeletionPolicy: "Delete"
     Properties:
       LogGroupName: !Sub "/aws/lambda/${LambdaUpdateScoreboardName}"
+      RetentionInDays: 7
+  LogBracketLambdaUpdateResults:
+    Type: "AWS::Logs::LogGroup"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${LambdaUpdateResultsName}"
       RetentionInDays: 7
   LogBracketLambdaUserAuth:
     Type: "AWS::Logs::LogGroup"

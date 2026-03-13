@@ -35,6 +35,8 @@ def lambda_handler(event, context):
     results_dict = blr_utils.read_file_s3(bucket, results_key)
     results = results_dict["results"]
     scores = results_dict["scores"]
+    ids = results_dict["ids"]
+    statuses = results_dict["statuses"]
 
     teams = blr_utils.read_file_s3(bucket,teams_key)
     names = [t["name"] for t in teams]
@@ -108,6 +110,8 @@ def lambda_handler(event, context):
             ],
             "score": scores[i],
             "result": results[i],
+            "status": statuses[i],
+            "id": ids[i],
             "picks": [],
         }
 

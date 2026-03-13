@@ -24,7 +24,9 @@ with etype argument in request body:
 
     data format:
     - etype=results: {"results": [0/1/None,....],
-                      "scores": [[#/None, #/None],...]}
+                      "scores": [[#/None, #/None],...]},
+                      "ids": [id1, ...],
+                      "statuses": [status1, ...]}
     - etype=teams: [[name, shortname],...] where order is same as
     - etype=competition: {"delete_competition":,
                           "email_all":,
@@ -72,6 +74,10 @@ def update_results(year, new_data):
     try:
         assert len(new_data["results"]) == len(old_data["results"]), "New results length must match Old results length"
         assert len(new_data["scores"]) == len(old_data["scores"]), "New scores length must match Old scores length"
+        if "ids" in new_data:
+            assert len(new_data["ids"]) == len(old_data["results"]), "New ids length must match results length"
+        if "statuses" in new_data:
+            assert len(new_data["statuses"]) == len(old_data["results"]), "New statuses length must match results length"
 
     except AssertionError as e:
         print("Error, validation failed")
@@ -81,9 +87,11 @@ def update_results(year, new_data):
                 "body": str(e)}
 
     # can't just write new_results to file since there could be other fields
-    write_data = old_data
+    write_data = dict(old_data)
     write_data["results"] = new_data["results"]
     write_data["scores"] = new_data["scores"]
+    write_data["ids"] = new_data["ids"]
+    write_data["statuses"] = new_data["statuses"]
 
     print(f"Changing {obj_key} FROM:")
     print(old_data)

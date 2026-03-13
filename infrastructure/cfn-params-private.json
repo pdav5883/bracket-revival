@@ -19,6 +19,7 @@
   "LambdaGetRoundStartName=BracketGetRoundStart",
   "LambdaGetScoreboardName=BracketGetScoreboard",
   "LambdaUpdatePicksName=BracketUpdatePicks",
+  "LambdaUpdateResultsName=BracketUpdateResults",
   "LambdaUpdateScoreboardName=BracketUpdateScoreboard",
   "LambdaUserAuthName=BracketUserAuth",
   "LayerCommonName=BracketCommon",

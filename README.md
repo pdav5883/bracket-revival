@@ -3,10 +3,12 @@ A March Madness bracket picking game where you get to re-pick your bracket after
 
 ## TODO
 ### New Features
-- Test page to play mini version to understand scoring
 - Underdog bonus points
 - Automatic score updating
+	- Need to connect to Scoreboard API, but code to update results
 - Late picks are allowed, but if game has started that is autopicked
+	- Need to look at game status when validating picks, loading picks
+
 
 ### Improvements
 - Button on picks page to see previous bracket
@@ -44,6 +46,9 @@ A March Madness bracket picking game where you get to re-pick your bracket after
 ## Scores
 - https://github.com/henrygd/ncaa-api?tab=readme-ov-file
 - Can get from espn, but there is a lot of data
+- NCAA tournament group is 100
+- Get all games from day
+	- https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard?groups=100&dates=20260320
 
 ## New Game Flow
   - If /join.html includes year, cid arguments, then go straight to page, other provide dropdown with GO selector
