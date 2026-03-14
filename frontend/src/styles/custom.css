@@ -86,6 +86,12 @@
   width: 30px;
 }
 
+/* Bracket page: allow player titles to truncate team names so checkmarks/xmarks stay visible */
+.player-title {
+  min-width: 0;
+  overflow: hidden;
+}
+
 /* Demo page: match status (info icon) - no border or background */
 .match-status {
   border: none !important;

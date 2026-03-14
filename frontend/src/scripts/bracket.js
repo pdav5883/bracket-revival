@@ -178,16 +178,20 @@ function populateBracket(queryParams, callback) {
             return playerHTML
           }
           else {
-            let titleHTML = playerHTML + " "
+            let iconsHTML = ""
             correctHist.forEach(correct => {
               if (correct) {
-                titleHTML += checkmark
+                iconsHTML += checkmark
               }
               else {
-                titleHTML += xmark
+                iconsHTML += xmark
               }
             })
-            return titleHTML
+            // Flex layout: team name truncates with ellipsis when needed, icons stay right after text (no extra space)
+            return "<span style='display: flex; align-items: center; min-width: 0; gap: 2px'>" +
+              "<span style='flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap'>" + playerHTML + "</span>" +
+              "<span style='flex-shrink: 0'>" + iconsHTML + "</span>" +
+              "</span>"
           }
         },
         // TODO make logo size variable with device
