@@ -64,7 +64,8 @@ def add_year(year):
     results = {"ids": [None] * trn.NUMGAMES,
                "results": [None] * trn.NUMGAMES,
                "scores": [[None, None]] * trn.NUMGAMES,
-               "statuses": ["NOT_STARTED"] * trn.NUMGAMES}
+               "statuses": ["NOT_STARTED"] * trn.NUMGAMES,
+               "completed_rounds": 0}
 
     team_blank = {"name": "Full ", "short_name": "Short ", "seed": 0}
     seed_order = [1, 16, 8, 9, 5, 12, 4, 13, 6, 11, 3, 14, 7, 10, 2, 15] * 4
@@ -76,6 +77,7 @@ def add_year(year):
         team["name"] += str(seed)
         team["short_name"] += str(seed)
         team["seed"] = seed
+        team["espn_id"] = "153"
         teams.append(team)
 
     blr_utils.write_file_s3(bucket, results_key, results)
@@ -117,9 +119,9 @@ def add_competition(year, compname):
                    "name": compname,
                    "scoreboard": {},
                    "pick_status": {},
-                   "completed_rounds": 0,
                    "open_picks": False,
                    "open_players": False,
+                   "use_game_status": False,
                    "first_deadline": "Thursday, March 20th at Noon (EST)"}
 
     blr_utils.write_file_s3(bucket, competition_key, competition)

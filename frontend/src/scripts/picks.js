@@ -135,7 +135,10 @@ async function populateRoundStart(queryParams, callback) {
       // in case we got here by checking for more picks
       $("#submitbutton").show()
 
-      let bracketData = makeBracketryStartData(result.start_games, result.bonus_games)
+      const constraints = result.constraints || null
+      let bracketData = makeBracketryStartData(
+        result.start_games, result.bonus_games, constraints
+      )
       prepopulateBracket(bracketData)
 
       const bracketOptions = {
@@ -144,6 +147,11 @@ async function populateRoundStart(queryParams, callback) {
         liveMatchBorderColor: "#ff4545",
         matchStatusBgColor: "#5a9cd8",
         onMatchSideClick: (thisMatch, thisTopBottom) => {
+          // do not allow changes to constraint-locked games
+          if (thisMatch.locked) {
+            return
+          }
+
           // if click is already on winner, don't do anything
           if (thisMatch.sides[thisTopBottom].isWinner) {
             return
@@ -298,6 +306,23 @@ function prepopulateBracket(bracketData) {
 
   let nextMatch, nextTopBottom
   
+  // handle constraint-locked games first (prepopulate and lock)
+  bracketData.matches.forEach(match => {
+    if (match.roundIndex === 0 && match.constraint != null) {
+      const constraintPick = match.constraint
+      match.sides[constraintPick].isWinner = true
+      match.locked = true
+      match.matchStatus = String(2 ** match.roundIndex)
+
+      const nxt = getNextMatch(bracketData, match.roundIndex, match.order)
+      nextMatch = nxt[0]
+      nextTopBottom = nxt[1]
+      if (nextMatch !== null) {
+        nextMatch.sides[nextTopBottom].contestantId = match.sides[constraintPick].contestantId
+      }
+    }
+  })
+
   // populate winners, points, contestantIds in next game
   bracketData.matches.forEach(match => {
     if (match.prevPickWinner !== undefined && match.prevPickWinner == match.sides[0].contestantId) {
@@ -410,7 +435,7 @@ async function submitPicks() {
 }
 
 
-function makeBracketryStartData(startGames, bonusGames) {
+function makeBracketryStartData(startGames, bonusGames, constraints = null) {
   let data = {
     rounds: [],
     matches: [],
@@ -456,6 +481,9 @@ function makeBracketryStartData(startGames, bonusGames) {
         { contestantId: game.teams[0] },
         { contestantId: game.teams[1] }
       ]
+    }
+    if (constraints && gInd < constraints.length && constraints[gInd] != null) {
+      match.constraint = constraints[gInd]
     }
     data.matches.push(match)
   })

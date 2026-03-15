@@ -1,9 +1,36 @@
 import json
 import pytest
+from bracket_common import bracket_utils
 from bracket_common import points
 from bracket_common import tournament as trn
 
 N = trn.NUMGAMES
+
+
+class TestComputeCompletedRounds:
+    def test_no_games_complete(self):
+        results = [None] * N
+        assert bracket_utils.compute_completed_rounds(results) == 0
+
+    def test_partial_first_round(self):
+        results = [1] * 10 + [None] * (N - 10)
+        assert bracket_utils.compute_completed_rounds(results) == 0
+
+    def test_first_round_complete(self):
+        results = [1] * trn.GAMES_PER_ROUND[0] + [None] * sum(trn.GAMES_PER_ROUND[1:])
+        assert bracket_utils.compute_completed_rounds(results) == 1
+
+    def test_second_round_complete(self):
+        results = (
+            [1] * trn.GAMES_PER_ROUND[0]
+            + [0] * trn.GAMES_PER_ROUND[1]
+            + [None] * sum(trn.GAMES_PER_ROUND[2:])
+        )
+        assert bracket_utils.compute_completed_rounds(results) == 2
+
+    def test_all_complete(self):
+        results = [0] * N
+        assert bracket_utils.compute_completed_rounds(results) == trn.NUMROUNDS
 
 
 class TestPoints:

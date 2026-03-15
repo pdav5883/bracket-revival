@@ -35,8 +35,8 @@ def lambda_handler(event, context):
     results_dict = blr_utils.read_file_s3(bucket, results_key)
     results = results_dict["results"]
     scores = results_dict["scores"]
-    ids = results_dict["ids"]
-    statuses = results_dict["statuses"]
+    ids = results_dict.get("ids", [None] * len(results))
+    statuses = results_dict.get("statuses", ["NOT_STARTED"] * len(results))
 
     teams = blr_utils.read_file_s3(bucket,teams_key)
     names = [t["name"] for t in teams]
@@ -44,13 +44,14 @@ def lambda_handler(event, context):
     seeds = [t["seed"] for t in teams]
     espn_ids = [t.get("espn_id", None) for t in teams]
 
-    if cid == "":
-        completed_rounds = trn.NUMROUNDS
-    else:
-        competition_key = year + "/" + cid + "/competition.json"
-        competition = blr_utils.read_file_s3(bucket, competition_key)
-        completed_rounds = competition["completed_rounds"]
+    # if cid == "":
+    #     completed_rounds = trn.NUMROUNDS
+    # removing the else statement because we want to show all games that have been played, even if round not complete
+    # else:
+    #     completed_rounds = results_dict["completed_rounds"]
 
+    completed_rounds = trn.NUMROUNDS
+    
     if pid == "":
         player = None
         player_picks = []

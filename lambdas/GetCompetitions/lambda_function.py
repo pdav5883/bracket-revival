@@ -20,6 +20,10 @@ def lambda_handler(event, context):
         return blr_utils.read_file_s3(bucket, "index.json")
     else:
         cid = cid.replace(" ", "").lower()
-        return blr_utils.read_file_s3(bucket, year + "/" + cid + "/competition.json")
+        competition_dict = blr_utils.read_file_s3(bucket, year + "/" + cid + "/competition.json")
+        results_dict = blr_utils.read_file_s3(bucket, year + "/results.json")
+        competition_dict["completed_rounds_from_results"] = results_dict["completed_rounds"]
+        competition_dict["started_rounds_from_results"] = results_dict["started_rounds"]
+        return competition_dict
   
 

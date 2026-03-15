@@ -30,7 +30,6 @@ with etype argument in request body:
     - etype=teams: [[name, shortname],...] where order is same as
     - etype=competition: {"delete_competition":,
                           "email_all":,
-                          "completed_rounds":,
                           "open_picks",
                           "open_players",
                           "email_individual", [name1, ...],
@@ -90,8 +89,18 @@ def update_results(year, new_data):
     write_data = dict(old_data)
     write_data["results"] = new_data["results"]
     write_data["scores"] = new_data["scores"]
-    write_data["ids"] = new_data["ids"]
-    write_data["statuses"] = new_data["statuses"]
+    write_data["ids"] = new_data.get("ids", old_data.get("ids", [""] * len(new_data["results"])))
+    statuses = list(new_data.get("statuses", old_data.get("statuses", ["NOT_STARTED"] * len(new_data["results"]))))
+
+    # Any game with non-null score must have status COMPLETE
+    for i, score in enumerate(write_data["scores"]):
+        if i < len(statuses) and score is not None and len(score) >= 2:
+            if score[0] is not None and score[1] is not None:
+                statuses[i] = "COMPLETE"
+    write_data["statuses"] = statuses
+
+    write_data["completed_rounds"] = bracket_utils.compute_completed_rounds(write_data["results"])
+    write_data["started_rounds"] = bracket_utils.compute_started_rounds(write_data["results"])
 
     print(f"Changing {obj_key} FROM:")
     print(old_data)
@@ -162,9 +171,13 @@ def update_competition(year, cid, new_competition):
     # start from old competition
     new_data = dict(old_competition)
 
-    new_data["completed_rounds"] = int(new_competition["completed_rounds"])
+    # completed_rounds is now in results.json, computed from game results
+    results_dict = blr_utils.read_file_s3(bucket, year + "/results.json")
+    completed_rounds = results_dict["completed_rounds"]
+
     new_data["open_picks"] = new_competition["open_picks"] in (True, "true", "True", 1, "1")
     new_data["open_players"] = new_competition["open_players"] in (True, "true", "True", 1, "1")
+    new_data["use_game_status"] = new_competition.get("use_game_status", False) in (True, "true", "True", 1, "1")
 
     # start updating index, do write after any updates from name edit loop below
     index = blr_utils.read_file_s3(bucket, "index.json")
@@ -225,7 +238,7 @@ def update_competition(year, cid, new_competition):
         player = blr_utils.read_file_s3(bucket, player_key)
         picks = player["picks"]
 
-        if len(picks) <= new_data["completed_rounds"]:
+        if len(picks) <= completed_rounds:
             last_picks = picks[-1]
             games_last_round = trn.GAMES_PER_ROUND[len(picks) - 1]
             next_picks = last_picks[games_last_round:]
@@ -234,7 +247,7 @@ def update_competition(year, cid, new_competition):
 
             print(f"Submitted auto-picks for player {pname} in comp {cid} year {year}: {next_picks}")
         else:
-            print("Cannot make auto-picks for player {pname} in comp {cid} year {year}. Player has made {len(picks)} picks through {new_data['completed_rounds'] rounds")
+            print(f"Cannot make auto-picks for player {pname} in comp {cid} year {year}. Player has made {len(picks)} picks through {completed_rounds} rounds")
 
     # sync scoreboard
     bracket_utils.trigger_sync_sns(year, cid)
@@ -264,7 +277,7 @@ def update_competition(year, cid, new_competition):
         blr_utils.trigger_email_sns(email_topic_arn, {"typ": "newround",
                            "content": {"year": year,
                                      "compname": new_data["name"],
-                                     "pick_round": new_data["completed_rounds"],
+                                     "pick_round": completed_rounds,
                                      "deadline": new_competition["deadline"]},
                            "recipient_names": index_player_list,
                            "recipient_emails": player_emails})
@@ -296,7 +309,7 @@ def update_competition(year, cid, new_competition):
         blr_utils.trigger_email_sns(email_topic_arn, {"typ": "reminder",
                              "content": {"year": year,
                                          "compname": new_data["name"],
-                                         "pick_round": new_data["completed_rounds"],
+                                         "pick_round": completed_rounds,
                                          "deadline": new_competition["deadline"]},
                              "recipient_names": new_competition["email_individual"],
                              "recipient_emails": player_emails})

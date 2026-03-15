@@ -65,7 +65,6 @@ function populateScoreboard(queryParams, callback) {
     params = {
       year: $("#yearsel").val(),
       cid: $("#compsel").val(),
-      rounds: $("#rndinput").val()
     }
   }
   else {

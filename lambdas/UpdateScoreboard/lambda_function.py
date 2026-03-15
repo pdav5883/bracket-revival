@@ -28,9 +28,9 @@ def lambda_handler(event, context):
     results_key = year + "/results.json"
     results_dict = blr_utils.read_file_s3(bucket, results_key)
     results = results_dict["results"]
+    completed_rounds = results_dict.get("completed_rounds")
 
     competition_key = year + "/" + cid + "/competition.json"
-    
     competition = blr_utils.read_file_s3(bucket, competition_key)
     scoreboard = competition["scoreboard"]
 
@@ -58,7 +58,7 @@ def lambda_handler(event, context):
         # pick status is None if picks aren't currently open, True if picks submitted for this round, False if waiting
         if not competition["open_picks"]:
             pick_status[pname] = None
-        elif len(player["picks"]) > competition["completed_rounds"]:
+        elif len(player["picks"]) > completed_rounds:
             pick_status[pname] = True
         else:
             pick_status[pname] = False

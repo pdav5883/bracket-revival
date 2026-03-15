@@ -5,9 +5,10 @@ A March Madness bracket picking game where you get to re-pick your bracket after
 ### New Features
 - Underdog bonus points
 - Automatic score updating
-	- Need to connect to Scoreboard API, but code to update results
+	- Need to connect to Scoreboard API
 - Late picks are allowed, but if game has started that is autopicked
-	- Need to look at game status when validating picks, loading picks
+	- Run test where picking second round
+	- Need to do a bit of testing with coordination of completed_rounds to ensure that player can't make picks before previous round is complete
 
 
 ### Improvements

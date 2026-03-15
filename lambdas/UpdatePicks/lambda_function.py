@@ -37,6 +37,10 @@ def lambda_handler(event, context):
                 "body": err_msg}
 
     # check that this submission is allowed
+    results_key = year + "/results.json"
+    results_dict = blr_utils.read_file_s3(bucket, results_key)
+    completed_rounds = results_dict["completed_rounds"]
+
     competition_key = year + "/" + cid + "/competition.json"
     competition = blr_utils.read_file_s3(bucket, competition_key)
 
@@ -46,11 +50,28 @@ def lambda_handler(event, context):
         return {"statusCode": 400,
                 "body": err_msg}
 
-    if rnd > competition["completed_rounds"]:
+    if rnd > completed_rounds:
         err_msg = f"{cid} is not accepting picks for Round {rnd}. Try again later."
         print(err_msg)
         return {"statusCode": 400,
                 "body": err_msg}
+
+    # Validate constraints when use_game_status is enabled
+    if competition.get("use_game_status", False):
+        results = results_dict.get("results")
+        statuses = results_dict.get("statuses", ["NOT_STARTED"] * len(results))
+        start_games_ind = bracket_utils.get_start_games_abs_ind(results, rnd)
+        constraints = bracket_utils.get_pick_constraints(
+            results, statuses, player["picks"], rnd, start_games_ind
+        )
+        for i, constraint in enumerate(constraints):
+            if constraint is not None and i < len(new_picks) and new_picks[i] != constraint:
+                err_msg = (
+                    f"Invalid picks: game {i + 1} has started and must be "
+                    f"{constraint} (locked by game status)."
+                )
+                print(err_msg)
+                return {"statusCode": 400, "body": err_msg}
 
     player["picks"].append(new_picks)
     

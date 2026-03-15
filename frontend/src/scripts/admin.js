@@ -289,13 +289,34 @@ function populateCompetitionTable(year, cid, callback) {
       input = makeBooleanSelect("selpicks", result.open_picks)
       cell.appendChild(input)
 
-      // completed rounds
+      // use game status (lock picks for started games)
+      row = table.insertRow()
+      cell = row.insertCell()
+      cell.textContent = "Use Game Status"
+      cell = row.insertCell()
+      input = makeBooleanSelect("selgamestatus", result.use_game_status ?? false)
+      cell.appendChild(input)
+
+      // completed rounds (read-only, computed from results.json)
       row = table.insertRow()
       cell = row.insertCell()
       cell.textContent = "Completed Rounds"
       cell = row.insertCell()
-      input = makeTextInput("inprounds", 2, result.completed_rounds)
+      input = makeTextInput("inprounds", 2, result.completed_rounds_from_results)
+      input.disabled = true
       cell.appendChild(input)
+      cell.innerHTML += " (from results.json)"
+
+      // started rounds (read-only, computed from results.json)
+      row = table.insertRow()
+      cell = row.insertCell()
+      cell.textContent = "Started Rounds"
+      cell = row.insertCell()
+      input = makeTextInput("inprounds", 2, result.started_rounds_from_results)
+      input.disabled = true
+      cell.appendChild(input)
+      cell.innerHTML += " (from results.json)"
+
 
       // players
       Object.keys(result.scoreboard).forEach((name, i) => {
@@ -613,9 +634,9 @@ async function submitCompetitionEdits(callback) {
     "delete_competition": $("#delete_competition").is(":checked"),
     "email_all": $("#email_all").is(":checked"),
     "deadline": $("#email_deadline").val(),
-    "completed_rounds": parseInt($("#inprounds").val()),
     "open_picks": $("#selpicks").val(),
     "open_players": $("#selplayers").val(),
+    "use_game_status": $("#selgamestatus").val(),
     "email_individual": emailNames,
     "autopick_individual": autopickNames,
     "players": players

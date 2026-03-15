@@ -73,6 +73,8 @@ def lambda_handler(event, context):
             scores[i] = data["scores"]
             results[i] = None
 
+    results_dict["completed_rounds"] = bracket_utils.compute_completed_rounds(results)
+    results_dict["started_rounds"] = bracket_utils.compute_started_rounds(results)
     blr_utils.write_file_s3(bucket, results_key, results_dict)
 
     # TODO: maybe sync competitions - will only want to sync scoreboards if a status changes to complete
