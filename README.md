@@ -3,31 +3,25 @@ A March Madness bracket picking game where you get to re-pick your bracket after
 
 ## TODO
 ### New Features
-- Underdog bonus points
 - Automatic score updating
 	- Need to connect to Scoreboard API
-- Late picks are allowed, but if game has started that is autopicked
-	- Run test where picking second round
-	- Need to do a bit of testing with coordination of completed_rounds to ensure that player can't make picks before previous round is complete
 
 
 ### Improvements
 - Button on picks page to see previous bracket
-- Next round buttons anchored to top of screen
-- Show completed rounds on scoreboard
 - Show pick round, bracket round on pages
 
 ### Bugs
 - Confirm welcome email from join game works
 - Confirm batch emailing from admin works
-- Confirm admin edit works
 
 ## Maybe TODO
 - Error handling for bad params
-- webpack into production
 - Refactor js into shared utils
 - Change logo retrieval to BLR assets
 - Restricted endpoint to grab emails and pick links for players
+- Underdog bonus points
+- Make round navigation buttons nicer
 
 ## Underdog Bonus
 - Underdog pick affects the base value of the win, which then gets multiplied the further you go down

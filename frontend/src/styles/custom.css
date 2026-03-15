@@ -86,6 +86,51 @@
   width: 30px;
 }
 
+/* Picks and bracket pages: bracket and sticky header full width */
+.picks-page #bracketdiv,
+.picks-page #bracketdiv .bracket-root,
+.bracket-page #bracketdiv,
+.bracket-page #bracketdiv .bracket-root {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Picks and bracket pages: single sticky bracket header (Prev/Next Round + round names) */
+.picks-page #bracketdiv .bracket-root .bracket-sticky-header,
+.bracket-page #bracketdiv .bracket-root .bracket-sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #fff;
+  box-shadow: 0 1px 0 var(--roundTitlesBorderColor, var(--rootBorderColor, #bbbbbb));
+}
+/* Nav row: full width with Prev left, Next right; no bottom border (line is on round titles row) */
+.picks-page .bracket-sticky-header-nav,
+.bracket-page .bracket-sticky-header-nav {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+.picks-page .bracket-sticky-header-nav .navigation-button,
+.bracket-page .bracket-sticky-header-nav .navigation-button {
+  border-bottom: none !important;
+}
+.picks-page .bracket-sticky-header-nav .navigation-button.left,
+.bracket-page .bracket-sticky-header-nav .navigation-button.left {
+  justify-content: flex-start;
+}
+.picks-page .bracket-sticky-header-nav .navigation-button.right,
+.bracket-page .bracket-sticky-header-nav .navigation-button.right {
+  justify-content: flex-end;
+}
+/* Round titles row: full width; full-width top border between button section and round names */
+.picks-page .bracket-sticky-header .round-titles-grid-item,
+.bracket-page .bracket-sticky-header .round-titles-grid-item {
+  width: 100% !important;
+  min-width: 100%;
+  border-top: 1px solid var(--roundTitlesBorderColor, var(--rootBorderColor, #bbbbbb));
+}
+
 /* Bracket page: allow player titles to truncate team names so checkmarks/xmarks stay visible */
 .player-title {
   min-width: 0;

@@ -12,7 +12,7 @@
   <link rel="icon" type="image/x-icon" href="./assets/favicon.ico">
 </head>
 
-<body>
+<body class="picks-page">
   <div id="nav-placeholder"></div>
   <div class="col-10 col-8-md mx-auto">
     <h1>Pick Your Bracket</h1>
@@ -42,6 +42,19 @@
       <button id="bracketbutton" class="m-1 btn btn-secondary">Bracket</button>
       <button id="morepicksbutton" class="m-1 btn btn-success">Check for More Picks</button>
       <p id="statustext"></p>
+    </div>
+  </div>
+
+  <div class="modal fade" id="lockedGameModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content">
+        <div class="modal-body text-center py-4">
+          <p class="mb-0">This game has already started. Using your last pick for this game.</p>
+        </div>
+        <div class="modal-footer justify-content-center">
+          <button type="button" class="btn btn-primary btn-sm" data-bs-dismiss="modal">OK</button>
+        </div>
+      </div>
     </div>
   </div>
 

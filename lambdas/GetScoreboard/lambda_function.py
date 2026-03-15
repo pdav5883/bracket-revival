@@ -56,5 +56,12 @@ def lambda_handler(event, context):
             elif rnd > completed_rounds:
                 player_render[rnd] = "-"
 
-    return {"names": names, "total_points": total_points, "round_points": round_points, "round_render": round_render}
+    return {
+        "names": names,
+        "total_points": total_points,
+        "round_points": round_points,
+        "round_render": round_render,
+        "completed_rounds": completed_rounds,
+        "started_rounds": started_rounds,
+    }
 

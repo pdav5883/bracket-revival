@@ -161,3 +161,38 @@ export function getRenderNames(names) {
   }
   return renderNames;
 }
+
+/** Wrap nav buttons and round titles in a single sticky header (picks and bracket pages). */
+export function wrapBracketHeaderForSticky(bracketDiv) {
+  const root = bracketDiv?.querySelector(".bracket-root")
+  if (!root) return
+  const leftNav = root.querySelector(".navigation-button.left")
+  const rightNav = root.querySelector(".navigation-button.right")
+  const roundTitles = root.querySelector(".round-titles-grid-item")
+  if (!leftNav || !rightNav || !roundTitles) return
+
+  const navRow = document.createElement("div")
+  navRow.className = "bracket-sticky-header-nav"
+  navRow.style.cssText = "display: flex; justify-content: space-between; align-items: stretch; width: 100%;"
+  navRow.append(leftNav, rightNav)
+
+  const wrapper = document.createElement("div")
+  wrapper.className = "bracket-sticky-header"
+  wrapper.style.cssText =
+    "grid-column: 1 / -1; grid-row: 1 / 3; display: grid; grid-template-columns: 1fr; grid-template-rows: auto auto; width: 100%; min-width: 0;"
+  roundTitles.style.gridColumn = "1"
+  wrapper.append(navRow, roundTitles)
+  root.prepend(wrapper)
+}
+
+/** Keep bracket div height from shrinking when switching rounds so the top stays fixed (same as demo). */
+export function preserveBracketMinHeightOnRoundChange(bracketDiv) {
+  if (!bracketDiv) return
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      if (bracketDiv.offsetHeight > 0) {
+        bracketDiv.style.minHeight = bracketDiv.offsetHeight + "px"
+      }
+    })
+  })
+}

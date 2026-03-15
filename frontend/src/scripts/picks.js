@@ -1,17 +1,20 @@
 import { API_URL, LOGO_URL } from "./constants.js" 
 
-import { 
+import {
   initCommon,
   initIndexYears,
   populateCompetitions,
-  populatePlayerNames
+  populatePlayerNames,
+  wrapBracketHeaderForSticky,
+  preserveBracketMinHeightOnRoundChange
 } from "./shared.js"
 
 import {
   initButtons,
   spinnerOn,
   spinnerOff,
-  getValidAccessToken
+  getValidAccessToken,
+  Modal
 } from "blr-shared-frontend"
 
 
@@ -147,8 +150,10 @@ async function populateRoundStart(queryParams, callback) {
         liveMatchBorderColor: "#ff4545",
         matchStatusBgColor: "#5a9cd8",
         onMatchSideClick: (thisMatch, thisTopBottom) => {
-          // do not allow changes to constraint-locked games
+          // do not allow changes to constraint-locked games; show explanation
           if (thisMatch.locked) {
+            const modal = Modal.getOrCreateInstance(document.getElementById("lockedGameModal"))
+            modal.show()
             return
           }
 
@@ -236,6 +241,10 @@ async function populateRoundStart(queryParams, callback) {
 
       bracket = createBracket(bracketData, document.getElementById("bracketdiv"), bracketOptions)
 
+      wrapBracketHeaderForSticky(document.getElementById("bracketdiv"))
+
+      preserveBracketMinHeightOnRoundChange(document.getElementById("bracketdiv"))
+
       const mobileOptions = {
         navButtonsPosition: "beforeTitles",
         leftNavButtonHTML: "<div style='padding: 15px 15px; font-weight: bold;'>< PREV ROUND</div>",
@@ -289,7 +298,6 @@ async function populateRoundStart(queryParams, callback) {
     }
   })
 }
-
 
 // performs in-place edit of bracketData to clear bracket contents and prepopulate with picks still alive
 function prepopulateBracket(bracketData) {

@@ -5,7 +5,9 @@ import {
   initIndexYears,
   populateCompetitions,
   populatePlayerNames,
-  initCommon
+  initCommon,
+  wrapBracketHeaderForSticky,
+  preserveBracketMinHeightOnRoundChange
 } from "./shared.js"
 
 import {
@@ -208,6 +210,10 @@ function populateBracket(queryParams, callback) {
 
       matches = bracketData.matches
       bracket = createBracket(bracketData, document.getElementById("bracketdiv"), bracketOptions)
+
+      wrapBracketHeaderForSticky(document.getElementById("bracketdiv"))
+
+      preserveBracketMinHeightOnRoundChange(document.getElementById("bracketdiv"))
 
       const mobileOptions = {
         navButtonsPosition: "beforeTitles",

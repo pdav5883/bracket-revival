@@ -1,4 +1,4 @@
-import { API_URL } from "./constants.js" 
+import { API_URL, ROUND_NAMES } from "./constants.js" 
 
 import {
   initCommon,
@@ -77,7 +77,9 @@ function populateScoreboard(queryParams, callback) {
     data: params,
     crossDomain: true,
     success: function(result) {
-      // {names: [], total_points: [], round_points: []}
+      // {names: [], total_points: [], round_points: [], completed_rounds, started_rounds}
+
+      updateRoundStatus(result.completed_rounds, result.started_rounds)
 
       // reconfigure results to allow sorting
       let leaders = []
@@ -163,9 +165,38 @@ function populateScoreboard(queryParams, callback) {
       if (callback) callback()
     },
     error: function(err) {
+      updateRoundStatus(null, null)
       if (callback) callback()
     }
   })
+}
+
+const NUMROUNDS = ROUND_NAMES.length
+
+function updateRoundStatus(completed_rounds, started_rounds) {
+  const el = document.getElementById("round-status")
+  if (el == null) return
+  if (completed_rounds == null || started_rounds == null) {
+    el.textContent = ""
+    return
+  }
+  if (completed_rounds >= NUMROUNDS) {
+    el.textContent = "Tournament Complete"
+    return
+  }
+  if (started_rounds > completed_rounds) {
+    el.textContent = ROUND_NAMES[completed_rounds] + " In Progress"
+    return
+  }
+  if (completed_rounds > 0) {
+    el.textContent = ROUND_NAMES[completed_rounds - 1] + " Complete"
+    return
+  }
+  if (started_rounds === 0) {
+    el.textContent = "First Round Not Started"
+    return
+  }
+  el.textContent = ROUND_NAMES[0] + " In Progress"
 }
 
 const checkmark = "<svg xmlns='http://www.w3.org/2000/svg' height='18' width='18' viewBox='0 0 512 512'><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><circle fill='#888888' cy='256' cx='256' r='260'/><circle fill='#ffffff' cy='256' cx='256' r='200'/><path fill='#22bc20' d='M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z'/></svg>"
