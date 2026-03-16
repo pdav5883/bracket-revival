@@ -9,7 +9,7 @@ A March Madness bracket picking game where you get to re-pick your bracket after
 
 ### Improvements
 - Button on picks page to see previous bracket
-- Show pick round, bracket round on pages
+- Make emails nicer
 
 ### Bugs
 - Confirm welcome email from join game works

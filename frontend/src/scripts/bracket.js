@@ -96,8 +96,15 @@ function populateBracket(queryParams, callback) {
     url: API_URL.bracket,
     data: params,
     crossDomain: true,
-    success: function(gamesNested) {
+    success: function(result) {
+      const gamesNested = result.games != null ? result.games : result
       const bracketData = makeBracketryData(gamesNested)
+
+      updateBracketStatus(
+        result.completed_rounds,
+        result.started_rounds,
+        getPicksLength(gamesNested)
+      )
 
       const bracketOptions = {
         matchMaxWidth: 250,
@@ -265,11 +272,46 @@ function populateBracket(queryParams, callback) {
       if (callback) callback()
     },
     error: function(err) {
+      updateBracketStatus(null, null, null)
       if (callback) callback()
     }
   })
 }
 
+const NUMROUNDS = ROUND_NAMES.length
+
+function getPicksLength(gamesNested) {
+  if (!gamesNested?.length) return 0
+  const lastGame = gamesNested[gamesNested.length - 1]?.[0]
+  return lastGame?.picks?.length ?? 0
+}
+
+function updateBracketStatus(completed_rounds, started_rounds, picksLength) {
+  const roundEl = document.getElementById("bracket-status")
+  const picksEl = document.getElementById("picks-status")
+  const infoEl = document.getElementById("bracket-info")
+  const roundText = getRoundStatusText(completed_rounds, started_rounds)
+  const picksText = getPicksStatusText(completed_rounds, picksLength)
+  if (roundEl) roundEl.textContent = roundText
+  if (picksEl) picksEl.textContent = picksText
+  if (infoEl) infoEl.classList.toggle("bracket-info--empty", !roundText && !picksText)
+}
+
+function getRoundStatusText(completed_rounds, started_rounds) {
+  if (completed_rounds == null || started_rounds == null) return ""
+  if (completed_rounds >= NUMROUNDS) return "Tournament Complete"
+  if (started_rounds > completed_rounds) return ROUND_NAMES[completed_rounds] + " Games In Progress"
+  if (completed_rounds > 0) return ROUND_NAMES[completed_rounds - 1] + " Games Complete"
+  if (started_rounds === 0) return ROUND_NAMES[0] + " Games Not Started"
+  return ROUND_NAMES[0] + " Games In Progress"
+}
+
+function getPicksStatusText(completed_rounds, picksLength) {
+  if (picksLength == null || picksLength === 0) return ""
+  if (picksLength === NUMROUNDS) return "All Picks Complete"
+  if (completed_rounds != null && picksLength > completed_rounds) return ROUND_NAMES[completed_rounds] + " Picks Complete"
+  return ROUND_NAMES[completed_rounds] + " Picks Pending"
+}
 
 function makeBracketryData(gamesNested) {
   let data = {

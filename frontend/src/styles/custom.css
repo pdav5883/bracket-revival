@@ -266,3 +266,33 @@
     scroll-margin-top: 4rem;
   }
 }
+
+/* Bracket page: compact status info above the bracket */
+.bracket-info {
+  display: block;
+  width: max-content;
+  margin-bottom: 1rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: var(--bs-secondary-color, #6c757d);
+  background-color: var(--bs-tertiary-bg, #f8f9fa);
+  border-radius: 0.25rem;
+  border-left: 3px solid var(--bs-border-color, #dee2e6);
+}
+
+.bracket-info span {
+  display: block;
+}
+
+.bracket-info span:empty {
+  display: none;
+}
+
+.bracket-info span + span:not(:empty) {
+  margin-top: 0.25rem;
+}
+
+.bracket-info.bracket-info--empty {
+  display: none;
+}

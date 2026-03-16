@@ -33,6 +33,8 @@ def lambda_handler(event, context):
     teams_key = year + "/teams.json"
 
     results_dict = blr_utils.read_file_s3(bucket, results_key)
+    tournament_completed_rounds = results_dict.get("completed_rounds", 0)
+    tournament_started_rounds = results_dict.get("started_rounds", 0)
     results = results_dict["results"]
     scores = results_dict["scores"]
     ids = results_dict.get("ids", [None] * len(results))
@@ -148,7 +150,11 @@ def lambda_handler(event, context):
             games_round.append(games.pop(0))
         games_nested.append(games_round)
 
-    return games_nested
+    return {
+        "games": games_nested,
+        "completed_rounds": tournament_completed_rounds,
+        "started_rounds": tournament_started_rounds,
+    }
 
 
 def make_absolute_bracket(results, picks=None):
