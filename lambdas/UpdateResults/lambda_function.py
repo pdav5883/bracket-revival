@@ -51,6 +51,8 @@ def lambda_handler(event, context):
     scores = results_dict["scores"]
     results = results_dict["results"]
 
+    update_scoreboard = False
+
     # Loop through scoreboard; for each entry find its id in results.ids and update
     for ev in scoreboard_data.get("events", []):
         event_id = ev.get("id")
@@ -62,6 +64,7 @@ def lambda_handler(event, context):
             continue
 
         data = _event_to_game_data(ev)
+        old_status = statuses[i]
         statuses[i] = data["status"]
         if data["status"] == "COMPLETE":
             scores[i] = data["scores"]
@@ -73,10 +76,17 @@ def lambda_handler(event, context):
             scores[i] = data["scores"]
             results[i] = None
 
+        if statuses[i] != old_status:
+            update_scoreboard = True
+
     results_dict["completed_rounds"] = bracket_utils.compute_completed_rounds(results)
     results_dict["started_rounds"] = bracket_utils.compute_started_rounds(results)
     blr_utils.write_file_s3(bucket, results_key, results_dict)
 
-    # TODO: maybe sync competitions - will only want to sync scoreboards if a status changes to complete
+    # sync scoreboard for all competitions in year
+    if update_scoreboard:
+        index = blr_utils.read_file_s3(bucket, "index.json")
+        for cid in index[year]:
+            bracket_utils.trigger_sync_sns(year, cid.replace(" ", "").lower())
 
     return {"body": f"Successfully updated results for year {year}"}

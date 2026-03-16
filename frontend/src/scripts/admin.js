@@ -103,8 +103,9 @@ function populateResultsTable(year, callback) {
     url: API_URL.bracket,
     data: { "year": year },
     crossDomain: true,
-    success: function (gamesNested) {
+    success: function (result) {
 
+      const gamesNested = result.games
       let table = document.getElementById("admintable")
       table.innerHTML = ""
 
@@ -134,7 +135,8 @@ function populateResultsByGameTable(year, callback) {
     url: API_URL.bracket,
     data: { "year": year },
     crossDomain: true,
-    success: function (gamesNested) {
+    success: function (results) {
+      const gamesNested = results.games
       let table = document.getElementById("admintable")
       table.innerHTML = ""
 
@@ -198,8 +200,8 @@ function populateTeamsTable(year, callback) {
     url: API_URL.bracket,
     data: { "year": year },
     crossDomain: true,
-    success: function (gamesNested) {
-      let gamesStart = gamesNested[0]
+    success: function (result) {
+      let gamesStart = result.games[0]
 
       let table = document.getElementById("admintable")
       table.innerHTML = ""
