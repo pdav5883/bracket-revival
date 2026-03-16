@@ -6,3 +6,4 @@ venv/
 .vscode/
 _tmp/
 scripts/*.json
+frontend/tests/*.json
