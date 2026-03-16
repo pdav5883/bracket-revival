@@ -36,6 +36,7 @@ $(async function() {
   $("#submitbutton").on("click", async () => await submitPicks())
   $("#scoreboardbutton").on("click", goToScoreboard)
   $("#bracketbutton").on("click", goToBracket)
+  $("#prevbracketbutton").on("click", goToBracketNewTab)
   $("#morepicksbutton").on("click", async () => await changeRoundStart())
 
   $("#yearsel").on("change", populateCompetitionsWrapper)
@@ -53,6 +54,7 @@ async function initPickPage() {
   $("#submitbutton").hide()
   $("#scoreboardbutton").hide()
   $("#bracketbutton").hide()
+  $("#prevbracketbutton").hide()
   $("#morepicksbutton").hide()
 
   const queryParams = new URLSearchParams(window.location.search)
@@ -90,11 +92,17 @@ function goToBracket() {
 }
 
 
+function goToBracketNewTab() {
+  window.open("/bracket.html?year=" + yearSubmit + "&cid=" + cidSubmit + "&pid=" + pidSubmit, "_blank")
+}
+
+
 async function changeRoundStart(queryParams) {
   // nests within function to avoid passing click arg to populate
   $("#submitbutton").hide()
   $("#scoreboardbutton").hide()
   $("#bracketbutton").hide()
+  $("#prevbracketbutton").hide()
   $("#morepicksbutton").hide()
 
   spinnerOn("gobutton")
@@ -137,6 +145,7 @@ async function populateRoundStart(queryParams, callback) {
 
       // in case we got here by checking for more picks
       $("#submitbutton").show()
+      $("#prevbracketbutton").show()
 
       const constraints = result.constraints || null
       let bracketData = makeBracketryStartData(
@@ -427,6 +436,7 @@ async function submitPicks() {
       $("#submitbutton").hide()
       $("#scoreboardbutton").show()
       $("#bracketbutton").show()
+      $("#prevbracketbutton").hide()
       $("#morepicksbutton").show()
     },
     error: function(err) {

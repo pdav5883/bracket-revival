@@ -5,10 +5,10 @@ A March Madness bracket picking game where you get to re-pick your bracket after
 ### New Features
 - Automatic score updating
 	- Need to connect to Scoreboard API
+	- Check if scoreboard gets sync'd
 
 
 ### Improvements
-- Button on picks page to see previous bracket
 - Make emails nicer
 
 ### Bugs
