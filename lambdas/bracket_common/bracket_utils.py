@@ -16,23 +16,30 @@ def trigger_sync_sns(year, cid):
     return None
 
 
-def populate_email_content(email_type, content):
+def populate_email_content(email_type, content=None):
     """
-    Populate email content with URLs and other dynamic values
+    Populate email content with URLs and other dynamic values.
+
+    Any keys that are subbed into this template with {{key}}, which happens in BLRSendEmail,
+    need to be added to the content dictionary after this function is called
     """
+    if content is None:
+        content = {}
+        
     if email_type == "welcome":
-        content["scoreboard_url"] = f"https://{root_url}/scoreboard.html?year={content['year']}&cid={content['compname']}"
+        content["scoreboard_url"] = "https://{{root_url}}/scoreboard.html?year={{year}}&cid={{compname}}"
     elif email_type in ("reminder", "newround"):
-        content["scoreboard_url"] = f"https://{root_url}/scoreboard.html?year={content['year']}&cid={content['compname']}"
+        content["scoreboard_url"] = "https://{{root_url}}/scoreboard.html?year={{year}}&cid={{compname}}"
         content["pick_round_name"] = trn.ROUND_NAMES[content["pick_round"]]
         content["bracket_name"] = ["First", "Second", "Third", "Fourth", "Fifth", "Sixth"][content["pick_round"]]
         
     if email_type in ("welcome", "newround", "reminder"):
-        content["bracket_url"] = f"https://{root_url}/bracket.html?year={content['year']}&cid={content['compname']}&pid={content['name']}"
-        content["pick_url"] = f"https://{root_url}/picks.html?year={content['year']}&cid={content['compname']}&pid={content['name']}"
+        content["bracket_url"] = "https://{{root_url}}/bracket.html?year={{year}}&cid={{compname}}&pid={{fullname}}"
+        content["pick_url"] = "https://{{root_url}}/picks.html?year={{year}}&cid={{compname}}&pid={{fullname}}"
 
     # Add timestamp to content
     content["timestamp"] = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
+    content["root_url"] = root_url
     
     return content
 
@@ -49,7 +56,7 @@ welcome_template = {"subject": "Welcome to bracket-revival! ({{compname}} {{year
                                <body>\
                                  <div class='content'>\
                                    <div class='timestamp'>{{timestamp}}</div>\
-                                   <p>Hi {{name}},</p>\
+                                   <p>Hi {{firstname}},</p>\
                                    <p>Welcome to bracket-revival! Before each round of March Madness, you'll be picking a fresh bracket from the surviving teams. The more times you correctly pick a team to win, the more points you'll score!</p>\
                                    <p>Click <a href='{{pick_url}}'>HERE</a> to pick your First Bracket!</p>\
                                    <p>You have until <strong>{{deadline}}</strong> when the first game starts to submit your picks - so don't delay!</p>\
@@ -73,7 +80,7 @@ newround_template = {"subject": "Time to Pick Your {{bracket_name}} Bracket! ({{
                                <body>\
                                  <div class='content'>\
                                    <div class='timestamp'>{{timestamp}}</div>\
-                                   <p>Hi {{name}},</p>\
+                                   <p>Hi {{firstname}},</p>\
                                    <p>It's time to pick a fresh bracket starting in the {{pick_round_name}} and going all the way to the Championship.</p>\
                                    <p>Click <a href='{{pick_url}}'>HERE</a> to make your picks.</p>\
                                    <p>You have until <strong>{{deadline}}</strong> when the next round starts - so don't delay!</p>\
@@ -96,7 +103,7 @@ reminder_template = {"subject": "Don't Forget to Pick Your {{bracket_name}} Brac
                                <body>\
                                  <div class='content'>\
                                    <div class='timestamp'>{{timestamp}}</div>\
-                                   <p>Hi {{name}},</p>\
+                                   <p>Hi {{firstname}},</p>\
                                    <p>A friendly reminder that time is running out to make your latest round of picks! The next round starts at <strong>{{deadline}}</strong>, so get your picks in before then!</p>\
                                    <p>Click <a href='{{pick_url}}'>HERE</a> to make your picks.</p>\
                                    <p>Your Friend,<br>The BLR Commissioner</p>\

@@ -12,6 +12,7 @@ from blr_common import blr_utils
 
 bucket = SUB_PrivateBucketName
 email_topic_arn = SUB_BLREmailTopicArn
+root_url = SUB_DeployedRootURL
 
 def lambda_handler(event, context):
     """
@@ -188,13 +189,22 @@ def add_player(year, compname, access_token):
     # sync scoreboard
     bracket_utils.trigger_sync_sns(year, cid)
 
-    # send welcome email
-    # TODO: this currently won't work because "name" is required to fill in URLs, however don't have name until the BLRSendEmail lambda when it gets subbed in. Just need to pass url downstream for later subbing
-    # content = bracket_utils.populate_email_content("welcome", {"year": year, "compname": compname, "deadline": competition["first_deadline"]})
-    # email = {"typ": "welcome", "content": content, "recipient_names": [playername], "recipient_emails": [pemail]}
-    # blr_utils.trigger_email_sns(email_topic_arn, email)
+    # send welcome email - see populate_email_content for why this ordering is important
+    content = bracket_utils.populate_email_content("welcome")
+    content["year"] = year
+    content["compname"] = compname
+    content["deadline"] = competition["first_deadline"]
+
+
+    email_msg = {
+        "template": bracket_utils.templates["welcome"],
+        "content": content,
+        "recipient_names": [playername],
+        "recipient_emails": [pemail]
+    }
+
+    blr_utils.trigger_email_sns(email_topic_arn, email_msg)
 
     return {"body": f"Successfully created new player {playername} in competition {compname} in year {year}"}
-
 
 

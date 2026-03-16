@@ -7,13 +7,10 @@ A March Madness bracket picking game where you get to re-pick your bracket after
 	- Need to connect to Scoreboard API
 	- Check if scoreboard gets sync'd
 
-
 ### Improvements
 - Make emails nicer
 
 ### Bugs
-- Confirm welcome email from join game works
-- Confirm batch emailing from admin works
 
 ## Maybe TODO
 - Error handling for bad params
@@ -22,6 +19,7 @@ A March Madness bracket picking game where you get to re-pick your bracket after
 - Restricted endpoint to grab emails and pick links for players
 - Underdog bonus points
 - Make round navigation buttons nicer
+- How string substitution happens into emails is hacky. Order of keys added matters, some subbing happens in bracket_utils while other happens in BLRSendEmail
 
 ## Underdog Bonus
 - Underdog pick affects the base value of the win, which then gets multiplied the further you go down

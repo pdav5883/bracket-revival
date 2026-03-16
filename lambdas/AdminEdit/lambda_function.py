@@ -273,14 +273,20 @@ def update_competition(year, cid, new_competition):
             except Exception as e:
                 print(f"Error getting email for player {player_name}: {str(e)}")
         
-        # TODO use bracket_utils.populate_email_content
-        blr_utils.trigger_email_sns(email_topic_arn, {"typ": "newround",
-                           "content": {"year": year,
-                                     "compname": new_data["name"],
-                                     "pick_round": completed_rounds,
-                                     "deadline": new_competition["deadline"]},
-                           "recipient_names": index_player_list,
-                           "recipient_emails": player_emails})
+        # new round email to all players - see populate_email_content for why this ordering is important
+        content = {"pick_round": completed_rounds}
+        content = bracket_utils.populate_email_content("newround", content)
+        content["year"] = year
+        content["compname"] = new_data["name"]
+        content["deadline"] = new_competition["deadline"]
+
+        email_msg = {
+            "template": bracket_utils.templates["newround"],
+            "content": content,
+            "recipient_names": index_player_list,
+            "recipient_emails": player_emails
+        }
+        blr_utils.trigger_email_sns(email_topic_arn, email_msg)
         
         print(f"Sent to addresses: {player_emails}")
 
@@ -305,13 +311,19 @@ def update_competition(year, cid, new_competition):
 
         print(f"Sent to addresses: {player_emails}")
 
-        # TODO use bracket_utils.populate_email_content
-        blr_utils.trigger_email_sns(email_topic_arn, {"typ": "reminder",
-                             "content": {"year": year,
-                                         "compname": new_data["name"],
-                                         "pick_round": completed_rounds,
-                                         "deadline": new_competition["deadline"]},
-                             "recipient_names": new_competition["email_individual"],
-                             "recipient_emails": player_emails})
+        content = {"pick_round": completed_rounds}
+
+        content = bracket_utils.populate_email_content("reminder", content)
+        content["year"] = year
+        content["compname"] = new_data["name"]
+        content["deadline"] = new_competition["deadline"]
+
+        email_msg = {
+            "template": bracket_utils.templates["reminder"],
+            "content": content,
+            "recipient_names": new_competition["email_individual"],
+            "recipient_emails": player_emails
+        }
+        blr_utils.trigger_email_sns(email_topic_arn, email_msg)
 
     return {"body": "Successful competition update"}
