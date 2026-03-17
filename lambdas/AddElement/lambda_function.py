@@ -66,7 +66,8 @@ def add_year(year):
                "results": [None] * trn.NUMGAMES,
                "scores": [[None, None]] * trn.NUMGAMES,
                "statuses": ["NOT_STARTED"] * trn.NUMGAMES,
-               "completed_rounds": 0}
+               "completed_rounds": 0,
+               "started_rounds": 0}
 
     team_blank = {"name": "Full ", "short_name": "Short ", "seed": 0}
     seed_order = [1, 16, 8, 9, 5, 12, 4, 13, 6, 11, 3, 14, 7, 10, 2, 15] * 4
@@ -123,7 +124,7 @@ def add_competition(year, compname):
                    "open_picks": False,
                    "open_players": False,
                    "use_game_status": False,
-                   "first_deadline": "Thursday, March 20th at Noon (EST)"}
+                   "first_deadline": "Thursday, March 19th at Noon (EST)"}
 
     blr_utils.write_file_s3(bucket, competition_key, competition)
 

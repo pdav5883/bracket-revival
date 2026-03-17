@@ -6,8 +6,15 @@ from . import tournament as trn
 
 sns = boto3.client("sns")
 
-root_url = SUB_DeployedRootURL
-sync_topic_arn = SUB_SyncTopicArn
+# SUB* are replaced at deploy; when running locally (e.g. scripts/preview_emails.py) use env
+try:
+    root_url = SUB_DeployedRootURL
+except NameError:
+    root_url = os.environ.get("DeployedRootURL", "")
+try:
+    sync_topic_arn = SUB_SyncTopicArn
+except NameError:
+    sync_topic_arn = os.environ.get("SyncTopicArn", "")
 
 
 def trigger_sync_sns(year, cid):
@@ -48,22 +55,42 @@ welcome_template = {"subject": "Welcome to bracket-revival! ({{compname}} {{year
                     "body": "<html>\
                                <head>\
                                  <style>\
-                                   body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }\
-                                   .content { max-width: 600px; margin: 0 auto; }\
-                                   .timestamp { font-size: 7pt; color: #999; margin-top: 15px; text-align: right; }\
+                                   body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5; }\
+                                   .wrapper { max-width: 560px; margin: 0 auto; padding: 24px 20px; }\
+                                   .card { background: #ffffff; border-radius: 12px; padding: 32px 28px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }\
+                                   .header { text-align: center; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 2px solid #e8e8e8; }\
+                                   .header h1 { margin: 0; font-size: 22px; color: #2d3748; font-weight: 600; }\
+                                   .header .tagline { margin: 6px 0 0; font-size: 14px; color: #718096; }\
+                                   .body-text { font-size: 15px; line-height: 1.6; color: #4a5568; margin: 0 0 16px; }\
+                                   .cta-block { text-align: center; margin: 28px 0; }\
+                                   .btn { display: inline-block; padding: 14px 28px; background-color: #2b6cb0; background: linear-gradient(135deg, #3182ce 0%, #2b6cb0 100%); color: #ffffff !important; text-decoration: none; font-weight: 600; font-size: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(49,130,206,0.3); }\
+                                   .btn:hover { background: #2b6cb0; }\
+                                   .deadline { background: #edf2f7; padding: 12px 16px; border-radius: 8px; margin: 20px 0; font-size: 14px; color: #2d3748; }\
+                                   .deadline strong { color: #2b6cb0; }\
+                                   .body-text a { color: #3182ce; text-decoration: none; font-weight: 500; }\
+                                   .body-text a:hover { text-decoration: underline; }\
+                                   .sign-off { margin-top: 28px; padding-top: 20px; border-top: 1px solid #e8e8e8; font-size: 15px; color: #4a5568; }\
+                                   .timestamp { font-size: 11px; color: #a0aec0; margin-top: 20px; text-align: center; }\
                                  </style>\
                                </head>\
                                <body>\
-                                 <div class='content'>\
-                                   <div class='timestamp'>{{timestamp}}</div>\
-                                   <p>Hi {{firstname}},</p>\
-                                   <p>Welcome to bracket-revival! Before each round of March Madness, you'll be picking a fresh bracket from the surviving teams. The more times you correctly pick a team to win, the more points you'll score!</p>\
-                                   <p>Click <a href='{{pick_url}}'>HERE</a> to pick your First Bracket!</p>\
-                                   <p>You have until <strong>{{deadline}}</strong> when the first game starts to submit your picks - so don't delay!</p>\
-                                   <p>For more info, be sure to check out the <a href='https://bracket.bearloves.rocks/rules.html'>Rules</a> and your game's <a href='{{scoreboard_url}}'>Scoreboard</a>.</p>\
-                                   <p>Look for an email like this after every round with a link to pick your next bracket. Thanks for playing!</p>\
-                                   <p>Your Friend,<br>The BLR Commissioner</p>\
-                                   <div class='timestamp'>{{timestamp}}</div>\
+                                 <div class='wrapper'>\
+                                   <div class='card'>\
+                                     <div class='header'>\
+                                       <h1>Welcome to Bracket Revival!</h1>\
+                                       <p class='tagline'>{{compname}} · {{year}}</p>\
+                                     </div>\
+                                     <p class='body-text'>Hi {{firstname}},</p>\
+                                     <p class='body-text'>Welcome to {{compname}} {{year}}! Before each round of March Madness, you'll be picking a fresh bracket from the surviving teams. The more times you correctly pick a team to win, the more points you'll score!</p>\
+                                     <div class='cta-block'>\
+                                       <a href='{{pick_url}}' class='btn'>Make Your Picks</a>\
+                                     </div>\
+                                    <div class='deadline'>Submit your picks by <strong>{{deadline}}</strong> when the first game tips off.</div>\
+                                    <p class='body-text'>For more info, be sure to check out the <a href='https://bracket.bearloves.rocks/rules.html'>Rules</a> and your game's <a href='{{scoreboard_url}}'>Scoreboard</a>.</p>\
+                                    <p class='body-text'>You'll get an email like this after every round with a link to pick your next bracket. Good luck!</p>\
+                                     <p class='sign-off'>— The BLR Commissioner</p>\
+                                     <div class='timestamp'>{{timestamp}}</div>\
+                                   </div>\
                                  </div>\
                                </body>\
                              </html>"}
@@ -72,21 +99,38 @@ newround_template = {"subject": "Time to Pick Your {{bracket_name}} Bracket! ({{
                      "body": "<html>\
                                <head>\
                                  <style>\
-                                   body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }\
-                                   .content { max-width: 600px; margin: 0 auto; }\
-                                   .timestamp { font-size: 7pt; color: #999; margin-top: 15px; text-align: right; }\
+                                   body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5; }\
+                                   .wrapper { max-width: 560px; margin: 0 auto; padding: 24px 20px; }\
+                                   .card { background: #ffffff; border-radius: 12px; padding: 32px 28px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }\
+                                   .header { text-align: center; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 2px solid #e8e8e8; }\
+                                   .header h1 { margin: 0; font-size: 22px; color: #2d3748; font-weight: 600; }\
+                                   .body-text { font-size: 15px; line-height: 1.6; color: #4a5568; margin: 0 0 16px; }\
+                                   .cta-block { text-align: center; margin: 28px 0; }\
+                                   .btn { display: inline-block; padding: 14px 28px; background-color: #2b6cb0; background: linear-gradient(135deg, #3182ce 0%, #2b6cb0 100%); color: #ffffff !important; text-decoration: none; font-weight: 600; font-size: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(49,130,206,0.3); }\
+                                   .deadline { background: #edf2f7; padding: 12px 16px; border-radius: 8px; margin: 20px 0; font-size: 14px; color: #2d3748; }\
+                                   .deadline strong { color: #2b6cb0; }\
+                                   .links { margin: 24px 0; font-size: 14px; }\
+                                   .links a { color: #3182ce; text-decoration: none; font-weight: 500; }\
+                                   .sign-off { margin-top: 28px; padding-top: 20px; border-top: 1px solid #e8e8e8; font-size: 15px; color: #4a5568; }\
+                                   .timestamp { font-size: 11px; color: #a0aec0; margin-top: 20px; text-align: center; }\
                                  </style>\
                                </head>\
                                <body>\
-                                 <div class='content'>\
-                                   <div class='timestamp'>{{timestamp}}</div>\
-                                   <p>Hi {{firstname}},</p>\
-                                   <p>It's time to pick a fresh bracket starting in the {{pick_round_name}} and going all the way to the Championship.</p>\
-                                   <p>Click <a href='{{pick_url}}'>HERE</a> to make your picks.</p>\
-                                   <p>You have until <strong>{{deadline}}</strong> when the next round starts - so don't delay!</p>\
-                                   <p>Looking for the <a href='{{scoreboard_url}}'>Scoreboard</a>, your <a href='{{bracket_url}}'>Brackets</a>, or a <a href='https://bracket.bearloves.rocks/rules.html'>Rules Refresher</a>?</p>\
-                                   <p>Your Friend,<br>The BLR Commissioner</p>\
-                                   <div class='timestamp'>{{timestamp}}</div>\
+                                 <div class='wrapper'>\
+                                   <div class='card'>\
+                                     <div class='header'>\
+                                       <h1>{{bracket_name}} Bracket — Picks Open</h1>\
+                                     </div>\
+                                     <p class='body-text'>Hi {{firstname}},</p>\
+                                     <p class='body-text'>It's time to pick a fresh bracket starting in the {{pick_round_name}} and going through the Championship.</p>\
+                                     <div class='cta-block'>\
+                                       <a href='{{pick_url}}' class='btn'>Make Your Picks</a>\
+                                     </div>\
+                                     <div class='deadline'>The next round starts at <strong>{{deadline}}</strong>, and you won't be able to pick a game once it has started.</div>\
+                                     <p class='body-text'>Need the <a href='{{scoreboard_url}}'>scoreboard</a>, your <a href='{{bracket_url}}'>brackets</a>, or the <a href='https://bracket.bearloves.rocks/rules.html'>rules</a>?</p>\
+                                     <p class='sign-off'>— The BLR Commissioner</p>\
+                                     <div class='timestamp'>{{timestamp}}</div>\
+                                   </div>\
                                  </div>\
                                </body>\
                              </html>"}
@@ -95,19 +139,35 @@ reminder_template = {"subject": "Don't Forget to Pick Your {{bracket_name}} Brac
                      "body": "<html>\
                                <head>\
                                  <style>\
-                                   body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }\
-                                   .content { max-width: 600px; margin: 0 auto; }\
-                                   .timestamp { font-size: 7pt; color: #999; margin-top: 15px; text-align: right; }\
+                                   body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5; }\
+                                   .wrapper { max-width: 560px; margin: 0 auto; padding: 24px 20px; }\
+                                   .card { background: #ffffff; border-radius: 12px; padding: 32px 28px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }\
+                                   .header { text-align: center; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 2px solid #e8e8e8; }\
+                                   .header h1 { margin: 0; font-size: 22px; color: #2d3748; font-weight: 600; }\
+                                   .body-text { font-size: 15px; line-height: 1.6; color: #4a5568; margin: 0 0 16px; }\
+                                   .cta-block { text-align: center; margin: 28px 0; }\
+                                   .btn { display: inline-block; padding: 14px 28px; background-color: #2b6cb0; background: linear-gradient(135deg, #3182ce 0%, #2b6cb0 100%); color: #ffffff !important; text-decoration: none; font-weight: 600; font-size: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(49,130,206,0.3); }\
+                                   .deadline { background: #fef3c7; padding: 12px 16px; border-radius: 8px; margin: 20px 0; font-size: 14px; color: #92400e; }\
+                                   .deadline strong { color: #b45309; }\
+                                   .sign-off { margin-top: 28px; padding-top: 20px; border-top: 1px solid #e8e8e8; font-size: 15px; color: #4a5568; }\
+                                   .timestamp { font-size: 11px; color: #a0aec0; margin-top: 20px; text-align: center; }\
                                  </style>\
                                </head>\
                                <body>\
-                                 <div class='content'>\
-                                   <div class='timestamp'>{{timestamp}}</div>\
-                                   <p>Hi {{firstname}},</p>\
-                                   <p>A friendly reminder that time is running out to make your latest round of picks! The next round starts at <strong>{{deadline}}</strong>, so get your picks in before then!</p>\
-                                   <p>Click <a href='{{pick_url}}'>HERE</a> to make your picks.</p>\
-                                   <p>Your Friend,<br>The BLR Commissioner</p>\
-                                   <div class='timestamp'>{{timestamp}}</div>\
+                                 <div class='wrapper'>\
+                                   <div class='card'>\
+                                     <div class='header'>\
+                                       <h1>Make Your Picks!</h1>\
+                                     </div>\
+                                     <p class='body-text'>Hi {{firstname}},</p>\
+                                     <p class='body-text'>Friendly reminder: the next round starts at <strong>{{deadline}}</strong>, and you won't be able to pick a game that has already started. Get your {{bracket_name}} bracket in before then!</p>\
+                                     <div class='cta-block'>\
+                                       <a href='{{pick_url}}' class='btn'>Make Your Picks</a>\
+                                     </div>\
+                                     <div class='deadline'>Next Game: {{deadline}}</div>\
+                                     <p class='sign-off'>— The BLR Commissioner</p>\
+                                     <div class='timestamp'>{{timestamp}}</div>\
+                                   </div>\
                                  </div>\
                                </body>\
                              </html>"}
