@@ -15,7 +15,7 @@ def lambda_handler(event, context):
     ########################
     ##### TESTING ONLY #####
     ########################
-    return {"isAuthorized": True}
+    # return {"isAuthorized": True}
 
     if not access_token:
         return {"isAuthorized": False}
