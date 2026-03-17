@@ -38,7 +38,7 @@ $(function() {
   $("#newplayer-signinbutton").on("click", () => {
     const year = $("#yearsel").val();
     const compname = $("#compsel").val();
-    const currentUrl = encodeURIComponent(window.location.pathname + `?year=${year}&compname=${compname}`);
+    const currentUrl = encodeURIComponent(window.location.href + `?year=${year}&compname=${compname}`);
     window.location.href = `/login.html?redirectUrl=${currentUrl}`;
   })
 

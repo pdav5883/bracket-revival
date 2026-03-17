@@ -196,3 +196,20 @@ export function preserveBracketMinHeightOnRoundChange(bracketDiv) {
     })
   })
 }
+
+/** When user changes round (Prev/Next), scroll to bracket top only if the nav header is already stuck at the top. */
+export function scrollBracketToTopOnRoundChange(bracketDiv) {
+  if (!bracketDiv) return
+  bracketDiv.addEventListener("click", (e) => {
+    if (!e.target.closest(".navigation-button")) return
+    const stickyHeader = bracketDiv.querySelector(".bracket-sticky-header")
+    const wasStuckAtTop = stickyHeader && stickyHeader.getBoundingClientRect().top <= 5
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (!wasStuckAtTop) return
+        const y = bracketDiv.getBoundingClientRect().top + window.scrollY
+        window.scrollTo(0, y)
+      })
+    })
+  })
+}

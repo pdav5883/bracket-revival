@@ -6,7 +6,8 @@ import {
   populateCompetitions,
   populatePlayerNames,
   wrapBracketHeaderForSticky,
-  preserveBracketMinHeightOnRoundChange
+  preserveBracketMinHeightOnRoundChange,
+  scrollBracketToTopOnRoundChange
 } from "./shared.js"
 
 import {
@@ -253,6 +254,7 @@ async function populateRoundStart(queryParams, callback) {
       wrapBracketHeaderForSticky(document.getElementById("bracketdiv"))
 
       preserveBracketMinHeightOnRoundChange(document.getElementById("bracketdiv"))
+      scrollBracketToTopOnRoundChange(document.getElementById("bracketdiv"))
 
       const mobileOptions = {
         navButtonsPosition: "beforeTitles",
