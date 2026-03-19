@@ -3,11 +3,8 @@ A March Madness bracket picking game where you get to re-pick your bracket after
 
 ## TODO
 ### New Features
-- Automatic score updating
-	- Need to connect to Scoreboard API with cron job
 
 ### Improvements
-- Make emails nicer
 
 ### Bugs
 

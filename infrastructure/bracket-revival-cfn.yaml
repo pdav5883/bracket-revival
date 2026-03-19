@@ -1061,6 +1061,47 @@ Resources:
 ############################
   
 ############################
+#### Scheduled - Update Results
+############################
+  SchedulerRoleBracketUpdateResults:
+    Type: "AWS::IAM::Role"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      Path: "/"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service: "scheduler.amazonaws.com"
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: "InvokeBracketUpdateResults"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "lambda:InvokeFunction"
+                Resource: !GetAtt LambdaBracketUpdateResults.Arn
+
+  SchedulerScheduleBracketUpdateResults:
+    Type: "AWS::Scheduler::Schedule"
+    UpdateReplacePolicy: "Delete"
+    DeletionPolicy: "Delete"
+    Properties:
+      Description: "Update results.json every 5 minutes during ET window (Thu-Sun, 12PM-1:55AM)"
+      FlexibleTimeWindow:
+        Mode: "OFF"
+      ScheduleExpression: "cron(0/5 12-23,0-1 ? * THU-SUN *)"
+      ScheduleExpressionTimezone: "America/New_York"
+      State: "ENABLED"
+      Target:
+        Arn: !GetAtt LambdaBracketUpdateResults.Arn
+        RoleArn: !GetAtt SchedulerRoleBracketUpdateResults.Arn
+
+############################
 #### Logs 
 ############################
   LogBracketLambdaAddElement:
