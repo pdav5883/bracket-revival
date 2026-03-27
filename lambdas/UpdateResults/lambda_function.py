@@ -124,7 +124,7 @@ def lambda_handler(event, context):
             num_updated += 1
 
     results_dict["completed_rounds"] = bracket_utils.compute_completed_rounds(results)
-    results_dict["started_rounds"] = bracket_utils.compute_started_rounds(results)
+    results_dict["started_rounds"] = bracket_utils.compute_started_rounds(results_dict["completed_rounds"], statuses)
     blr_utils.write_file_s3(bucket, results_key, results_dict)
 
     # sync scoreboard for all competitions in year

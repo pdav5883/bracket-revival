@@ -90,17 +90,10 @@ def update_results(year, new_data):
     write_data["results"] = new_data["results"]
     write_data["scores"] = new_data["scores"]
     write_data["ids"] = new_data.get("ids", old_data.get("ids", [""] * len(new_data["results"])))
-    statuses = list(new_data.get("statuses", old_data.get("statuses", ["NOT_STARTED"] * len(new_data["results"]))))
-
-    # Any game with non-null score must have status COMPLETE
-    for i, score in enumerate(write_data["scores"]):
-        if i < len(statuses) and score is not None and len(score) >= 2:
-            if score[0] is not None and score[1] is not None:
-                statuses[i] = "COMPLETE"
-    write_data["statuses"] = statuses
+    write_data["statuses"] = list(new_data.get("statuses", old_data.get("statuses", ["NOT_STARTED"] * len(new_data["results"]))))
 
     write_data["completed_rounds"] = bracket_utils.compute_completed_rounds(write_data["results"])
-    write_data["started_rounds"] = bracket_utils.compute_started_rounds(write_data["results"])
+    write_data["started_rounds"] = bracket_utils.compute_started_rounds(write_data["completed_rounds"], write_data["statuses"])
 
     print(f"Changing {obj_key} FROM:")
     print(old_data)

@@ -192,19 +192,17 @@ def compute_completed_rounds(results):
             break
     return completed_rounds
 
-def compute_started_rounds(results):
+def compute_started_rounds(completed_rounds, statuses):
     """
     Find the number of rounds that have started
     """
-    completed_rounds = compute_completed_rounds(results)
-
     if completed_rounds == trn.NUMROUNDS:
       return completed_rounds
 
     prev_games = sum(trn.GAMES_PER_ROUND[0:completed_rounds])
-    next_round_results = results[prev_games:prev_games + trn.GAMES_PER_ROUND[completed_rounds]]
+    next_round_statuses = statuses[prev_games:prev_games + trn.GAMES_PER_ROUND[completed_rounds]]
 
-    if any(x is not None for x in next_round_results):
+    if any(x != "NOT_STARTED" for x in next_round_statuses):
       return completed_rounds + 1
     else:
       return completed_rounds
